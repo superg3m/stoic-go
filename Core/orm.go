@@ -16,6 +16,12 @@ type BaseStoicTable struct {
 	originalData map[string]interface{}
 }
 
+type I_CRUD interface {
+	canUpdate()
+	canCreate()
+	canDelete()
+}
+
 const (
 	NULLABLE  = 1 << iota // 1 << 0 = 1 (bit 0)
 	UPDATABLE             // 1 << 1 = 2 (bit 1)
