@@ -1,27 +1,24 @@
 package CLS
 
-import "time"
+import (
+	"errors"
+	"time"
+)
 
-const (
- 	SQL_SELBYEMAIL       = "user-selectbyemail";
-	SQL_SELBYEMAILNOTID  = "user-selectbyemailandnotid";
-	SQL_UPDATELASTACTIVE = "user-updatelastactivetime";
-
-	ERROR_INVALID_EMAIL = "Invalid Email";
-	ERROR_INVALID_ID = "Invalid ID";
+var ( // ERRORS
+	ERROR_INVALID_EMAIL = errors.New("Invalid Email")
+	ERROR_INVALID_ID    = errors.New("Invalid ID")
 )
 
 type User struct {
-	I_RouteRegistery
-	DbModel
+	BaseStoicTable
 
-
-	ID int
-	Email string
+	ID             int
+	Email          string
 	EmailConfirmed bool
-	Joined time.Time
-	LastActive time.Time
-	LastLogin time.Time
+	Joined         time.Time
+	LastActive     time.Time
+	LastLogin      time.Time
 }
 
 func FromID(id int) {
@@ -29,273 +26,19 @@ func FromID(id int) {
 }
 
 func FromEmail(email string) (User, error) {
-	var ret User;
+	var ret User
 
 	if !Utils.ValidEmail() {
-		return User{}, errors.New(ERROR_INVALID_EMAIL)
+		return User{}, ERROR_INVALID_EMAIL
 	}
 }
 
-func setupModel() {
-	DbModel.setTableName('User');
-
-	$this->setColumn('email',          'Email',          BaseDbTypes::STRING,   BCF::SHOULD_INSERT | BCF::SHOULD_UPDATE);
-	$this->setColumn('emailConfirmed', 'EmailConfirmed', BaseDbTypes::BOOLEAN,  BCF::SHOULD_INSERT | BCF::SHOULD_UPDATE);
-	$this->setColumn('id',             'ID',             BaseDbTypes::INTEGER,  BCF::IS_KEY        | BCF::AUTO_INCREMENT);
-	$this->setColumn('joined',         'Joined',         BaseDbTypes::DATETIME, BCF::SHOULD_INSERT);
-	$this->setColumn('lastActive',     'LastActive',     BaseDbTypes::DATETIME, BCF::SHOULD_INSERT | BCF::SHOULD_UPDATE  | BCF::ALLOWS_NULLS);
-	$this->setColumn('lastLogin',      'LastLogin',      BaseDbTypes::DATETIME, BCF::SHOULD_INSERT | BCF::SHOULD_UPDATE  | BCF::ALLOWS_NULLS);
-
-	if (!static::$dbInitialized) {
-		PdoHelper::storeQuery(PdoDrivers::PDO_SQLSRV, self::SQL_SELBYEMAIL, $this->generateClassQuery(BaseDbQueryTypes::SELECT, false) . " WHERE [Email] = :email");
-		PdoHelper::storeQuery(PdoDrivers::PDO_MYSQL,  self::SQL_SELBYEMAIL, $this->generateClassQuery(BaseDbQueryTypes::SELECT, false) . " WHERE `Email` = :email");
-		PdoHelper::storeQuery(PdoDrivers::PDO_PGSQL,  self::SQL_SELBYEMAIL, $this->generateClassQuery(BaseDbQueryTypes::SELECT, false) . " WHERE \"Email\" = :email");
-
-		PdoHelper::storeQuery(PdoDrivers::PDO_SQLSRV, self::SQL_SELBYEMAILNOTID, "SELECT COUNT(*) FROM {$this->getDbTableName()} WHERE [Email] = :email AND [ID] <> :id");
-		PdoHelper::storeQuery(PdoDrivers::PDO_MYSQL,  self::SQL_SELBYEMAILNOTID, "SELECT COUNT(*) FROM {$this->getDbTableName()} WHERE `Email` = :email AND `ID` <> :id");
-		PdoHelper::storeQuery(PdoDrivers::PDO_PGSQL,  self::SQL_SELBYEMAILNOTID, "SELECT COUNT(*) FROM {$this->getDbTableName()} WHERE \"Email\" = :email AND \"ID\" <> :id");
-
-		PdoHelper::storeQuery(PdoDrivers::PDO_SQLSRV, self::SQL_UPDATELASTACTIVE, "UPDATE {$this->getDbTableName()} SET [LastActive] = :today WHERE [ID] = :userId");
-		PdoHelper::storeQuery(PdoDrivers::PDO_MYSQL,  self::SQL_UPDATELASTACTIVE, "UPDATE {$this->getDbTableName()} SET `LastActive` = :today WHERE `ID` = :userId");
-		PdoHelper::storeQuery(PdoDrivers::PDO_PGSQL,  self::SQL_UPDATELASTACTIVE, "UPDATE {$this->getDbTableName()} SET \"LastActive\" = :today WHERE \"ID\" = :userId");
-
-		static::$dbInitialized = true;
-	}
-
-	$this->id             = 0;
-	$this->lastActive     = null;
-	$this->lastLogin      = null;
-	$this->email          = '';
-	$this->emailConfirmed = false;
-	$this->joined         = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
-
-	return;
+// Implement the setupTable function for User
+func init() {
+	ORM.RegisterTableName("User")
+	ORM.RegisterTableColumn("ID", "user_id", PRIMARY_KEY) // Using reflection to know the type!
+	ORM.RegisterTableColumn("Email", "email_address", PRIMARY_KEY)
+	ORM.RegisterTableColumn("Name", "full_name", NULLABLE|UPDATABLE)
+	ORM.RegisterTableColumn("Age", "age", PRIMARY_KEY)
+	ORM.RegisterTableColumn("ID", "user_id", PRIMARY_KEY)
 }
-
-func (user *User) MarkActive() {
-	// 
-}
-
-	class User extends StoicDbModel {
-		/**
-		 * Static method to retrieve a user by their email address. Returns blank user if user not found.
-		 *
-		 * @param string $email Email address value to search for in database.
-		 * @param PdoHelper $db PdoHelper instance for internal use.
-		 * @param null|Logger $log Optional Logger instance for internal use, new instance created if not supplied.
-		 * @return User
-		 */
-		public static function fromEmail(string $email, PdoHelper $db, Logger $log = null) : User {
-			$ret = new User($db, $log);
-
-			if (!static::validEmail($email)) {
-				$ret->log->error("Invalid email address");
-
-				return $ret;
-			}
-
-			$ret->tryPdoExcept(function () use (&$ret, $email) {
-				$stmt = $ret->db->prepareStored(self::SQL_SELBYEMAIL);
-				$stmt->bindParam(':email', $email);
-
-				if ($stmt->execute()) {
-					$row = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-					if ($row !== false) {
-						$ret = User::fromArray($row, $ret->db, $ret->log);
-					}
-				}
-
-				return;
-			}, "Failed to get user by email address");
-
-			return $ret;
-		}
-
-		/**
-		 * Static method to retrieve a user by their integer identifier. Returns blank user if user not found.
-		 *
-		 * @param int $id Integer identifier to use when searching the database.
-		 * @param PdoHelper $db PdoHelper instance for internal use.
-		 * @param Logger|null $log Optional Logger instance for internal use, new instance created if not supplied.
-		 * @throws \Exception
-		 * @return User
-		 */
-		public static function fromId(int $id, PdoHelper $db, Logger $log = null) : User {
-			$ret = new User($db, $log);
-			$ret->id = $id;
-
-			if ($ret->read()->isBad()) {
-				$ret->id = 0;
-			}
-
-			return $ret;
-		}
-
-		/**
-		 * Static method to validate the format of an email address.
-		 *
-		 * @param string $email The email address to validate.
-		 * @return bool
-		 */
-		public static function validEmail(string $email) : bool {
-			return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
-		}
-
-
-		/**
-		 * Determines if system should attempt to create a new User in the database.
-		 *
-		 * @return bool|ReturnHelper
-		 */
-		protected function __canCreate() : bool|ReturnHelper {
-			$ret = new ReturnHelper();
-
-			if ($this->id > 0 || !static::validEmail($this->email)) {
-				$ret->addMessage("Cannot create a User with invalid email or id fields");
-
-				return $ret;
-			}
-
-			$this->tryPdoExcept(function () use (&$ret) {
-				$stmt = $this->db->prepareStored(self::SQL_SELBYEMAIL);
-				$stmt->bindValue(':email', $this->email);
-				$stmt->execute();
-
-				if ($stmt->fetch() !== false) {
-					$ret->addMessage("Found duplicate User by email, unable to create (Email: {$this->email})");
-				} else {
-					$ret->makeGood();
-					$this->joined = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
-				}
-
-				return;
-			}, "Failed to check for duplicate users");
-
-			return $ret;
-		}
-
-		/**
-		 * Determines if the system should attempt to delete a User from the database.
-		 *
-		 * @return bool|ReturnHelper
-		 */
-		protected function __canDelete() : bool|ReturnHelper {
-			if ($this->id < 1) {
-				return false;
-			}
-
-			return true;
-		}
-
-		/**
-		 * Determines if the system should attempt to read a User from the database.
-		 *
-		 * @return bool|ReturnHelper
-		 */
-		protected function __canRead() : bool|ReturnHelper {
-			if ($this->id < 1) {
-				return false;
-			}
-
-			return true;
-		}
-
-		/**
-		 * Determines if the system should attempt to update a User in the database.
-		 *
-		 * @return bool|ReturnHelper
-		 */
-		protected function __canUpdate() : bool|ReturnHelper {
-			$ret = new ReturnHelper();
-
-			if ($this->id < 1 || !static::validEmail($this->email)) {
-				$ret->addMessage("Invalid data for User update (check ID and Email for valid values.");
-
-				return $ret;
-			}
-
-			$this->tryPdoExcept(function () use (&$ret) {
-				$stmt = $this->db->prepareStored(self::SQL_SELBYEMAILNOTID);
-				$stmt->bindValue(':email', $this->email);
-				$stmt->bindValue(':id', $this->id, \PDO::PARAM_INT);
-				$stmt->execute();
-
-				if ($stmt->fetch()[0] > 0) {
-					$ret->addMessage("Found duplicate User by email, unable to update (Email: {$this->email})");
-				} else {
-					$ret->makeGood();
-				}
-
-				return;
-			}, "Failed to check for duplicate users");
-
-			return $ret;
-		}
-
-		/**
-		 * Initializes a new User object.
-		 *
-		 * @throws \Exception
-		 * @return void
-		 */
-		protected function __setupModel() : void {
-			$this->setTableName('User');
-
-			$this->setColumn('email',          'Email',          BaseDbTypes::STRING,   BCF::SHOULD_INSERT | BCF::SHOULD_UPDATE);
-			$this->setColumn('emailConfirmed', 'EmailConfirmed', BaseDbTypes::BOOLEAN,  BCF::SHOULD_INSERT | BCF::SHOULD_UPDATE);
-			$this->setColumn('id',             'ID',             BaseDbTypes::INTEGER,  BCF::IS_KEY        | BCF::AUTO_INCREMENT);
-			$this->setColumn('joined',         'Joined',         BaseDbTypes::DATETIME, BCF::SHOULD_INSERT);
-			$this->setColumn('lastActive',     'LastActive',     BaseDbTypes::DATETIME, BCF::SHOULD_INSERT | BCF::SHOULD_UPDATE  | BCF::ALLOWS_NULLS);
-			$this->setColumn('lastLogin',      'LastLogin',      BaseDbTypes::DATETIME, BCF::SHOULD_INSERT | BCF::SHOULD_UPDATE  | BCF::ALLOWS_NULLS);
-
-			if (!static::$dbInitialized) {
-				PdoHelper::storeQuery(PdoDrivers::PDO_SQLSRV, self::SQL_SELBYEMAIL, $this->generateClassQuery(BaseDbQueryTypes::SELECT, false) . " WHERE [Email] = :email");
-				PdoHelper::storeQuery(PdoDrivers::PDO_MYSQL,  self::SQL_SELBYEMAIL, $this->generateClassQuery(BaseDbQueryTypes::SELECT, false) . " WHERE `Email` = :email");
-				PdoHelper::storeQuery(PdoDrivers::PDO_PGSQL,  self::SQL_SELBYEMAIL, $this->generateClassQuery(BaseDbQueryTypes::SELECT, false) . " WHERE \"Email\" = :email");
-
-				PdoHelper::storeQuery(PdoDrivers::PDO_SQLSRV, self::SQL_SELBYEMAILNOTID, "SELECT COUNT(*) FROM {$this->getDbTableName()} WHERE [Email] = :email AND [ID] <> :id");
-				PdoHelper::storeQuery(PdoDrivers::PDO_MYSQL,  self::SQL_SELBYEMAILNOTID, "SELECT COUNT(*) FROM {$this->getDbTableName()} WHERE `Email` = :email AND `ID` <> :id");
-				PdoHelper::storeQuery(PdoDrivers::PDO_PGSQL,  self::SQL_SELBYEMAILNOTID, "SELECT COUNT(*) FROM {$this->getDbTableName()} WHERE \"Email\" = :email AND \"ID\" <> :id");
-
-				PdoHelper::storeQuery(PdoDrivers::PDO_SQLSRV, self::SQL_UPDATELASTACTIVE, "UPDATE {$this->getDbTableName()} SET [LastActive] = :today WHERE [ID] = :userId");
-				PdoHelper::storeQuery(PdoDrivers::PDO_MYSQL,  self::SQL_UPDATELASTACTIVE, "UPDATE {$this->getDbTableName()} SET `LastActive` = :today WHERE `ID` = :userId");
-				PdoHelper::storeQuery(PdoDrivers::PDO_PGSQL,  self::SQL_UPDATELASTACTIVE, "UPDATE {$this->getDbTableName()} SET \"LastActive\" = :today WHERE \"ID\" = :userId");
-
-				static::$dbInitialized = true;
-			}
-
-			$this->id             = 0;
-			$this->lastActive     = null;
-			$this->lastLogin      = null;
-			$this->email          = '';
-			$this->emailConfirmed = false;
-			$this->joined         = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
-
-			return;
-		}
-
-		/**
-		 * Attempts to update the LastActive time for the given user.
-		 *
-		 * @return void
-		 */
-		public function markActive() : void {
-			if ($this->id < 1) {
-				return;
-			}
-
-			$this->lastActive = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
-
-			$this->tryPdoExcept(function () {
-				$stmt = $this->db->prepareStored(self::SQL_UPDATELASTACTIVE);
-				$stmt->bindValue(':today', $this->lastActive->format('Y-m-d H:i:s'));
-				$stmt->bindValue(':userId', $this->id, \PDO::PARAM_INT);
-				$stmt->execute();
-
-				return;
-			}, "Failed to mark user as active");
-
-			return;
-		}
-	}
