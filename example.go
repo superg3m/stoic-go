@@ -1,5 +1,6 @@
-package CLS
+package main
 
+/*
 import (
 	"errors"
 	"time"
@@ -42,3 +43,4 @@ func init() {
 	ORM.RegisterTableColumn("Age", "age", PRIMARY_KEY)
 	ORM.RegisterTableColumn("ID", "user_id", PRIMARY_KEY)
 }
+*/
