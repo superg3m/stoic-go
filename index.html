@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Creation</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Create User</h1>
+    <form id="createUserForm">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <br><br>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+        <br><br>
+        <button type="submit">Create User</button>
+    </form>
+
+    <div id="responseMessage" style="margin-top: 20px;"></div>
+
+    <script>
+        $(document).ready(function () {
+            $('#createUserForm').on('submit', function (e) {
+                e.preventDefault(); // Prevent the default form submission
+    
+                // Get form data
+                const userData = {
+                    username: $('#username').val(),
+                    email: $('#email').val()
+                };
+    
+            $.ajax({
+                url: 'http://localhost:8080/User/Create', // Ensure protocol is included
+                type: 'POST',
+                contentType: 'application/json', // Inform the server you're sending JSON data
+                data: JSON.stringify(userData), // Convert the data to a JSON string
+                success: function (response) {
+                    $('#responseMessage').html(`<p style="color: green;">${response}</p>`);
+                },
+                error: function (xhr, status, error) {
+                    $('#responseMessage').html(`<p style="color: red;">Error: ${xhr.responseText || error}</p>`);
+                }
+            });
+        });
+    });
+    </script>    
+</body>
+</html>
