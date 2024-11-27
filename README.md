@@ -3,7 +3,7 @@
 - cmd
     - bin
         - StoicMigration
-        - StoicBuilder
+        - StoicModelBuilder
  
 ## Exec.ps1 | init | stop | reset | test | migration up | migration down
 
