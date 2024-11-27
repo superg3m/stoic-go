@@ -6,50 +6,15 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"runtime"
-	"strconv"
 )
 
 type StoicRequest struct {
 	*http.Request
 }
 
-type StoicResponse struct {
-	http.ResponseWriter
-}
-
-func PanicOnError(err error, msg ...string) {
-	if err != nil {
-		fmt.Printf("%s\n", msg)
-		fmt.Printf("Error: %v\n", err)
-		printCallStack()
-		panic(err)
-	}
-}
-
-func printCallStack() {
-	pc := make([]uintptr, 10) // Retrieve up to 10 stack frames
-	n := runtime.Callers(2, pc)
-	frames := runtime.CallersFrames(pc[:n])
-
-	fmt.Println("Call stack:")
-	for {
-		frame, more := frames.Next()
-		fmt.Printf("- %s:%d %s\n", frame.File, frame.Line, frame.Function)
-		if !more {
-			break
-		}
-	}
-}
-
-func (response *StoicResponse) SetError(msg string) {
-	response.WriteHeader(http.StatusInternalServerError)
-	fmt.Fprintf(response, "%s", msg)
-}
-
 func readRequestBody(r *StoicRequest) []byte {
 	body, err := io.ReadAll(r.Body)
-	PanicOnError(err)
+	PanicOnError(err, "")
 
 	r.Body = io.NopCloser(bytes.NewBuffer(body))
 	return body
@@ -124,41 +89,18 @@ func (r *StoicRequest) HasAll(args ...string) bool {
 	return true
 }
 
-func castAny[T any](v any) T {
-	val, ok := v.(T)
-	if !ok {
-		panic("type assertion failed")
-	}
-
-	return val
-}
-
 func (r *StoicRequest) GetStringParam(name string) string {
 	return castAny[string](r.GetParamMap()[name])
 }
 
 func (r *StoicRequest) GetIntParam(name string) int {
-	raw := r.GetStringParam(name)
-	value, err := strconv.Atoi(raw)
-	PanicOnError(err, fmt.Sprintf("invalid int value for parameter %s: %s", name, raw))
-
-	return value
+	return castAny[int](r.GetStringParam(name))
 }
 
 func (r *StoicRequest) GetBoolParam(name string) bool {
-	raw := r.GetStringParam(name)
-	value, err := strconv.ParseBool(raw)
-	if err != nil {
-		panic(fmt.Sprintf("invalid bool value for parameter %s: %s", name, raw))
-	}
-	return value
+	return castAny[bool](r.GetStringParam(name))
 }
 
 func (r *StoicRequest) GetFloatParam(name string) float64 {
-	raw := r.GetStringParam(name)
-	value, err := strconv.ParseFloat(raw, 64)
-	if err != nil {
-		panic(fmt.Sprintf("invalid float value for parameter %s: %s", name, raw))
-	}
-	return value
+	return castAny[float64](r.GetStringParam(name))
 }
