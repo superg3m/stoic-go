@@ -2,9 +2,15 @@ package Core
 
 import (
 	"fmt"
+	"net/mail"
 	"runtime"
 	"strconv"
 )
+
+func ValidEmail(email string) bool {
+	_, err := mail.ParseAddress(email)
+	return err == nil
+}
 
 func castAny[T any](v any) T {
 	var result any

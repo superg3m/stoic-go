@@ -1,9 +1,11 @@
-package main
+package Api
 
-/*
 import (
 	"errors"
 	"time"
+
+	"github.com/superg3m/stoic-go/Core"
+	"github.com/superg3m/stoic-go/ORM"
 )
 
 var ( // ERRORS
@@ -12,7 +14,7 @@ var ( // ERRORS
 )
 
 type User struct {
-	BaseStoicTable
+	ORM.BaseStoicTable
 
 	ID             int
 	Email          string
@@ -29,18 +31,19 @@ func FromID(id int) {
 func FromEmail(email string) (User, error) {
 	var ret User
 
-	if !Utils.ValidEmail() {
+	if !Core.ValidEmail(email) {
 		return User{}, ERROR_INVALID_EMAIL
 	}
+
+	return ret, nil
 }
 
 // Implement the setupTable function for User
 func init() {
 	ORM.RegisterTableName("User")
-	ORM.RegisterTableColumn("ID", "user_id", PRIMARY_KEY) // Using reflection to know the type!
-	ORM.RegisterTableColumn("Email", "email_address", PRIMARY_KEY)
-	ORM.RegisterTableColumn("Name", "full_name", NULLABLE|UPDATABLE)
-	ORM.RegisterTableColumn("Age", "age", PRIMARY_KEY)
-	ORM.RegisterTableColumn("ID", "user_id", PRIMARY_KEY)
+	ORM.RegisterTableColumn("ID", "user_id", ORM.PRIMARY_KEY) // Using reflection to know the type!
+	ORM.RegisterTableColumn("Email", "email_address", ORM.PRIMARY_KEY)
+	ORM.RegisterTableColumn("Name", "full_name", ORM.NULLABLE|ORM.UPDATABLE)
+	ORM.RegisterTableColumn("Age", "age", ORM.PRIMARY_KEY)
+	ORM.RegisterTableColumn("ID", "user_id", ORM.PRIMARY_KEY)
 }
-*/

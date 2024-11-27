@@ -1,13 +1,21 @@
-package Core
+package ORM
 
 import (
 	"fmt"
 	"reflect"
 )
 
+type ORM_FLAG int
+
+const (
+	PRIMARY_KEY ORM_FLAG = 1 << iota // 1 << 0 = 1 (bit 0)
+	NULLABLE                         // 1 << 1 = 2 (bit 1)
+	UPDATABLE                        // 1 << 2 = 4 (bit 2)
+)
+
 type FieldMetadata struct {
-	field string // Name of the field in the DB
-	flags int    // Bit flag to store Nullable, Updatable, etc.
+	field string   // Name of the field in the DB
+	flags ORM_FLAG // Bit flag to store Nullable, Updatable, etc.
 }
 
 type BaseStoicTable struct {
@@ -22,11 +30,6 @@ type I_CRUD interface {
 	canDelete()
 }
 
-const (
-	NULLABLE  = 1 << iota // 1 << 0 = 1 (bit 0)
-	UPDATABLE             // 1 << 1 = 2 (bit 1)
-)
-
 func (base *BaseStoicTable) getFieldMetadata(fieldName string) (FieldMetadata, bool) {
 	meta, exists := base.fieldMeta[fieldName]
 	return meta, exists
@@ -40,11 +43,11 @@ func (f *FieldMetadata) isUpdatable() bool {
 	return f.flags&UPDATABLE != 0
 }
 
-func RegisterTableName() {
+func RegisterTableName(tableName string) {
 
 }
 
-func RegisterTableColumn() {
+func RegisterTableColumn(structMemberName string, attributeName string, flags ORM_FLAG) {
 
 }
 
