@@ -90,7 +90,7 @@ func (r *StoicRequest) HasAll(args ...string) bool {
 }
 
 func (r *StoicRequest) GetStringParam(name string) string {
-	return castAny[string](r.GetParamMap()[name])
+	return r.GetParamMap()[name].(string)
 }
 
 func (r *StoicRequest) GetIntParam(name string) int {

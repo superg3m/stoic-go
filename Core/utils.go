@@ -3,7 +3,6 @@ package Core
 import (
 	"fmt"
 	"net/mail"
-	"runtime"
 	"strconv"
 )
 
@@ -85,25 +84,9 @@ func formatArgs(format string, args ...any) string {
 	return fmt.Sprintf(format, args)
 }
 
-func printCallStack() {
-	pc := make([]uintptr, 10) // Retrieve up to 10 stack frames
-	n := runtime.Callers(2, pc)
-	frames := runtime.CallersFrames(pc[:n])
-
-	fmt.Println("Call stack:")
-	for {
-		frame, more := frames.Next()
-		fmt.Printf("- %s:%d %s\n", frame.File, frame.Line, frame.Function)
-		if !more {
-			break
-		}
-	}
-}
-
 func PanicOnError(err error, format string, args ...any) {
 	if err != nil {
 		fmt.Printf("Developer Error: %s\n", formatArgs(format, args))
-		printCallStack()
 		panic(err)
 	}
 }
