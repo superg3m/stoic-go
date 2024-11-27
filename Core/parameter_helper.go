@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"runtime"
 	"strconv"
 )
 
@@ -17,6 +18,30 @@ type StoicResponse struct {
 	http.ResponseWriter
 }
 
+func PanicOnError(err error, msg ...string) {
+	if err != nil {
+		fmt.Printf("%s\n", msg)
+		fmt.Printf("Error: %v\n", err)
+		printCallStack()
+		panic(err)
+	}
+}
+
+func printCallStack() {
+	pc := make([]uintptr, 10) // Retrieve up to 10 stack frames
+	n := runtime.Callers(2, pc)
+	frames := runtime.CallersFrames(pc[:n])
+
+	fmt.Println("Call stack:")
+	for {
+		frame, more := frames.Next()
+		fmt.Printf("- %s:%d %s\n", frame.File, frame.Line, frame.Function)
+		if !more {
+			break
+		}
+	}
+}
+
 func (response *StoicResponse) SetError(msg string) {
 	response.WriteHeader(http.StatusInternalServerError)
 	fmt.Fprintf(response, "%s", msg)
@@ -24,9 +49,8 @@ func (response *StoicResponse) SetError(msg string) {
 
 func readRequestBody(r *StoicRequest) []byte {
 	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		panic("")
-	}
+	PanicOnError(err)
+
 	r.Body = io.NopCloser(bytes.NewBuffer(body))
 	return body
 }
@@ -100,16 +124,24 @@ func (r *StoicRequest) HasAll(args ...string) bool {
 	return true
 }
 
+func castAny[T any](v any) T {
+	val, ok := v.(T)
+	if !ok {
+		panic("type assertion failed")
+	}
+
+	return val
+}
+
 func (r *StoicRequest) GetStringParam(name string) string {
-	return r.GetParamMap()[name].(string)
+	return castAny[string](r.GetParamMap()[name])
 }
 
 func (r *StoicRequest) GetIntParam(name string) int {
 	raw := r.GetStringParam(name)
 	value, err := strconv.Atoi(raw)
-	if err != nil {
-		panic(fmt.Sprintf("invalid int value for parameter %s: %s", name, raw))
-	}
+	PanicOnError(err, fmt.Sprintf("invalid int value for parameter %s: %s", name, raw))
+
 	return value
 }
 
