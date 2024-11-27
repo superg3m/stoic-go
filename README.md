@@ -1,4 +1,9 @@
 # High level overview of Stoic-Go
+
+- cmd
+    - bin
+        - StoicMigration
+        - StoicBuilder
  
 ## Exec.ps1 | init | stop | reset | test | migration up | migration down
 
@@ -10,7 +15,11 @@
     - Go Backend: Stoic-Go
 
 - Migration Control
-    - Goose: https://github.com/pressly/goose
+    - Goose: https://github.com/pressly/goose (Sql lite only -_-)
+    - Custom parsing like goose
+    - #StoicMigration Up
+    - #StoicMigration Down
+    - Store migration in db to know which ones have been successfully run
 
 
 
