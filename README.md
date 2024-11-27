@@ -1,6 +1,6 @@
 # High level overview of Stoic-Go
  
-## Exec.ps1 | init | test
+## Exec.ps1 | init | stop | reset | test | migration up | migration down
 
 ### init
 - Docker
@@ -13,7 +13,8 @@
     - Goose: https://github.com/pressly/goose
 
 
-### Testing
+
+### test
 
 
 # Goals
