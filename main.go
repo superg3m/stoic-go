@@ -25,11 +25,15 @@ func helloWorld(request *Core.StoicRequest, response Core.StoicResponse) {
 	//request.PrintRequestData()
 
 	if !request.HasAll("username", "email") {
-		fmt.Fprintf(response, "Invalid Params")
+		response.SetError("Invalid Params")
 		return
 	}
 
-	username, _ := request.GetStringParam("username")
+	username := request.GetStringParam("username")
+	if username != "superg3m" {
+		response.SetError("Wrong Password")
+		return
+	}
 
 	fmt.Fprintf(response, "Hello %s", string(username))
 }

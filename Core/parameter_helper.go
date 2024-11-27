@@ -17,181 +17,116 @@ type StoicResponse struct {
 	http.ResponseWriter
 }
 
-func readRequestBody(r *StoicRequest) ([]byte, error) {
+func (response *StoicResponse) SetError(msg string) {
+	response.WriteHeader(http.StatusInternalServerError)
+	fmt.Fprintf(response, "%s", msg)
+}
+
+func readRequestBody(r *StoicRequest) []byte {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		return nil, err
+		panic("")
 	}
 	r.Body = io.NopCloser(bytes.NewBuffer(body))
-	return body, nil
+	return body
 }
 
-func (r *StoicRequest) Has(name string) bool {
-	body, err := readRequestBody(r)
-	if err != nil {
-		fmt.Println("Error reading body:", err)
-		return false
-	}
-
-	switch r.Method {
-	case "GET":
-		values := r.URL.Query()
-		_, exists := values[name]
-		return exists
-
-	case "POST":
-		contentType := r.Header.Get("Content-Type")
-
-		if contentType == "application/json" {
-			var requestBody map[string]interface{}
-			err := json.NewDecoder(bytes.NewBuffer(body)).Decode(&requestBody)
-			if err != nil {
-				fmt.Println("Error parsing JSON:", err)
-				return false
-			}
-			_, exists := requestBody[name]
-			return exists
-
-		} else if contentType == "application/x-www-form-urlencoded" {
-			if err := r.ParseForm(); err != nil {
-				fmt.Println("Error parsing form:", err)
-				return false
-			}
-			_, exists := r.PostForm[name]
-			return exists
-		}
-
-	default:
-		fmt.Println("Unsupported method or content type.")
-		return false
-	}
-
-	return true
-}
-
-func To[T any](value interface{}) (T, error) {
-	var zero T // Default zero value of type T
-	switch v := value.(type) {
-	case T:
-		return v, nil
-	default:
-		return zero, fmt.Errorf("unable to cast %v to %T", value, zero)
-	}
-}
-
-func (r *StoicRequest) PrintRequestData() {
-	body, err := readRequestBody(r)
-	if err != nil {
-		fmt.Println("Error reading body:", err)
-		return
-	}
-	fmt.Printf("Request Body: %s\n", string(body))
+func (r *StoicRequest) GetParamMap() map[string]interface{} {
+	paramMap := make(map[string]interface{})
 
 	if r.Method == "GET" {
-		fmt.Println("Query Parameters:")
 		for key, values := range r.URL.Query() {
-			fmt.Printf("  %s: %v\n", key, values)
+			if len(values) > 0 {
+				paramMap[key] = values[0]
+			}
 		}
+		return paramMap
 	}
 
 	if r.Method == "POST" {
 		contentType := r.Header.Get("Content-Type")
+		body := readRequestBody(r)
 
 		if contentType == "application/json" {
 			var requestBody map[string]interface{}
-			err := json.NewDecoder(bytes.NewBuffer(body)).Decode(&requestBody)
-			if err == nil {
-				fmt.Println("JSON Body:")
-				for key, value := range requestBody {
-					fmt.Printf("  %s: %v\n", key, value)
-				}
-			} else {
-				fmt.Println("Error parsing JSON body:", err)
+			if err := json.Unmarshal(body, &requestBody); err != nil {
+				panic(fmt.Sprintf("error parsing JSON body: %s", err))
+			}
+			for key, value := range requestBody {
+				paramMap[key] = value
 			}
 
 		} else if contentType == "application/x-www-form-urlencoded" {
-			if err := r.ParseForm(); err == nil {
-				fmt.Println("Form Data:")
-				for key, values := range r.PostForm {
-					fmt.Printf("  %s: %v\n", key, values)
-				}
-			} else {
-				fmt.Println("Error parsing form data:", err)
+			if err := r.ParseForm(); err != nil {
+				panic(fmt.Sprintf("error parsing form: %s", err))
 			}
+			for key, values := range r.PostForm {
+				if len(values) > 0 {
+					paramMap[key] = values[0]
+				}
+			}
+		} else {
+			panic(fmt.Sprintf("unsupported content type: %s", contentType))
 		}
+
+		return paramMap
+	}
+
+	panic(fmt.Sprintf("unsupported HTTP method: %s", r.Method))
+}
+
+func (r *StoicRequest) Has(name string) bool {
+	params := r.GetParamMap()
+	_, exists := params[name]
+	return exists
+}
+
+func (r *StoicRequest) PrintRequestData() {
+	params := r.GetParamMap()
+
+	fmt.Println("Request Parameters:")
+	for key, value := range params {
+		fmt.Printf("  %s: %v\n", key, value)
 	}
 }
 
 func (r *StoicRequest) HasAll(args ...string) bool {
+	params := r.GetParamMap()
 	for _, name := range args {
-		if !r.Has(name) {
+		if _, exists := params[name]; !exists {
 			return false
 		}
 	}
-
 	return true
 }
 
-func (r *StoicRequest) GetStringParam(name string) (string, error) {
-	body, err := readRequestBody(r)
-	if err != nil {
-		fmt.Println("Error reading body:", err)
-		return "", err
-	}
-
-	var strValue string
-	switch r.Method {
-	case "GET":
-		strValue = r.URL.Query().Get(name)
-	case "POST":
-		var requestBody map[string]interface{}
-		err := json.NewDecoder(bytes.NewBuffer(body)).Decode(&requestBody)
-		if err != nil {
-			return "", err
-		}
-
-		strValue2, exists := requestBody[name]
-		if !exists {
-			return "", err
-		}
-
-		strValue, _ = To[string](strValue2)
-
-	default:
-		return "", fmt.Errorf("unsupported HTTP method")
-	}
-
-	if strValue == "" {
-		return "", fmt.Errorf("parameter %s not found", name)
-	}
-
-	return strValue, nil
+func (r *StoicRequest) GetStringParam(name string) string {
+	return r.GetParamMap()[name].(string)
 }
 
-func (r *StoicRequest) GetIntParam(name string) (int, error) {
-	strValue, err := r.GetStringParam(name)
+func (r *StoicRequest) GetIntParam(name string) int {
+	raw := r.GetStringParam(name)
+	value, err := strconv.Atoi(raw)
 	if err != nil {
-		return 0, err
+		panic(fmt.Sprintf("invalid int value for parameter %s: %s", name, raw))
 	}
-
-	intValue, err := strconv.Atoi(strValue)
-	if err != nil {
-		return 0, fmt.Errorf("cannot convert %s to int", strValue)
-	}
-
-	return intValue, nil
+	return value
 }
 
-func (r *StoicRequest) GetBoolParam(name string) (bool, error) {
-	strValue, err := r.GetStringParam(name)
+func (r *StoicRequest) GetBoolParam(name string) bool {
+	raw := r.GetStringParam(name)
+	value, err := strconv.ParseBool(raw)
 	if err != nil {
-		return false, err
+		panic(fmt.Sprintf("invalid bool value for parameter %s: %s", name, raw))
 	}
+	return value
+}
 
-	boolValue, err := strconv.ParseBool(strValue)
+func (r *StoicRequest) GetFloatParam(name string) float64 {
+	raw := r.GetStringParam(name)
+	value, err := strconv.ParseFloat(raw, 64)
 	if err != nil {
-		return false, fmt.Errorf("cannot convert %s to bool", strValue)
+		panic(fmt.Sprintf("invalid float value for parameter %s: %s", name, raw))
 	}
-
-	return boolValue, nil
+	return value
 }
