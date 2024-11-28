@@ -27,15 +27,15 @@ func addCorsHeader(res http.ResponseWriter) {
 }
 
 func helloWorld(request *Core.StoicRequest, response Core.StoicResponse) {
-	// Validate required parameters
 	if !request.HasAll("username", "email") {
 		response.SetError("Invalid Params")
 		return
 	}
 
 	username := request.GetStringParam("username")
-	if len(username) < 7 {
-		response.SetError("username must be at least 7 characters long")
+
+	if len(username) < 8 {
+		response.SetError("username must be at least 8 characters long")
 		return
 	}
 
