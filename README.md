@@ -4,6 +4,7 @@
     - bin
         - StoicMigration
         - StoicModelBuilder
+        - wgo (Hot Recompiles Go code) (really good software nice job): ./cmd/bin/wgo.exe run main.go -w "*.go" 
  
 ## Exec.ps1 | init | stop | reset | test | migration up | migration down
 

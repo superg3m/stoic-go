@@ -1,9 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/superg3m/stoic-go/Core"
 )
@@ -18,24 +23,28 @@ func addCorsHeader(res http.ResponseWriter) {
 	headers.Add("Vary", "Access-Control-Request-Method")
 	headers.Add("Vary", "Access-Control-Request-Headers")
 	headers.Add("Access-Control-Allow-Headers", "Content-Type, Origin, Accept, token")
-	headers.Add("Access-Control-Allow-Methods", "GET, POST,OPTIONS")
+	headers.Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 }
 
 func helloWorld(request *Core.StoicRequest, response Core.StoicResponse) {
-	//request.PrintRequestData()
-
+	// Validate required parameters
 	if !request.HasAll("username", "email") {
 		response.SetError("Invalid Params")
 		return
 	}
 
 	username := request.GetStringParam("username")
+	if len(username) < 7 {
+		response.SetError("username must be at least 7 characters long")
+		return
+	}
+
 	if username != "superg3m" {
 		response.SetError("Wrong Password")
 		return
 	}
 
-	fmt.Fprintf(response, "Hello %s", string(username))
+	fmt.Fprintf(response, "Hello %s", username)
 }
 
 // makeCompatible adapts StoicHandlerFunc to http.HandlerFunc
@@ -58,8 +67,31 @@ func main() {
 	const SERVER_PORT = ":8080"
 
 	Core.RegisterPrefix("Api/0.1/")
-	http.HandleFunc("/User/Create", makeCompatible(helloWorld))
+	mux := http.NewServeMux()
+	mux.HandleFunc("/User/Create", makeCompatible(helloWorld))
 
-	fmt.Println("Cors Fix Server started on Port:", SERVER_PORT)
-	log.Fatal(http.ListenAndServe(SERVER_PORT, nil))
+	server := &http.Server{
+		Addr:    SERVER_PORT,
+		Handler: mux,
+	}
+
+	go func() {
+		stop := make(chan os.Signal, 1)
+		signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+
+		<-stop
+		log.Println("Shutting down server...")
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		if err := server.Shutdown(ctx); err != nil {
+			log.Fatalf("Server shutdown failed: %v", err)
+		}
+		log.Println("Server gracefully stopped.")
+	}()
+
+	log.Printf("Starting server on %s", SERVER_PORT)
+	if err := server.ListenAndServe(); err != http.ErrServerClosed {
+		log.Fatalf("Server failed: %v", err)
+	}
 }
