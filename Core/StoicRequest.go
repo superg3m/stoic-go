@@ -14,7 +14,7 @@ type StoicRequest struct {
 
 func readRequestBody(r *StoicRequest) []byte {
 	body, err := io.ReadAll(r.Body)
-	PanicOnError(err, "")
+	AssertOnError(err)
 
 	r.Body = io.NopCloser(bytes.NewBuffer(body))
 	return body

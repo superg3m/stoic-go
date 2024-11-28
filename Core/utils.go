@@ -3,7 +3,12 @@ package Core
 import (
 	"fmt"
 	"net/mail"
+	"os"
+	"path/filepath"
+	"runtime"
 	"strconv"
+
+	"github.com/fatih/color"
 )
 
 func ValidEmail(email string) bool {
@@ -19,7 +24,7 @@ func castAny[T any](v any) T {
 		switch v := v.(type) {
 		case string:
 			intValue, err := strconv.Atoi(v)
-			PanicOnError(err, "failed to convert string to int: %v", v)
+			AssertOnError(err)
 			result = intValue
 		case float64:
 			result = int(v)
@@ -47,7 +52,7 @@ func castAny[T any](v any) T {
 		switch v := v.(type) {
 		case string:
 			boolValue, err := strconv.ParseBool(v)
-			PanicOnError(err, "failed to convert string to bool: %v", v)
+			AssertOnError(err)
 			result = boolValue
 		case int:
 			result = v != 0
@@ -60,7 +65,7 @@ func castAny[T any](v any) T {
 		switch v := v.(type) {
 		case string:
 			floatValue, err := strconv.ParseFloat(v, 64)
-			PanicOnError(err, "failed to convert string to float64: %v", v)
+			AssertOnError(err)
 			result = floatValue
 		case int:
 			result = float64(v)
@@ -84,10 +89,49 @@ func formatArgs(format string, args ...any) string {
 	return fmt.Sprintf(format, args)
 }
 
-func PanicOnError(err error, format string, args ...any) {
+func printCallStack() {
+	// Retrieve program counters for all active stack frames
+	pc := make([]uintptr, 32)   // Pre-allocate for stack frames
+	n := runtime.Callers(2, pc) // Skip runtime.Callers and printCallStack
+	frames := runtime.CallersFrames(pc[:n])
+
+	// Store all frames to calculate total depth
+	var allFrames []runtime.Frame
+	for {
+		frame, more := frames.Next()
+		allFrames = append(allFrames, frame)
+		if !more {
+			break
+		}
+	}
+
+	// Set up color formatting
+	header := color.New(color.FgCyan, color.Bold).SprintFunc()
+	functionName := color.New(color.FgYellow).SprintFunc()
+	fileDetails := color.New(color.FgMagenta).SprintFunc()
+
+	fmt.Println(header("Call Stack:"))
+	for i := 0; i < len(allFrames)-1; i++ {
+		frame := allFrames[i]
+		// Get relative file path
+		relativePath, pathErr := filepath.Rel(".", frame.File)
+		if pathErr != nil {
+			relativePath = frame.File // Fallback to absolute path
+		}
+
+		// Print stack frame information
+		fmt.Printf("  %s\n    %s:%d\n",
+			functionName(frame.Function),
+			fileDetails(relativePath), frame.Line)
+	}
+}
+
+func AssertOnError(err error) {
 	if err != nil {
-		fmt.Printf("Developer Error: %s\n", formatArgs(format, args))
-		panic(err)
+		header := color.New(color.FgRed, color.Bold).SprintFunc()
+		fmt.Println(header("[Developer Error]: ", err))
+		printCallStack()
+		os.Exit(-1)
 	}
 }
 
