@@ -40,6 +40,8 @@ func getSqlCommandsFromFile(mode MigrationMode, filePath string) []string {
 	ret := []string{}
 	migrationStr := []string{"-- StoicMigration Up", "-- StoicMigration Down"}
 
+	delimitor := ';' // This might change if you see DELIMITOR ~ or something
+
 	otherMode := int(mode)
 	Core.ToggleBit(&otherMode, 0)
 
@@ -72,7 +74,7 @@ func getSqlCommandsFromFile(mode MigrationMode, filePath string) []string {
 
 		for _, c := range line {
 			charAccumulator = append(charAccumulator, byte(c))
-			if c == ';' {
+			if c == delimitor {
 				ret = append(ret, string(charAccumulator))
 				charAccumulator = nil
 			}
