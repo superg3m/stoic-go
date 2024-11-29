@@ -3,6 +3,8 @@ package ORM
 import (
 	"fmt"
 	"reflect"
+
+	"github.com/superg3m/stoic-go/Core"
 )
 
 type ORM_FLAG int
@@ -14,15 +16,17 @@ const (
 )
 
 type FieldMetadata struct {
-	field string   // Name of the field in the DB
-	flags ORM_FLAG // Bit flag to store Nullable, Updatable, etc.
+	attributeName string   // Name of the field in the DB
+	flags         ORM_FLAG // Bit flag to store Nullable, Updatable, etc.
 }
 
 type BaseStoicTable struct {
-	tableName    string
-	fieldMeta    map[string]FieldMetadata
-	originalData map[string]interface{}
+	tableName         string
+	fieldMeta         map[string]FieldMetadata
+	fieldOriginalData map[string]any
 }
+
+var globalTable BaseStoicTable
 
 type I_CRUD interface {
 	canUpdate()
@@ -32,6 +36,7 @@ type I_CRUD interface {
 
 func (base *BaseStoicTable) getFieldMetadata(fieldName string) (FieldMetadata, bool) {
 	meta, exists := base.fieldMeta[fieldName]
+	Core.Assert(exists)
 	return meta, exists
 }
 
@@ -44,32 +49,36 @@ func (f *FieldMetadata) isUpdatable() bool {
 }
 
 func RegisterTableName(tableName string) {
-
+	globalTable.tableName = tableName
 }
 
 func RegisterTableColumn(structMemberName string, attributeName string, flags ORM_FLAG) {
-
+	globalTable.fieldMeta[structMemberName] = FieldMetadata{
+		attributeName: attributeName,
+		flags:         flags,
+	}
 }
 
 func (b *BaseStoicTable) storeOriginalData(v interface{}) {
 	val := reflect.ValueOf(v).Elem()
 	for i := 0; i < val.NumField(); i++ {
 		field := val.Type().Field(i)
-		b.originalData[field.Name] = val.Field(i).Interface()
+		b.fieldOriginalData[field.Name] = val.Field(i).Interface()
 	}
 }
 
 func (b *BaseStoicTable) hasFieldChanged(v interface{}, fieldName string) bool {
 	val := reflect.ValueOf(v).Elem()
 	currentValue := val.FieldByName(fieldName).Interface()
-	originalValue, exists := b.originalData[fieldName]
+	originalValue, exists := b.fieldOriginalData[fieldName]
 	if !exists {
 		return false
 	}
+
 	return originalValue != currentValue
 }
 
-func (b *BaseStoicTable) update(v interface{}) error {
+func (b *BaseStoicTable) update(v interface{}) {
 	val := reflect.ValueOf(v).Elem()
 	for i := 0; i < val.NumField(); i++ {
 		field := val.Type().Field(i)
@@ -78,22 +87,20 @@ func (b *BaseStoicTable) update(v interface{}) error {
 			continue
 		}
 
-		// Only check updatable fields
 		if meta.isUpdatable() && b.hasFieldChanged(v, field.Name) {
-			fmt.Printf("Field '%s' has been updated.\n", field.Name)
+			// actual update logic ...
 		} else {
-			fmt.Printf("Field '%s' has not been updated.\n", field.Name)
+			errMsg := fmt.Sprintf("Field '%s' is not allowed to be updated.\n", field.Name)
+			Core.AssertMsg(false, errMsg)
 		}
 	}
-
-	// actual update logic ...
-	return nil
 }
 
-func (b *BaseStoicTable) create(v interface{}) error {
+func (b *BaseStoicTable) create(v interface{}) {
 	val := reflect.ValueOf(v).Elem()
 	for i := 0; i < val.NumField(); i++ {
 		field := val.Type().Field(i)
+		b.storeOriginalData(v)
 		_, exists := b.fieldMeta[field.Name]
 		if !exists {
 			continue
@@ -101,5 +108,4 @@ func (b *BaseStoicTable) create(v interface{}) error {
 	}
 
 	// actual create logic ...
-	return nil
 }
