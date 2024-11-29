@@ -153,12 +153,10 @@ func castAny[T any](v any) T {
 }
 
 func printCallStack() {
-	// Retrieve program counters for all active stack frames
-	pc := make([]uintptr, 32)   // Pre-allocate for stack frames
-	n := runtime.Callers(2, pc) // Skip runtime.Callers and printCallStack
+	pc := make([]uintptr, 32)
+	n := runtime.Callers(2, pc)
 	frames := runtime.CallersFrames(pc[:n])
 
-	// Store all frames to calculate total depth
 	var allFrames []runtime.Frame
 	for {
 		frame, more := frames.Next()
@@ -171,13 +169,11 @@ func printCallStack() {
 	LogPrint(COLOR_CYAN("Call Stack:"))
 	for i := 0; i < len(allFrames)-1; i++ {
 		frame := allFrames[i]
-		// Get relative file path
 		relativePath, pathErr := filepath.Rel(".", frame.File)
 		if pathErr != nil {
-			relativePath = frame.File // Fallback to absolute path
+			relativePath = frame.File
 		}
 
-		// Print stack frame information
 		fmt.Printf("  %s\n    %s:%d\n",
 			COLOR_YELLOW(frame.Function),
 			COLOR_MAGENTA(relativePath), frame.Line)
@@ -207,7 +203,3 @@ func AssertMsg(condition bool, msg string) {
 		os.Exit(-1)
 	}
 }
-
-// Asserts
-// Logging
-//
