@@ -1,8 +1,15 @@
 -- StoicMigration Up
 CREATE TABLE User (
-    id int;
-    PRIMARY KEY(id);
+    id int,
+    PRIMARY KEY(id)
+);
+
+CREATE TABLE UserRelation (
+    id int,
+    relation varchar(255),
+    PRIMARY KEY(id)
 );
 
 -- StoicMigration Down
 IF EXISTS DROP TABLE User;
+IF EXISTS DROP TABLE UserRelation;

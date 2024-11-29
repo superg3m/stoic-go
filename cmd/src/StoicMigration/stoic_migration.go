@@ -47,15 +47,24 @@ func getSqlCommandsFromFile(mode MigrationMode, filePath string) []string {
 	Core.AssertOnError(err)
 
 	if !hasMigrationString(data, migrationStr[mode]) {
-		err_string := fmt.Sprintf("Migratoin File doesn't' have %s", migrationStr[mode])
+		err_string := fmt.Sprintf("Migration File doesn't' have %s", migrationStr[mode])
 		Core.AssertOnError(errors.New(err_string))
 		return []string{}
 	}
 
-	strData := strings.Split(string(data), "\r\n")
+	strData := strings.Split(strings.ReplaceAll(string(data), "\r\n", "\n"), "\n")
 
+	charAccumulator := []byte{}
+	found := false
 	for _, line := range strData {
-		charAccumulator := []byte{}
+		if line != migrationStr[mode] && !found {
+			continue
+		}
+
+		if line == migrationStr[mode] {
+			found = true
+			continue
+		}
 
 		if line == migrationStr[otherMode] {
 			break
@@ -63,19 +72,28 @@ func getSqlCommandsFromFile(mode MigrationMode, filePath string) []string {
 
 		for _, c := range line {
 			charAccumulator = append(charAccumulator, byte(c))
-			if c == '\r' || c == '\n' {
+			if c == ';' {
 				ret = append(ret, string(charAccumulator))
 				charAccumulator = nil
 			}
 		}
-		fmt.Println(line)
 	}
 
 	return ret
 }
 
 func main() {
-	sqlCommands := getSqlCommandsFromFile(MIGRATION_MODE_UP, "../../../Migrations/mysql/UserCreate.mysql")
+	sqlUpCommands := getSqlCommandsFromFile(MIGRATION_MODE_UP, "../../../Migrations/mysql/UserCreate.mysql")
 
-	_ = sqlCommands
+	for _, element := range sqlUpCommands {
+		fmt.Println(element)
+	}
+
+	fmt.Println("\n")
+
+	sqlDownCommands := getSqlCommandsFromFile(MIGRATION_MODE_DOWN, "../../../Migrations/mysql/UserCreate.mysql")
+
+	for _, element := range sqlDownCommands {
+		fmt.Println(element)
+	}
 }
