@@ -35,7 +35,7 @@ func helloWorld(request *Core.StoicRequest, response Core.StoicResponse) {
 	username := request.GetStringParam("username")
 
 	if len(username) < 8 {
-		response.SetError("username must be at least 8 characters long")
+		response.SetError("Username must be at least 8 characters long")
 		return
 	}
 
@@ -47,7 +47,6 @@ func helloWorld(request *Core.StoicRequest, response Core.StoicResponse) {
 	fmt.Fprintf(response, "Hello %s", username)
 }
 
-// makeCompatible adapts StoicHandlerFunc to http.HandlerFunc
 func makeCompatible(handler StoicHandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		addCorsHeader(w)
@@ -63,6 +62,30 @@ func makeCompatible(handler StoicHandlerFunc) http.HandlerFunc {
 	}
 }
 
+func gracefulShutdown(server *http.Server) {
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+
+	<-stop
+	Core.LogDebug("Shutting down server...")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
+		Core.LogFatal(fmt.Sprintf("Server shutdown failed: %s", err))
+	}
+	Core.LogDebug("Server gracefully stopped.")
+}
+
+const (
+	DB_ENGINE = "mysql"
+	HOST      = "localhost"
+	PORT      = 5432
+	USER      = "jacob"
+	PASSWORD  = "password"
+	DBNAME    = "bookstoreDB"
+)
+
 func main() {
 	const SERVER_PORT = ":8080"
 
@@ -75,20 +98,15 @@ func main() {
 		Handler: mux,
 	}
 
-	go func() {
-		stop := make(chan os.Signal, 1)
-		signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+	//dsn := Core.GetDSN(DB_ENGINE, HOST, PORT, USER, PASSWORD, DBNAME)
 
-		<-stop
-		Core.LogDebug("Shutting down server...")
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
+	//db := Core.ConnectToDatabase(DB_ENGINE, dsn)
+	//defer db.Close()
 
-		if err := server.Shutdown(ctx); err != nil {
-			Core.LogFatal(fmt.Sprintf("Server shutdown failed: %s", err))
-		}
-		Core.LogDebug("Server gracefully stopped.")
-	}()
+	siteSettings := Core.GetSiteSettings()
+	fmt.Println(siteSettings["settings"].(map[string]any)["dbHost"])
+
+	go gracefulShutdown(server)
 
 	Core.LogDebug(fmt.Sprintf("Starting server on %s", SERVER_PORT))
 	if err := server.ListenAndServe(); err != http.ErrServerClosed {

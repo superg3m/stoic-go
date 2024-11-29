@@ -1,6 +1,7 @@
 package Core
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/mail"
 	"os"
@@ -174,15 +175,21 @@ func printCallStack() {
 			relativePath = frame.File
 		}
 
-		fmt.Printf("  %s\n    %s:%d\n",
-			COLOR_YELLOW(frame.Function),
-			COLOR_MAGENTA(relativePath), frame.Line)
+		fmt.Printf("%s:%d\n", COLOR_MAGENTA(relativePath), frame.Line)
 	}
 }
 
 func AssertOnError(err error) {
 	if err != nil {
 		LogFatal(fmt.Sprint("[Developer Error]: ", err))
+		printCallStack()
+		os.Exit(-1)
+	}
+}
+
+func AssertOnErrorMsg(err error, msg string) {
+	if err != nil {
+		LogFatal(fmt.Sprint("[Developer Error]: ", msg))
 		printCallStack()
 		os.Exit(-1)
 	}
@@ -202,4 +209,16 @@ func AssertMsg(condition bool, msg string) {
 		printCallStack()
 		os.Exit(-1)
 	}
+}
+
+func GetSiteSettings() map[string]any {
+	var ret map[string]any
+
+	byteData, err := os.ReadFile("./siteSettings.json")
+	AssertOnError(err)
+
+	err2 := json.Unmarshal(byteData, &ret)
+	AssertOnError(err2)
+
+	return ret
 }
