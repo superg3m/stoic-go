@@ -88,14 +88,14 @@ func main() {
 	sqlUpCommands := getSqlCommandsFromFile(MIGRATION_MODE_UP, "../../../Migrations/mysql/UserCreate.mysql")
 
 	for _, element := range sqlUpCommands {
-		fmt.Println(element)
+		Core.LogPrint(element)
 	}
 
-	fmt.Println("\n")
+	Core.LogPrint("\n")
 
 	sqlDownCommands := getSqlCommandsFromFile(MIGRATION_MODE_DOWN, "../../../Migrations/mysql/UserCreate.mysql")
 
 	for _, element := range sqlDownCommands {
-		fmt.Println(element)
+		Core.LogPrint(element)
 	}
 }

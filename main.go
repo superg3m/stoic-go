@@ -80,17 +80,17 @@ func main() {
 		signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 
 		<-stop
-		log.Println("Shutting down server...")
+		Core.LogDebug("Shutting down server...")
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
 		if err := server.Shutdown(ctx); err != nil {
-			log.Fatalf("Server shutdown failed: %v", err)
+			Core.LogFatal(fmt.Sprintf("Server shutdown failed: %s", err))
 		}
-		log.Println("Server gracefully stopped.")
+		Core.LogDebug("Server gracefully stopped.")
 	}()
 
-	log.Printf("Starting server on %s", SERVER_PORT)
+	Core.LogDebug(fmt.Sprintf("Starting server on %s", SERVER_PORT))
 	if err := server.ListenAndServe(); err != http.ErrServerClosed {
 		log.Fatalf("Server failed: %v", err)
 	}

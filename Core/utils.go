@@ -18,14 +18,28 @@ var (
 	COLOR_YELLOW  = color.New(color.FgYellow).SprintFunc()
 	COLOR_MAGENTA = color.New(color.FgMagenta).SprintFunc()
 	COLOR_CYAN    = color.New(color.FgCyan).SprintFunc()
+
+	COLOR_BG_RED = color.New(color.FgWhite, color.BgRed).SprintFunc()
 )
 
 func log(msg string) {
 	fmt.Println(msg)
 }
 
-func LogInit() {
+func LoggerInit() {
 	// stdout OR filePtr
+}
+
+// TODO (Jovanni): need to fix this!
+func LogOnError(err error, format string, args ...any) {
+	if err != nil {
+		LogFatal(fmt.Sprintf("Error: %s\n", err))
+		panic(err)
+	}
+}
+
+func LogPrint(msg string) {
+	log(msg)
 }
 
 func LogSuccess(msg string) {
@@ -33,7 +47,7 @@ func LogSuccess(msg string) {
 }
 
 func LogDebug(msg string) {
-	log(COLOR_GREEN(msg))
+	log(COLOR_BLUE(msg))
 }
 
 func LogWarn(msg string) {
@@ -45,7 +59,7 @@ func LogError(msg string) {
 }
 
 func LogFatal(msg string) {
-
+	log(COLOR_BG_RED(msg))
 }
 
 func GetBit(number int, bit_to_check int) int {
@@ -138,10 +152,6 @@ func castAny[T any](v any) T {
 	return result.(T)
 }
 
-func formatArgs(format string, args ...any) string {
-	return fmt.Sprintf(format, args)
-}
-
 func printCallStack() {
 	// Retrieve program counters for all active stack frames
 	pc := make([]uintptr, 32)   // Pre-allocate for stack frames
@@ -158,7 +168,7 @@ func printCallStack() {
 		}
 	}
 
-	fmt.Println(COLOR_CYAN("Call Stack:"))
+	LogPrint(COLOR_CYAN("Call Stack:"))
 	for i := 0; i < len(allFrames)-1; i++ {
 		frame := allFrames[i]
 		// Get relative file path
@@ -176,22 +186,9 @@ func printCallStack() {
 
 func AssertOnError(err error) {
 	if err != nil {
-		header := color.New(color.FgRed, color.Bold).SprintFunc()
-		fmt.Println(header("[Developer Error]: ", err))
+		LogFatal(fmt.Sprint("[Developer Error]: ", err))
 		printCallStack()
 		os.Exit(-1)
-	}
-}
-
-func LoggerInit(fileName string) {
-
-}
-
-// TODO (Jovanni): need to fix this!
-func LogOnError(err error, format string, args ...any) {
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
-		panic(err)
 	}
 }
 
