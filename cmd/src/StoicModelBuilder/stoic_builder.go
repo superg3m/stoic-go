@@ -1,7 +1,54 @@
-package StoicModelBuilder
+package main
+
+import (
+	"html/template"
+	"os"
+
+	"github.com/superg3m/stoic-go/Core"
+)
 
 // ./cmd/bin/builder dsn password username dbname Table to build
-// ./cmd/bin/builder "UserAction"
+// ./cmd/bin/builder "<TableName>"
 
-// Parse throuhg database and then look for table called user Action make sure
-// if files already exists then just say "file already exists for UserAction table"
+// Parse through the database and look for a table called <TableName>.
+// If files already exist, then just log: "File already exists for <TableName> table."
+
+type Attribute struct {
+	Name     string
+	Type     string
+	DBColumn string
+	Flags    string
+}
+
+type TemplateDataType struct {
+	TableName  string
+	Attributes []Attribute
+}
+
+func main() {
+	tableName := "User"
+	attributes := []Attribute{
+		{"ID", "int", "user_id", "ORM.PRIMARY_KEY"},
+		{"Email", "string", "email_address", "ORM.NULLABLE|ORM.UPDATABLE"},
+		{"Joined", "time.Time", "joined_at", "ORM.NULLABLE"},
+	}
+
+	templateData := TemplateDataType{
+		TableName:  tableName,
+		Attributes: attributes,
+	}
+
+	tmplFile := "cls.tmpl"
+	tmpl, err := template.New(tmplFile).ParseFiles(tmplFile)
+	if err != nil {
+		panic(err)
+	}
+
+	filePtr, err := os.Create("./user.go")
+	Core.AssertOnError(err)
+
+	err = tmpl.Execute(filePtr, templateData)
+	if err != nil {
+		panic(err)
+	}
+}

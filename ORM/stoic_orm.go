@@ -22,8 +22,8 @@ type FieldMetadata struct {
 
 type BaseStoicTable struct {
 	tableName         string
-	fieldMeta         map[string]FieldMetadata
-	fieldOriginalData map[string]any
+	fieldMeta         map[string]FieldMetadata // Key is memeberFieldName
+	fieldOriginalData map[string]any           // Key is memeberFieldName
 }
 
 var globalTable BaseStoicTable

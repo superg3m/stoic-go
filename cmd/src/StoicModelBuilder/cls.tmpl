@@ -1,0 +1,20 @@
+package Api
+
+import "time" // Adjust imports as necessary
+
+type {{ .TableName }} struct {
+	ORM.BaseStoicTable
+
+	{{- range .Attributes }}
+	{{ .Name }} {{ .Type }} // Description for {{ .Name }}
+	{{- end }}
+}
+
+// Implement the setupTable function for {{ .TableName }}
+func init() {
+	ORM.RegisterTableName("{{ .TableName }}")
+
+	{{- range .Attributes }}
+	ORM.RegisterTableColumn("{{ .Name }}", "{{ .DBColumn }}", {{ .Flags }})
+	{{- end }}
+}

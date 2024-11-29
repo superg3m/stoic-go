@@ -18,8 +18,8 @@
 - Migration Control
     - Goose: https://github.com/pressly/goose (Sql lite only -_-)
     - Custom parsing like goose
-    - #StoicMigration Up
-    - #StoicMigration Down
+    - -- StoicMigration Up
+    - -- StoicMigration Down
     - Store migration in db to know which ones have been successfully run
 
 
