@@ -11,6 +11,43 @@ import (
 	"github.com/fatih/color"
 )
 
+var (
+	COLOR_RED     = color.New(color.FgRed).SprintFunc()
+	COLOR_BLUE    = color.New(color.FgBlue).SprintFunc()
+	COLOR_GREEN   = color.New(color.FgGreen).SprintFunc()
+	COLOR_YELLOW  = color.New(color.FgYellow).SprintFunc()
+	COLOR_MAGENTA = color.New(color.FgMagenta).SprintFunc()
+	COLOR_CYAN    = color.New(color.FgCyan).SprintFunc()
+)
+
+func log(msg string) {
+	fmt.Println(msg)
+}
+
+func LogInit() {
+	// stdout OR filePtr
+}
+
+func LogSuccess(msg string) {
+	log(COLOR_GREEN(msg))
+}
+
+func LogDebug(msg string) {
+	log(COLOR_GREEN(msg))
+}
+
+func LogWarn(msg string) {
+	log(COLOR_MAGENTA(msg))
+}
+
+func LogError(msg string) {
+	log(COLOR_RED(msg))
+}
+
+func LogFatal(msg string) {
+
+}
+
 func GetBit(number int, bit_to_check int) int {
 	return ((number & (1 << bit_to_check)) >> bit_to_check)
 }
@@ -121,12 +158,7 @@ func printCallStack() {
 		}
 	}
 
-	// Set up color formatting
-	header := color.New(color.FgCyan, color.Bold).SprintFunc()
-	functionName := color.New(color.FgYellow).SprintFunc()
-	fileDetails := color.New(color.FgMagenta).SprintFunc()
-
-	fmt.Println(header("Call Stack:"))
+	fmt.Println(COLOR_CYAN("Call Stack:"))
 	for i := 0; i < len(allFrames)-1; i++ {
 		frame := allFrames[i]
 		// Get relative file path
@@ -137,8 +169,8 @@ func printCallStack() {
 
 		// Print stack frame information
 		fmt.Printf("  %s\n    %s:%d\n",
-			functionName(frame.Function),
-			fileDetails(relativePath), frame.Line)
+			COLOR_YELLOW(frame.Function),
+			COLOR_MAGENTA(relativePath), frame.Line)
 	}
 }
 

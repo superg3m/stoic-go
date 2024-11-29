@@ -86,7 +86,7 @@ func (b *BaseStoicTable) update(v interface{}) error {
 		}
 	}
 
-	// Proceed with actual update logic here (e.g., DB update)
+	// actual update logic ...
 	return nil
 }
 
@@ -100,6 +100,6 @@ func (b *BaseStoicTable) create(v interface{}) error {
 		}
 	}
 
-	// Proceed with actual create logic here (e.g., DB insert)
+	// actual create logic ...
 	return nil
 }
