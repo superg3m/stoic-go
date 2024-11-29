@@ -11,6 +11,22 @@ import (
 	"github.com/fatih/color"
 )
 
+func GetBit(number int, bit_to_check int) int {
+	return ((number & (1 << bit_to_check)) >> bit_to_check)
+}
+
+func SetBit(number *int, bit_to_set int) {
+	*number |= (1 << bit_to_set)
+}
+
+func UnsetBit(number *int, bit_to_unset int) {
+	*number &= (^(1 << bit_to_unset))
+}
+
+func ToggleBit(number *int, bit_to_toggle int) {
+	*number ^= (1 << bit_to_toggle)
+}
+
 func ValidEmail(email string) bool {
 	_, err := mail.ParseAddress(email)
 	return err == nil
