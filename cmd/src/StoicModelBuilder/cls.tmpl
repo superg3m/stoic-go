@@ -10,6 +10,27 @@ type {{ .TableName }} struct {
 	{{- end }}
 }
 
+func UserAccount(request *Core.StoicRequest, response Core.StoicResponse) {
+	if !request.HasAll("username", "email") {
+		response.SetError("Invalid Params")
+		return
+	}
+
+	username := request.GetStringParam("username")
+
+	if len(username) < 8 {
+		response.SetError("Username must be at least 8 characters long")
+		return
+	}
+
+	if username != "superg3m" {
+		response.SetError("Wrong Password")
+		return
+	}
+
+	fmt.Fprintf(response, "Hello %s", username)
+}
+
 // Implement the setupTable function for {{ .TableName }}
 func init() {
 	ORM.RegisterTableName("{{ .TableName }}")
@@ -17,4 +38,8 @@ func init() {
 	{{- range .Attributes }}
 	ORM.RegisterTableColumn("{{ .Name }}", "{{ .DBColumn }}", {{ .Flags }})
 	{{- end }}
+
+	Core.RegisterApiEndpoint("{{ .TableName }}/Account", UserAccount,  "GET")
+	Core.RegisterApiEndpoint("{{ .TableName }}/Account", UserAccount, "POST")
+
 }

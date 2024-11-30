@@ -13,19 +13,6 @@ import (
 	"github.com/superg3m/stoic-go/Core"
 )
 
-type StoicHandlerFunc func(r *Core.StoicRequest, w Core.StoicResponse)
-
-// Enable CORS by adding headers
-func addCorsHeader(res http.ResponseWriter) {
-	headers := res.Header()
-	headers.Add("Access-Control-Allow-Origin", "*")
-	headers.Add("Vary", "Origin")
-	headers.Add("Vary", "Access-Control-Request-Method")
-	headers.Add("Vary", "Access-Control-Request-Headers")
-	headers.Add("Access-Control-Allow-Headers", "Content-Type, Origin, Accept, token")
-	headers.Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-}
-
 func helloWorld(request *Core.StoicRequest, response Core.StoicResponse) {
 	if !request.HasAll("username", "email") {
 		response.SetError("Invalid Params")
@@ -45,21 +32,6 @@ func helloWorld(request *Core.StoicRequest, response Core.StoicResponse) {
 	}
 
 	fmt.Fprintf(response, "Hello %s", username)
-}
-
-func makeCompatible(handler StoicHandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		addCorsHeader(w)
-
-		if r.Method == "OPTIONS" {
-			return
-		}
-
-		stoicRequest := &Core.StoicRequest{Request: r}
-		stoicResponse := Core.StoicResponse{ResponseWriter: w}
-
-		handler(stoicRequest, stoicResponse)
-	}
 }
 
 func gracefulShutdown(server *http.Server) {
@@ -89,17 +61,15 @@ const (
 func main() {
 	const SERVER_PORT = ":8080"
 
-	Core.RegisterPrefix("Api/0.1/")
-	mux := http.NewServeMux()
-	mux.HandleFunc("/User/Create", makeCompatible(helloWorld))
+	//Core.RegisterPrefix("Api/0.1")
+	Core.RegisterApiEndpoint("/User/Create", helloWorld, "POST")
 
 	server := &http.Server{
 		Addr:    SERVER_PORT,
-		Handler: mux,
+		Handler: Core.Router,
 	}
 
 	//dsn := Core.GetDSN(DB_ENGINE, HOST, PORT, USER, PASSWORD, DBNAME)
-
 	//db := Core.ConnectToDatabase(DB_ENGINE, dsn)
 	//defer db.Close()
 
