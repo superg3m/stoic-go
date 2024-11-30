@@ -3,6 +3,8 @@ package Core
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 func addCorsHeader(res http.ResponseWriter) {
@@ -33,10 +35,10 @@ func makeCompatible(handler StoicHandlerFunc) http.HandlerFunc {
 type StoicHandlerFunc func(r *StoicRequest, w StoicResponse)
 
 var prefix string
-var Router *http.ServeMux
+var Router *mux.Router
 
 func init() {
-	Router = http.NewServeMux()
+	Router = mux.NewRouter()
 	prefix = ""
 }
 
@@ -46,5 +48,5 @@ func RegisterPrefix(newPrefix string) {
 
 func RegisterApiEndpoint(path string, functionEndpoint StoicHandlerFunc, method string) {
 	resolvedPath := fmt.Sprintf("%s%s", prefix, path)
-	Router.HandleFunc(resolvedPath, makeCompatible(functionEndpoint))
+	Router.HandleFunc(resolvedPath, makeCompatible(functionEndpoint)).Methods(method, "OPTIONS")
 }
