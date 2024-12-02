@@ -61,7 +61,7 @@ const (
 func main() {
 	const SERVER_PORT = ":8080"
 
-	//Core.RegisterPrefix("Api/0.1")
+	//Core.RegisterPrefix("api/0.1")
 	Core.RegisterApiEndpoint("/User/Create", helloWorld, "POST")
 
 	server := &http.Server{
