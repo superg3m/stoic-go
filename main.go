@@ -3,17 +3,17 @@ package main
 import (
 	"context"
 	"fmt"
+	Server2 "github.com/superg3m/stoic-go/cmd/src/Server"
+	Utility2 "github.com/superg3m/stoic-go/cmd/src/Utility"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-
-	"github.com/superg3m/stoic-go/Core"
 )
 
-func helloWorld(request *Core.StoicRequest, response Core.StoicResponse) {
+func helloWorld(request *Server2.StoicRequest, response Server2.StoicResponse) {
 	if !request.HasAll("username", "email") {
 		response.SetError("Invalid Params")
 		return
@@ -39,14 +39,14 @@ func gracefulShutdown(server *http.Server) {
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 
 	<-stop
-	Core.LogDebug("Shutting down server...")
+	Utility2.LogDebug("Shutting down server...")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	if err := server.Shutdown(ctx); err != nil {
-		Core.LogFatal(fmt.Sprintf("Server shutdown failed: %s", err))
+		Utility2.LogFatal(fmt.Sprintf("Server shutdown failed: %s", err))
 	}
-	Core.LogDebug("Server gracefully stopped.")
+	Utility2.LogDebug("Server gracefully stopped.")
 }
 
 const (
@@ -61,24 +61,24 @@ const (
 func main() {
 	const SERVER_PORT = ":8080"
 
-	//Core.RegisterPrefix("api/0.1")
-	Core.RegisterApiEndpoint("/User/Create", helloWorld, "POST")
+	//core.RegisterPrefix("api/0.1")
+	Server2.RegisterApiEndpoint("/User/Create", helloWorld, "POST")
 
 	server := &http.Server{
 		Addr:    SERVER_PORT,
-		Handler: Core.Router,
+		Handler: Server2.Router,
 	}
 
-	//dsn := Core.GetDSN(DB_ENGINE, HOST, PORT, USER, PASSWORD, DBNAME)
-	//db := Core.ConnectToDatabase(DB_ENGINE, dsn)
+	//dsn := core.GetDSN(DB_ENGINE, HOST, PORT, USER, PASSWORD, DBNAME)
+	//db := core.ConnectToDatabase(DB_ENGINE, dsn)
 	//defer db.Close()
 
-	siteSettings := Core.GetSiteSettings()
+	siteSettings := Utility2.GetSiteSettings()
 	fmt.Println(siteSettings["settings"].(map[string]any)["dbHost"])
 
 	go gracefulShutdown(server)
 
-	Core.LogDebug(fmt.Sprintf("Starting server on %s", SERVER_PORT))
+	Utility2.LogDebug(fmt.Sprintf("Starting server on %s", SERVER_PORT))
 	if err := server.ListenAndServe(); err != http.ErrServerClosed {
 		log.Fatalf("Server failed: %v", err)
 	}

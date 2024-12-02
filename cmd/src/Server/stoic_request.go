@@ -1,9 +1,10 @@
-package Core
+package Server
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/superg3m/stoic-go/cmd/src/Utility"
 	"io"
 	"net/http"
 )
@@ -14,7 +15,7 @@ type StoicRequest struct {
 
 func readRequestBody(r *StoicRequest) []byte {
 	body, err := io.ReadAll(r.Body)
-	AssertOnError(err)
+	Utility.AssertOnError(err)
 
 	r.Body = io.NopCloser(bytes.NewBuffer(body))
 	return body
@@ -94,13 +95,13 @@ func (r *StoicRequest) GetStringParam(name string) string {
 }
 
 func (r *StoicRequest) GetIntParam(name string) int {
-	return castAny[int](r.GetStringParam(name))
+	return Utility.CastAny[int](r.GetStringParam(name))
 }
 
 func (r *StoicRequest) GetBoolParam(name string) bool {
-	return castAny[bool](r.GetStringParam(name))
+	return Utility.CastAny[bool](r.GetStringParam(name))
 }
 
 func (r *StoicRequest) GetFloatParam(name string) float64 {
-	return castAny[float64](r.GetStringParam(name))
+	return Utility.CastAny[float64](r.GetStringParam(name))
 }

@@ -2,10 +2,9 @@ package Api
 
 import (
 	"errors"
+	"github.com/superg3m/stoic-go/cmd/src/ORM"
+	"github.com/superg3m/stoic-go/cmd/src/Utility"
 	"time"
-
-	"github.com/superg3m/stoic-go/Core"
-	"github.com/superg3m/stoic-go/ORM"
 )
 
 var ( // ERRORS
@@ -31,7 +30,7 @@ func FromID(id int) {
 func FromEmail(email string) (User, error) {
 	var ret User
 
-	if !Core.ValidEmail(email) {
+	if !Utility.ValidEmail(email) {
 		return User{}, ERROR_INVALID_EMAIL
 	}
 

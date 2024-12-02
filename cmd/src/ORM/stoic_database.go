@@ -1,9 +1,9 @@
-package Core
+package ORM
 
 import (
 	"fmt"
-
 	"github.com/jmoiron/sqlx"
+	"github.com/superg3m/stoic-go/cmd/src/Utility"
 )
 
 // mysql
@@ -37,6 +37,6 @@ func GetDSN(dbEngine, host string, port int, user, password, dbname string) stri
 
 func ConnectToDatabase(dbEngine, dsn string) *sqlx.DB {
 	db, err := sqlx.Connect(dbEngine, dsn)
-	AssertOnErrorMsg(err, "Failed to connect to database")
+	Utility.AssertOnErrorMsg(err, "Failed to connect to database")
 	return db
 }

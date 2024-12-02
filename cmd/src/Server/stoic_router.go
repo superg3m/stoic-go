@@ -1,4 +1,4 @@
-package Core
+package Server
 
 import (
 	"fmt"
@@ -37,11 +37,6 @@ type StoicHandlerFunc func(r *StoicRequest, w StoicResponse)
 var prefix string
 var Router *mux.Router
 
-func init() {
-	Router = mux.NewRouter()
-	prefix = ""
-}
-
 func RegisterPrefix(newPrefix string) {
 	prefix = newPrefix
 }
@@ -49,4 +44,9 @@ func RegisterPrefix(newPrefix string) {
 func RegisterApiEndpoint(path string, functionEndpoint StoicHandlerFunc, method string) {
 	resolvedPath := fmt.Sprintf("%s%s", prefix, path)
 	Router.HandleFunc(resolvedPath, makeCompatible(functionEndpoint)).Methods(method, "OPTIONS")
+}
+
+func init() {
+	Router = mux.NewRouter()
+	prefix = ""
 }

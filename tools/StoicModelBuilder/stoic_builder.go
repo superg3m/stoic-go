@@ -1,10 +1,9 @@
 package main
 
 import (
+	"github.com/superg3m/stoic-go/cmd/src/Utility"
 	"html/template"
 	"os"
-
-	"github.com/superg3m/stoic-go/Core"
 )
 
 // ./cmd/bin/builder dsn password username dbname Table to build
@@ -45,7 +44,7 @@ func main() {
 	}
 
 	filePtr, err := os.Create("./user.go")
-	Core.AssertOnError(err)
+	Utility.AssertOnError(err)
 
 	err = tmpl.Execute(filePtr, templateData)
 	if err != nil {

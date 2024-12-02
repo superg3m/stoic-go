@@ -2,9 +2,8 @@ package ORM
 
 import (
 	"fmt"
+	"github.com/superg3m/stoic-go/cmd/src/Utility"
 	"reflect"
-
-	"github.com/superg3m/stoic-go/Core"
 )
 
 type ORM_FLAG int
@@ -36,7 +35,7 @@ type I_CRUD interface {
 
 func (base *BaseStoicTable) getFieldMetadata(fieldName string) (FieldMetadata, bool) {
 	meta, exists := base.fieldMeta[fieldName]
-	Core.Assert(exists)
+	Utility.Assert(exists)
 	return meta, exists
 }
 
@@ -91,7 +90,7 @@ func (b *BaseStoicTable) update(v interface{}) {
 			// actual update logic ...
 		} else {
 			errMsg := fmt.Sprintf("Field '%s' is not allowed to be updated.\n", field.Name)
-			Core.AssertMsg(false, errMsg)
+			Utility.AssertMsg(false, errMsg)
 		}
 	}
 }

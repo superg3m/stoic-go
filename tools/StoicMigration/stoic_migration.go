@@ -3,10 +3,9 @@ package main
 import (
 	"errors"
 	"fmt"
+	Utility2 "github.com/superg3m/stoic-go/cmd/src/Utility"
 	"os"
 	"strings"
-
-	"github.com/superg3m/stoic-go/Core"
 )
 
 const STOIC_MIGRATION_UP_STR = "-- StoicMigration Up"
@@ -43,14 +42,14 @@ func getSqlCommandsFromFile(mode MigrationMode, filePath string) []string {
 	delimitor := ';' // This might change if you see DELIMITOR ~ or something
 
 	otherMode := int(mode)
-	Core.ToggleBit(&otherMode, 0)
+	Utility2.ToggleBit(&otherMode, 0)
 
 	data, err := os.ReadFile(filePath)
-	Core.AssertOnError(err)
+	Utility2.AssertOnError(err)
 
 	if !hasMigrationString(data, migrationStr[mode]) {
 		err_string := fmt.Sprintf("Migration File doesn't' have %s", migrationStr[mode])
-		Core.AssertOnError(errors.New(err_string))
+		Utility2.AssertOnError(errors.New(err_string))
 		return []string{}
 	}
 
@@ -88,14 +87,14 @@ func main() {
 	sqlUpCommands := getSqlCommandsFromFile(MIGRATION_MODE_UP, "../../../Migrations/mysql/UserCreate.mysql")
 
 	for _, element := range sqlUpCommands {
-		Core.LogPrint(element)
+		Utility2.LogPrint(element)
 	}
 
-	Core.LogPrint("\n")
+	Utility2.LogPrint("\n")
 
 	sqlDownCommands := getSqlCommandsFromFile(MIGRATION_MODE_DOWN, "../../../Migrations/mysql/UserCreate.mysql")
 
 	for _, element := range sqlDownCommands {
-		Core.LogPrint(element)
+		Utility2.LogPrint(element)
 	}
 }

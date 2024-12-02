@@ -46,3 +46,6 @@
     - castAny[T any](v any) T
     - 
 
+
+cd ./tools/wgo-main
+go install
