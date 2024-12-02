@@ -84,7 +84,7 @@ func getSqlCommandsFromFile(mode MigrationMode, filePath string) []string {
 }
 
 func main() {
-	sqlUpCommands := getSqlCommandsFromFile(MIGRATION_MODE_UP, "../../../Migrations/mysql/UserCreate.mysql")
+	sqlUpCommands := getSqlCommandsFromFile(MIGRATION_MODE_UP, "../../../migrations/mysql/UserCreate.mysql")
 
 	for _, element := range sqlUpCommands {
 		Utility2.LogPrint(element)
@@ -92,7 +92,7 @@ func main() {
 
 	Utility2.LogPrint("\n")
 
-	sqlDownCommands := getSqlCommandsFromFile(MIGRATION_MODE_DOWN, "../../../Migrations/mysql/UserCreate.mysql")
+	sqlDownCommands := getSqlCommandsFromFile(MIGRATION_MODE_DOWN, "../../../migrations/mysql/UserCreate.mysql")
 
 	for _, element := range sqlDownCommands {
 		Utility2.LogPrint(element)
