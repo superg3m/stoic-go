@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/superg3m/stoic-go/cmd/src/Utility"
+	"github.com/superg3m/stoic-go/core/Utility"
 	"io"
 	"net/http"
 )

@@ -2,7 +2,7 @@ package ORM
 
 import (
 	"fmt"
-	"github.com/superg3m/stoic-go/cmd/src/Utility"
+	"github.com/superg3m/stoic-go/core/Utility"
 	"reflect"
 )
 

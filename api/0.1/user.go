@@ -2,8 +2,8 @@ package Api
 
 import (
 	"errors"
-	"github.com/superg3m/stoic-go/cmd/src/ORM"
-	"github.com/superg3m/stoic-go/cmd/src/Utility"
+	"github.com/superg3m/stoic-go/core/ORM"
+	"github.com/superg3m/stoic-go/core/Utility"
 	"time"
 )
 

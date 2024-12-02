@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	Server2 "github.com/superg3m/stoic-go/cmd/src/Server"
-	Utility2 "github.com/superg3m/stoic-go/cmd/src/Utility"
+	"github.com/superg3m/stoic-go/core/Server"
+	"github.com/superg3m/stoic-go/core/Utility"
 	"log"
 	"net/http"
 	"os"
@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-func helloWorld(request *Server2.StoicRequest, response Server2.StoicResponse) {
+func helloWorld(request *Server.StoicRequest, response Server.StoicResponse) {
 	if !request.HasAll("username", "email") {
 		response.SetError("Invalid Params")
 		return
@@ -39,14 +39,14 @@ func gracefulShutdown(server *http.Server) {
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 
 	<-stop
-	Utility2.LogDebug("Shutting down server...")
+	Utility.LogDebug("Shutting down server...")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	if err := server.Shutdown(ctx); err != nil {
-		Utility2.LogFatal(fmt.Sprintf("Server shutdown failed: %s", err))
+		Utility.LogFatal(fmt.Sprintf("Server shutdown failed: %s", err))
 	}
-	Utility2.LogDebug("Server gracefully stopped.")
+	Utility.LogDebug("Server gracefully stopped.")
 }
 
 const (
@@ -62,23 +62,23 @@ func main() {
 	const SERVER_PORT = ":8080"
 
 	//core.RegisterPrefix("api/0.1")
-	Server2.RegisterApiEndpoint("/User/Create", helloWorld, "POST")
+	Server.RegisterApiEndpoint("/User/Create", helloWorld, "POST")
 
 	server := &http.Server{
 		Addr:    SERVER_PORT,
-		Handler: Server2.Router,
+		Handler: Server.Router,
 	}
 
 	//dsn := core.GetDSN(DB_ENGINE, HOST, PORT, USER, PASSWORD, DBNAME)
 	//db := core.ConnectToDatabase(DB_ENGINE, dsn)
 	//defer db.Close()
 
-	siteSettings := Utility2.GetSiteSettings()
+	siteSettings := Utility.GetSiteSettings()
 	fmt.Println(siteSettings["settings"].(map[string]any)["dbHost"])
 
 	go gracefulShutdown(server)
 
-	Utility2.LogDebug(fmt.Sprintf("Starting server on %s", SERVER_PORT))
+	Utility.LogDebug(fmt.Sprintf("Starting server on %s", SERVER_PORT))
 	if err := server.ListenAndServe(); err != http.ErrServerClosed {
 		log.Fatalf("Server failed: %v", err)
 	}
