@@ -1,4 +1,4 @@
-package Api
+package User
 
 import (
 	"errors"
@@ -37,7 +37,6 @@ func FromEmail(email string) (User, error) {
 	return ret, nil
 }
 
-// Implement the setupTable function for User
 func init() {
 	ORM.RegisterTableName("User")
 	ORM.RegisterTableColumn("ID", "user_id", ORM.PRIMARY_KEY) // Using reflection to know the type!

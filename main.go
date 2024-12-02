@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"github.com/superg3m/stoic-go/core/Client"
 	"github.com/superg3m/stoic-go/core/Server"
 	"github.com/superg3m/stoic-go/core/Utility"
 	"log"
@@ -13,7 +15,7 @@ import (
 	"time"
 )
 
-func helloWorld(request *Server.StoicRequest, response Server.StoicResponse) {
+func helloWorld(request *Client.StoicRequest, response Server.StoicResponse) {
 	if !request.HasAll("username", "email") {
 		response.SetError("Invalid Params")
 		return
@@ -79,7 +81,7 @@ func main() {
 	go gracefulShutdown(server)
 
 	Utility.LogDebug(fmt.Sprintf("Starting server on %s", SERVER_PORT))
-	if err := server.ListenAndServe(); err != http.ErrServerClosed {
+	if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 		log.Fatalf("Server failed: %v", err)
 	}
 }

@@ -37,13 +37,13 @@ func main() {
 		Attributes: attributes,
 	}
 
-	tmplFile := "cls.tmpl"
+	tmplFile := "CLS.tmpl"
 	tmpl, err := template.New(tmplFile).ParseFiles(tmplFile)
 	if err != nil {
 		panic(err)
 	}
 
-	filePtr, err := os.Create("./user.go")
+	filePtr, err := os.Create("./user.cls.go")
 	Utility.AssertOnError(err)
 
 	err = tmpl.Execute(filePtr, templateData)

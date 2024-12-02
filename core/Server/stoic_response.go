@@ -17,3 +17,11 @@ func (response *StoicResponse) SetError(msg string) {
 		Utility.Assert(false)
 	}
 }
+
+func (response *StoicResponse) SetData(data any) {
+	response.WriteHeader(http.StatusOK)
+	_, err := fmt.Fprintf(response, "%+v", data)
+	if err != nil {
+		Utility.Assert(false)
+	}
+}

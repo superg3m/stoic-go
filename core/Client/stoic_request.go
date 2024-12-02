@@ -1,4 +1,4 @@
-package Server
+package Client
 
 import (
 	"bytes"
@@ -104,4 +104,17 @@ func (r *StoicRequest) GetBoolParam(name string) bool {
 
 func (r *StoicRequest) GetFloatParam(name string) float64 {
 	return Utility.CastAny[float64](r.GetStringParam(name))
+}
+
+func (r *StoicRequest) GetJsonParam(name string, target any) {
+	paramMap := r.GetParamMap()
+
+	value, exists := paramMap[name]
+	Utility.Assert(exists)
+
+	jsonData, err := json.Marshal(value)
+	Utility.AssertOnErrorMsg(err, fmt.Sprintf("failed to marshal parameter %q: %s", name, err))
+
+	err2 := json.Unmarshal(jsonData, target)
+	Utility.AssertOnErrorMsg(err2, fmt.Sprintf("failed to unmarshal parameter %q into target type: %s", name, err2))
 }

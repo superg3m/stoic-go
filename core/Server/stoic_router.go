@@ -2,6 +2,7 @@ package Server
 
 import (
 	"fmt"
+	"github.com/superg3m/stoic-go/core/Client"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -25,14 +26,14 @@ func makeCompatible(handler StoicHandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		stoicRequest := &StoicRequest{Request: r}
+		stoicRequest := &Client.StoicRequest{Request: r}
 		stoicResponse := StoicResponse{ResponseWriter: w}
 
 		handler(stoicRequest, stoicResponse)
 	}
 }
 
-type StoicHandlerFunc func(r *StoicRequest, w StoicResponse)
+type StoicHandlerFunc func(r *Client.StoicRequest, w StoicResponse)
 
 var prefix string
 var Router *mux.Router

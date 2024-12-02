@@ -177,7 +177,7 @@ $ wgo make build :: make run
 $ wgo -file .go go build -o main main.go :: ./main
 
 # Clear the screen with `clear` before running `go test`.
-# Windows users should use `cls` instead of `clear`.
+# Windows users should use `CLS` instead of `clear`.
 $ wgo -file .go clear :: go test . -race -coverprofile=coverage.out
 ```
 
@@ -209,7 +209,7 @@ $ clear
 $ wgo -file .go clear :: go run main.go
 
 # If you're on Windows:
-$ wgo -file .go cls :: go run main.go
+$ wgo -file .go CLS :: go run main.go
 ```
 
 ## Running parallel wgo commands
