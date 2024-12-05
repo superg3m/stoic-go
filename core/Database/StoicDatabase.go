@@ -1,15 +1,38 @@
-package ORM
+package Database
 
 import (
+	"database/sql"
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/superg3m/stoic-go/core/Utility"
+	"strings"
 )
 
 // mysql
 // sqlserver
 // postgres
 // sql_lite
+
+func InsertIntoDB[T any](db *sql.DB, tableName string, table T) error {
+	fieldNames := Utility.GetStructFieldNames(table)
+
+	placeholders := make([]string, len(fieldNames))
+	for i := range placeholders {
+		placeholders[i] = "?"
+	}
+
+	values := Utility.GetStructValues(table)
+
+	query := fmt.Sprintf(
+		"INSERT INTO %s (%s) VALUES (%s)",
+		tableName,
+		strings.Join(fieldNames, ", "),
+		strings.Join(placeholders, ", "),
+	)
+
+	_, err := db.Exec(query, values...)
+	return err
+}
 
 func GetDSN(dbEngine, host string, port int, user, password, dbname string) string {
 	switch dbEngine {

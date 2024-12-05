@@ -71,8 +71,8 @@ func main() {
 		Handler: Server.Router,
 	}
 
-	//dsn := core.GetDSN(DB_ENGINE, HOST, PORT, USER, PASSWORD, DBNAME)
-	//db := core.ConnectToDatabase(DB_ENGINE, dsn)
+	//dsn := Database.GetDSN(DB_ENGINE, HOST, PORT, USER, PASSWORD, DBNAME)
+	//db := Database.ConnectToDatabase(DB_ENGINE, dsn)
 	//defer db.Close()
 
 	siteSettings := Utility.GetSiteSettings()

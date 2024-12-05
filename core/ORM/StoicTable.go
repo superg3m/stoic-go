@@ -8,30 +8,31 @@ import (
 
 type ORM_FLAG int
 
-const (
+const ( // ORM_Flags
 	PRIMARY_KEY ORM_FLAG = 1 << iota // 1 << 0 = 1 (bit 0)
 	NULLABLE                         // 1 << 1 = 2 (bit 1)
 	UPDATABLE                        // 1 << 2 = 4 (bit 2)
 )
 
 type FieldMetadata struct {
-	attributeName string   // Name of the field in the DB
+	attributeName string   // Name of the field in the Database
 	flags         ORM_FLAG // Bit flag to store Nullable, Updatable, etc.
 }
 
+type InterfaceCRUD interface {
+	canCreate() bool
+	canUpdate() bool
+	canDelete() bool
+}
+
 type BaseStoicTable struct {
-	tableName         string
-	fieldMeta         map[string]FieldMetadata // Key is memeberFieldName
-	fieldOriginalData map[string]any           // Key is memeberFieldName
+	InterfaceCRUD
+	tableName string
+	fieldMeta map[string]FieldMetadata // Key is memeberFieldName
+	isCreated bool
 }
 
 var globalTable BaseStoicTable
-
-type I_CRUD interface {
-	canUpdate()
-	canCreate()
-	canDelete()
-}
 
 func (base *BaseStoicTable) getFieldMetadata(fieldName string) (FieldMetadata, bool) {
 	meta, exists := base.fieldMeta[fieldName]
@@ -58,35 +59,16 @@ func RegisterTableColumn(structMemberName string, attributeName string, flags OR
 	}
 }
 
-func (b *BaseStoicTable) storeOriginalData(v interface{}) {
-	val := reflect.ValueOf(v).Elem()
-	for i := 0; i < val.NumField(); i++ {
-		field := val.Type().Field(i)
-		b.fieldOriginalData[field.Name] = val.Field(i).Interface()
-	}
-}
-
-func (b *BaseStoicTable) hasFieldChanged(v interface{}, fieldName string) bool {
-	val := reflect.ValueOf(v).Elem()
-	currentValue := val.FieldByName(fieldName).Interface()
-	originalValue, exists := b.fieldOriginalData[fieldName]
-	if !exists {
-		return false
-	}
-
-	return originalValue != currentValue
-}
-
 func (b *BaseStoicTable) update(v interface{}) {
 	val := reflect.ValueOf(v).Elem()
 	for i := 0; i < val.NumField(); i++ {
 		field := val.Type().Field(i)
-		meta, exists := b.fieldMeta[field.Name]
+		fieldMeta, exists := b.fieldMeta[field.Name]
 		if !exists {
 			continue
 		}
 
-		if meta.isUpdatable() && b.hasFieldChanged(v, field.Name) {
+		if fieldMeta.isUpdatable() {
 			// actual update logic ...
 		} else {
 			errMsg := fmt.Sprintf("Field '%s' is not allowed to be updated.\n", field.Name)
@@ -96,15 +78,20 @@ func (b *BaseStoicTable) update(v interface{}) {
 }
 
 func (b *BaseStoicTable) create(v interface{}) {
+	Utility.Assert(b.canCreate())
+
 	val := reflect.ValueOf(v).Elem()
 	for i := 0; i < val.NumField(); i++ {
 		field := val.Type().Field(i)
-		b.storeOriginalData(v)
 		_, exists := b.fieldMeta[field.Name]
 		if !exists {
 			continue
 		}
 	}
+
+	b.isCreated = true
+
+	createInDatabase
 
 	// actual create logic ...
 }
