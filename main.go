@@ -64,6 +64,8 @@ func main() {
 	const SERVER_PORT = ":8080"
 
 	//core.RegisterPrefix("api/0.1")
+	Server.RegisterCommonMiddleware(Server.MiddlewareCORS())
+
 	Server.RegisterApiEndpoint("/User/Create", helloWorld, "POST")
 
 	server := &http.Server{
