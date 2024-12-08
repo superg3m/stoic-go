@@ -19,6 +19,9 @@ func (response *StoicResponse) SetError(msg string) {
 }
 
 func (response *StoicResponse) SetData(data any) {
+
+	// should use reflection to determine if the header response needs to be text, json an other stuff
+
 	response.WriteHeader(http.StatusOK)
 	_, err := fmt.Fprintf(response, "%+v", data)
 	if err != nil {
