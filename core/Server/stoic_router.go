@@ -2,26 +2,28 @@ package Server
 
 import (
 	"fmt"
-	"github.com/superg3m/stoic-go/core/Client"
-	"net/http"
-
 	"github.com/gorilla/mux"
+	"github.com/superg3m/stoic-go/core/Client"
+	"github.com/superg3m/stoic-go/core/Middleware"
+	"net/http"
+	"reflect"
 )
 
-func addCorsHeader(res http.ResponseWriter) {
-	headers := res.Header()
-	headers.Add("Access-Control-Allow-Origin", "*")
-	headers.Add("Vary", "Origin")
-	headers.Add("Vary", "Access-Control-Request-Method")
-	headers.Add("Vary", "Access-Control-Request-Headers")
-	headers.Add("Access-Control-Allow-Headers", "Content-Type, Origin, Accept, token")
-	headers.Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+type StoicHandlerFunc func(r *Client.StoicRequest, w StoicResponse)
+
+var prefix string
+var Router *mux.Router
+var commonMiddlewares []StoicMiddleware
+
+func init() {
+	Router = mux.NewRouter()
+	prefix = ""
+	commonMiddlewares = []StoicMiddleware{}
 }
 
+// Wrap the StoicHandlerFunc with middleware for compatibility.
 func makeCompatible(handler StoicHandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		addCorsHeader(w)
-
 		if r.Method == "OPTIONS" {
 			return
 		}
@@ -33,21 +35,41 @@ func makeCompatible(handler StoicHandlerFunc) http.HandlerFunc {
 	}
 }
 
-type StoicHandlerFunc func(r *Client.StoicRequest, w StoicResponse)
+func RegisterCommonMiddleware(middlewares ...StoicMiddleware) {
+	for _, middleware := range middlewares {
+		// Check if middleware is already in the commonMiddlewares list (to avoid duplicates)
+		if !isMiddlewareRegistered(middleware) {
+			commonMiddlewares = append(commonMiddlewares, middleware)
+		}
+	}
+}
 
-var prefix string
-var Router *mux.Router
+// Check if a middleware is already registered
+func isMiddlewareRegistered(middleware StoicMiddleware) bool {
+	for _, existingMiddleware := range commonMiddlewares {
+		// Compare functions by their reflect value to check if they are the same
+		if reflect.DeepEqual(existingMiddleware, middleware) {
+			return true
+		}
+	}
+	return false
+}
 
 func RegisterPrefix(newPrefix string) {
 	prefix = newPrefix
 }
 
-func RegisterApiEndpoint(path string, functionEndpoint StoicHandlerFunc, method string) {
-	resolvedPath := fmt.Sprintf("%s%s", prefix, path)
-	Router.HandleFunc(resolvedPath, makeCompatible(functionEndpoint)).Methods(method, "OPTIONS")
+func chainMiddleware(handler StoicHandlerFunc, middlewares []Middleware.StoicMiddleware) StoicHandlerFunc {
+	for i := len(middlewares) - 1; i >= 0; i-- {
+		handler = middlewares[i](handler)
+	}
+	return handler
 }
 
-func init() {
-	Router = mux.NewRouter()
-	prefix = ""
+func RegisterApiEndpoint(path string, handler StoicHandlerFunc, method string, middlewares ...StoicMiddleware) {
+	middlewareList := append(commonMiddlewares, middlewares...)
+	finalHandler := chainMiddleware(handler, middlewareList)
+
+	resolvedPath := fmt.Sprintf("%s%s", prefix, path)
+	Router.HandleFunc(resolvedPath, makeCompatible(finalHandler)).Methods(method, "OPTIONS")
 }
