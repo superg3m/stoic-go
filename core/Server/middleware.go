@@ -11,6 +11,8 @@ import (
 // CORS Middleware
 // Authentication Middleware (Authorized Levels) (Tree hierarchy) ((Bitwise - 1) & flag) == 1) means has auth requirement
 
+// https://www.youtube.com/watch?v=ALbAYpNC6s8
+
 type StoicMiddleware func(next StoicHandlerFunc) StoicHandlerFunc
 
 type AuthLevel int
