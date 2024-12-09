@@ -23,7 +23,11 @@ const (
 	ADMIN
 )
 
-func MiddlewareValidParams(requiredParams ...string) StoicMiddleware {
+type StoicMiddlewareT struct{}
+
+var Middleware StoicMiddlewareT
+
+func (m *StoicMiddlewareT) MiddlewareValidParams(requiredParams ...string) StoicMiddleware {
 	return func(next StoicHandlerFunc) StoicHandlerFunc {
 		return func(req *Client.StoicRequest, res StoicResponse) {
 			var retParams = []string{}
@@ -42,7 +46,7 @@ func MiddlewareValidParams(requiredParams ...string) StoicMiddleware {
 	}
 }
 
-func MiddlewareCORS() StoicMiddleware {
+func (m *StoicMiddlewareT) MiddlewareCORS() StoicMiddleware {
 	return func(next StoicHandlerFunc) StoicHandlerFunc {
 		return func(req *Client.StoicRequest, res StoicResponse) {
 			// Add CORS headers
@@ -64,7 +68,7 @@ func MiddlewareCORS() StoicMiddleware {
 	}
 }
 
-func MiddlewareOauth() StoicMiddleware {
+func (m *StoicMiddlewareT) MiddlewareOauth() StoicMiddleware {
 	return func(next StoicHandlerFunc) StoicHandlerFunc {
 		return func(req *Client.StoicRequest, res StoicResponse) {
 			token := req.GetStringParam("oauth_token")
@@ -81,7 +85,7 @@ func isValidOauthToken(token string) bool {
 	return token == "valid-oauth-token"
 }
 
-func MiddlewareJWT() StoicMiddleware {
+func (m *StoicMiddlewareT) MiddlewareJWT() StoicMiddleware {
 	return func(next StoicHandlerFunc) StoicHandlerFunc {
 		return func(req *Client.StoicRequest, res StoicResponse) {
 			token := req.GetStringParam("jwt")
@@ -98,7 +102,7 @@ func isValidJWT(token string) bool {
 	return token == "valid-jwt"
 }
 
-func MiddlewareLogger() StoicMiddleware {
+func (m *StoicMiddlewareT) MiddlewareLogger() StoicMiddleware {
 	return func(next StoicHandlerFunc) StoicHandlerFunc {
 		return func(req *Client.StoicRequest, res StoicResponse) {
 			fmt.Printf("Received request: Method=%s, Path=%s\n", req.Request.Method, req.Request.URL.Path)
@@ -107,7 +111,7 @@ func MiddlewareLogger() StoicMiddleware {
 	}
 }
 
-func RegisterCommonMiddleware(middlewares ...StoicMiddleware) {
+func (m *StoicMiddlewareT) RegisterCommonMiddleware(middlewares ...StoicMiddleware) {
 	for _, middleware := range middlewares {
 		if !isMiddlewareRegistered(middleware) {
 			commonMiddlewares = append(commonMiddlewares, middleware)

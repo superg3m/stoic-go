@@ -1,0 +1,9 @@
+Make a single package called Core
+
+- StoicCore.Router
+- StoicCore.Middleware
+- StoicCore.Client
+- StoicCore.Server
+- StoicCore.ORM
+- StoicCore.Database
+- StoicCore.Utility

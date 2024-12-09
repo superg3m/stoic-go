@@ -49,3 +49,7 @@
 
 cd ./tools/wgo-main
 go install
+
+i'm sorry for my sins I'm about to use a whole lot of global state purely for the name spacing if this becomes
+a problem we can also consolidate it into something called StoicState and then initialize everything in teh main.go
+The only issue is that the Nice Namespacing that we get will be gone!
