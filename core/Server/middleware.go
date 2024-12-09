@@ -26,8 +26,15 @@ const (
 func MiddlewareValidParams(requiredParams ...string) StoicMiddleware {
 	return func(next StoicHandlerFunc) StoicHandlerFunc {
 		return func(req *Client.StoicRequest, res StoicResponse) {
-			if !req.HasAll(requiredParams...) {
-				res.SetError(fmt.Sprintf("Missing required parameters: %v", requiredParams))
+			var retParams = []string{}
+			for _, param := range requiredParams {
+				if !req.Has(param) {
+					retParams = append(retParams, param)
+				}
+			}
+
+			if len(retParams) != 0 {
+				res.SetError(fmt.Sprintf("Missing required parameters: %v", retParams))
 				return
 			}
 			next(req, res)
