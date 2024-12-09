@@ -16,11 +16,6 @@ import (
 )
 
 func helloWorld(request *Client.StoicRequest, response Server.StoicResponse) {
-	if !request.HasAll("username", "email") {
-		response.SetError("Invalid Params")
-		return
-	}
-
 	username := request.GetStringParam("username")
 
 	if len(username) < 8 {
@@ -66,7 +61,9 @@ func main() {
 	//core.RegisterPrefix("api/0.1")
 	Server.RegisterCommonMiddleware(Server.MiddlewareCORS())
 
-	Server.RegisterApiEndpoint("/User/Create", helloWorld, "POST")
+	Server.RegisterApiEndpoint("/User/Create", helloWorld, "POST",
+		Server.MiddlewareValidParams("username", "email"),
+	)
 
 	server := &http.Server{
 		Addr:    SERVER_PORT,
