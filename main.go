@@ -28,7 +28,10 @@ func helloWorld(request *Client.StoicRequest, response Server.StoicResponse) {
 		return
 	}
 
-	fmt.Fprintf(response, "Hello %s", username)
+	_, err := fmt.Fprintf(response, "Hello %s", username)
+	if err != nil {
+		return
+	}
 }
 
 func gracefulShutdown(server *http.Server) {

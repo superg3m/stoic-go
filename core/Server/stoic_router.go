@@ -2,40 +2,50 @@ package Server
 
 import (
 	"fmt"
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 	"github.com/superg3m/stoic-go/core/Client"
-	"net/http"
 )
 
 type StoicHandlerFunc func(r *Client.StoicRequest, w StoicResponse)
 
 var prefix string
-var Router *mux.Router
+var Router *gin.Engine
 var commonMiddlewares []StoicMiddleware
 
 func init() {
-	Router = mux.NewRouter()
+	Router = gin.Default()
 	prefix = ""
 	commonMiddlewares = []StoicMiddleware{}
-}
-
-func makeCompatible(handler StoicHandlerFunc, middlewareList []StoicMiddleware) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		stoicRequest := &Client.StoicRequest{Request: r}
-		stoicResponse := StoicResponse{ResponseWriter: w}
-
-		finalHandler := chainMiddleware(handler, middlewareList)
-		finalHandler(stoicRequest, stoicResponse)
-	}
 }
 
 func RegisterPrefix(newPrefix string) {
 	prefix = newPrefix
 }
 
-func RegisterApiEndpoint(path string, handler StoicHandlerFunc, method string, middlewares ...StoicMiddleware) {
-	middlewareList := append(commonMiddlewares, middlewares...)
+func adaptHandler(handler StoicHandlerFunc, middlewareList []StoicMiddleware) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		stoicRequest := &Client.StoicRequest{Request: c.Request}
+		stoicResponse := StoicResponse{ResponseWriter: c.Writer}
 
+		finalHandler := chainMiddleware(handler, middlewareList)
+		finalHandler(stoicRequest, stoicResponse)
+	}
+}
+
+func RegisterApiEndpoint(path string, handler StoicHandlerFunc, method string, middlewares ...StoicMiddleware) {
 	resolvedPath := fmt.Sprintf("%s%s", prefix, path)
-	Router.HandleFunc(resolvedPath, makeCompatible(handler, middlewareList)).Methods(method, "OPTIONS")
+	allMiddlewares := append(commonMiddlewares, middlewares...)
+
+	switch method {
+	case "GET":
+		Router.GET(resolvedPath, adaptHandler(handler, allMiddlewares)).OPTIONS(resolvedPath, adaptHandler(handler, allMiddlewares))
+	case "POST":
+		Router.POST(resolvedPath, adaptHandler(handler, allMiddlewares)).OPTIONS(resolvedPath, adaptHandler(handler, allMiddlewares))
+	case "PUT":
+		Router.PUT(resolvedPath, adaptHandler(handler, allMiddlewares)).OPTIONS(resolvedPath, adaptHandler(handler, allMiddlewares))
+	case "DELETE":
+		Router.DELETE(resolvedPath, adaptHandler(handler, allMiddlewares)).OPTIONS(resolvedPath, adaptHandler(handler, allMiddlewares))
+	default:
+		panic("Unsupported method: " + method)
+	}
 }

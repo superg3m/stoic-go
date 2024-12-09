@@ -66,6 +66,10 @@ func (r *StoicRequest) GetParamMap() map[string]interface{} {
 }
 
 func (r *StoicRequest) Has(name string) bool {
+	if r.Request.Method == "OPTIONS" {
+		return true
+	}
+
 	params := r.GetParamMap()
 	_, exists := params[name]
 	return exists
