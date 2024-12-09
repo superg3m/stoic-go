@@ -13,7 +13,10 @@ var Router *gin.Engine
 var commonMiddlewares []StoicMiddleware
 
 func init() {
-	Router = gin.Default()
+	gin.SetMode(gin.ReleaseMode)
+
+	// Router = gin.Default() // Logger, Recovery Middleware
+	Router = gin.New()
 	prefix = ""
 	commonMiddlewares = []StoicMiddleware{}
 }
