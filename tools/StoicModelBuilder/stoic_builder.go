@@ -43,7 +43,21 @@ func main() {
 		panic(err)
 	}
 
-	filePtr, err := os.Create("./user.cls.go")
+	filePtr, err := os.Create("./user.api.go")
+	Utility.AssertOnError(err)
+
+	err = tmpl.Execute(filePtr, templateData)
+	if err != nil {
+		panic(err)
+	}
+
+	tmplFile = "API.tmpl"
+	tmpl, err = template.New(tmplFile).ParseFiles(tmplFile)
+	if err != nil {
+		panic(err)
+	}
+
+	filePtr, err = os.Create("./user.cls.go")
 	Utility.AssertOnError(err)
 
 	err = tmpl.Execute(filePtr, templateData)

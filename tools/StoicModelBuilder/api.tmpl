@@ -1,0 +1,106 @@
+package API
+
+import (
+	"github.com/superg3m/stoic-go/Core/Router"
+)
+
+// Example CRUD operation handlers for {{ .TableName }}
+
+func Get(request *Router.StoicRequest, response Router.StoicResponse) {
+	id := request.GetIntParam("id")
+	if id == 0 {
+		response.SetError("ID is required")
+		return
+	}
+
+	record, err := {{ .TableName }}.FindByID(id)
+	if err != nil {
+		response.SetError(fmt.Sprintf("Error fetching {{ .TableName }}: %s", err))
+		return
+	}
+
+	response.SetData(record)
+}
+
+func Create(request *Router.StoicRequest, response Router.StoicResponse) {
+	// Instantiate a new model object
+	entity := {{ .TableName }}.New() // Adjust to match your actual constructor
+
+	// Dynamically assign values from request to the model
+	{{- range .Attributes }}
+	entity.{{ .Name }} = request.GetStringParam("{{ .Name }}") // Adjust for attribute types if needed
+	{{- end }}
+
+	// Perform create operation
+	err := entity.Create()
+	if err != nil {
+		response.SetError(fmt.Sprintf("Error creating {{ .TableName }}: %s", err))
+		return
+	}
+
+	response.SetData(fmt.Sprintf("{{ .TableName }} created successfully with ID %d", entity.ID))
+}
+
+func Update(request *Router.StoicRequest, response Router.StoicResponse) {
+	id := request.GetIntParam("id")
+	if id == 0 {
+		response.SetError("ID is required")
+		return
+	}
+
+	// Fetch existing record
+	entity, err := {{ .TableName }}.FindByID(id)
+	if err != nil {
+		response.SetError(fmt.Sprintf("Error fetching {{ .TableName }}: %s", err))
+		return
+	}
+
+	// Update fields dynamically
+	{{- range .Attributes }}
+	if request.Has("{{ .Name }}") {
+		entity.{{ .Name }} = request.GetStringParam("{{ .Name }}") // The GetStringParam get get determined by the type!
+	}
+	{{- end }}
+
+	// Save updated record
+	err = entity.Update()
+	if err != nil {
+		response.SetError(fmt.Sprintf("Error updating {{ .TableName }}: %s", err))
+		return
+	}
+
+	response.SetData(fmt.Sprintf("{{ .TableName }} with ID %d updated successfully", id))
+}
+
+func Delete(request *Router.StoicRequest, response Router.StoicResponse) {
+	id := request.GetIntParam("id")
+	if id == 0 {
+		response.SetError("ID is required")
+		return
+	}
+
+	// Perform delete operation
+	err := {{ .TableName }}.DeleteByID(id) // Dynamic DeleteByID
+	if err != nil {
+		response.SetError(fmt.Sprintf("Error deleting {{ .TableName }}: %s", err))
+		return
+	}
+
+	response.SetData(fmt.Sprintf("{{ .TableName }} with ID %d deleted successfully", id))
+}
+
+// Register endpoints
+func init() {
+	Router.RegisterApiEndpoint("{{ .TableName }}/Get", Get, "GET",
+		Router.MiddlewareValidParams("id")
+	)
+	Router.RegisterApiEndpoint("{{ .TableName }}/Create", Create, "POST",
+		Router.MiddlewareValidParams({{ range .Attributes }}"{{ .Name }}", {{ end }})
+	)
+	Router.RegisterApiEndpoint("{{ .TableName }}/Update", Update, "PUT",
+		Router.MiddlewareValidParams("id", {{ range .Attributes }}"{{ .Name }}", {{ end }})
+	)
+	Router.RegisterApiEndpoint("{{ .TableName }}/Delete", Delete, "DELETE",
+		Router.MiddlewareValidParams("id") // Only ID required for deletion
+	)
+}
