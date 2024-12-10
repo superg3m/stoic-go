@@ -31,13 +31,7 @@ func Create(request *Router.StoicRequest, response Router.StoicResponse) {
 	entity.{{ .Name }} = request.GetStringParam("{{ .Name }}") // Adjust for attribute types if needed
 	{{- end }}
 
-	// Perform create operation
-	err := entity.Create()
-	if err != nil {
-		response.SetError(fmt.Sprintf("Error creating {{ .TableName }}: %s", err))
-		return
-	}
-
+	entity.Create()
 	response.SetData(fmt.Sprintf("{{ .TableName }} created successfully with ID %d", entity.ID))
 }
 
@@ -62,12 +56,7 @@ func Update(request *Router.StoicRequest, response Router.StoicResponse) {
 	}
 	{{- end }}
 
-	// Save updated record
-	err = entity.Update()
-	if err != nil {
-		response.SetError(fmt.Sprintf("Error updating {{ .TableName }}: %s", err))
-		return
-	}
+	entity.Update()
 
 	response.SetData(fmt.Sprintf("{{ .TableName }} with ID %d updated successfully", id))
 }
@@ -79,13 +68,7 @@ func Delete(request *Router.StoicRequest, response Router.StoicResponse) {
 		return
 	}
 
-	// Perform delete operation
 	err := {{ .TableName }}.DeleteByID(id) // Dynamic DeleteByID
-	if err != nil {
-		response.SetError(fmt.Sprintf("Error deleting {{ .TableName }}: %s", err))
-		return
-	}
-
 	response.SetData(fmt.Sprintf("{{ .TableName }} with ID %d deleted successfully", id))
 }
 
