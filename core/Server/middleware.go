@@ -68,40 +68,6 @@ func (m *StoicMiddlewareT) MiddlewareCORS() StoicMiddleware {
 	}
 }
 
-func (m *StoicMiddlewareT) MiddlewareOauth() StoicMiddleware {
-	return func(next StoicHandlerFunc) StoicHandlerFunc {
-		return func(req *Client.StoicRequest, res StoicResponse) {
-			token := req.GetStringParam("oauth_token")
-			if token == "" || !isValidOauthToken(token) {
-				res.SetError("Invalid or missing OAuth token")
-				return
-			}
-			next(req, res)
-		}
-	}
-}
-
-func isValidOauthToken(token string) bool {
-	return token == "valid-oauth-token"
-}
-
-func (m *StoicMiddlewareT) MiddlewareJWT() StoicMiddleware {
-	return func(next StoicHandlerFunc) StoicHandlerFunc {
-		return func(req *Client.StoicRequest, res StoicResponse) {
-			token := req.GetStringParam("jwt")
-			if token == "" || !isValidJWT(token) {
-				res.SetError("Invalid or missing JWT token")
-				return
-			}
-			next(req, res)
-		}
-	}
-}
-
-func isValidJWT(token string) bool {
-	return token == "valid-jwt"
-}
-
 func (m *StoicMiddlewareT) MiddlewareLogger() StoicMiddleware {
 	return func(next StoicHandlerFunc) StoicHandlerFunc {
 		return func(req *Client.StoicRequest, res StoicResponse) {
