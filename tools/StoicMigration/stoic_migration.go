@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/superg3m/stoic-go/core/Utility"
+	"github.com/superg3m/stoic-go/Core/Utility"
 	"os"
 	"strings"
 )

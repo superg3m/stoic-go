@@ -1,5 +1,0 @@
-package ORM
-
-func createSql() {
-
-}

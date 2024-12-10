@@ -2,8 +2,8 @@ package User
 
 import (
 	"errors"
-	"github.com/superg3m/stoic-go/core/ORM"
-	"github.com/superg3m/stoic-go/core/Utility"
+	"github.com/superg3m/stoic-go/Core/ORM"
+	"github.com/superg3m/stoic-go/Core/Utility"
 	"time"
 )
 

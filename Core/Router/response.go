@@ -1,8 +1,8 @@
-package Server
+package Router
 
 import (
 	"fmt"
-	"github.com/superg3m/stoic-go/core/Utility"
+	"github.com/superg3m/stoic-go/Core/Utility"
 	"net/http"
 )
 

@@ -1,24 +1,16 @@
-package Client
+package Router
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/superg3m/stoic-go/core/Utility"
+	"github.com/superg3m/stoic-go/Core/Utility"
 	"io"
 	"net/http"
 )
 
 type StoicRequest struct {
 	*http.Request
-}
-
-func readRequestBody(r *StoicRequest) []byte {
-	body, err := io.ReadAll(r.Body)
-	Utility.AssertOnError(err)
-
-	r.Body = io.NopCloser(bytes.NewBuffer(body))
-	return body
 }
 
 func (r *StoicRequest) GetParamMap() map[string]interface{} {
@@ -45,7 +37,6 @@ func (r *StoicRequest) GetParamMap() map[string]interface{} {
 			for key, value := range requestBody {
 				paramMap[key] = value
 			}
-
 		} else if contentType == "application/x-www-form-urlencoded" {
 			if err := r.ParseForm(); err != nil {
 				panic(fmt.Sprintf("error parsing form: %s", err))
@@ -121,4 +112,12 @@ func (r *StoicRequest) GetJsonParam(name string, target any) {
 
 	err2 := json.Unmarshal(jsonData, target)
 	Utility.AssertOnErrorMsg(err2, fmt.Sprintf("failed to unmarshal parameter %q into target type: %s", name, err2))
+}
+
+func readRequestBody(r *StoicRequest) []byte {
+	body, err := io.ReadAll(r.Body)
+	Utility.AssertOnError(err)
+
+	r.Body = io.NopCloser(bytes.NewBuffer(body))
+	return body
 }

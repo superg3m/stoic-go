@@ -4,9 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/superg3m/stoic-go/core/Client"
-	"github.com/superg3m/stoic-go/core/Server"
-	"github.com/superg3m/stoic-go/core/Utility"
+	"github.com/superg3m/stoic-go/Core/Router"
+	"github.com/superg3m/stoic-go/Core/Utility"
 	"log"
 	"net/http"
 	"os"
@@ -15,7 +14,7 @@ import (
 	"time"
 )
 
-func helloWorld(request *Client.StoicRequest, response Server.StoicResponse) {
+func helloWorld(request *Router.StoicRequest, response Router.StoicResponse) {
 	username := request.GetStringParam("username")
 
 	if len(username) < 8 {
@@ -61,16 +60,16 @@ const (
 func main() {
 	const SERVER_PORT = ":8080"
 
-	//core.RegisterPrefix("api/0.1")
-	Server.Middleware.RegisterCommonMiddleware(Server.Middleware.MiddlewareCORS())
+	//Core.RegisterPrefix("api/0.1")
+	Router.MiddlewareRegisterCommon(Router.MiddlewareCORS())
 
-	Server.RegisterApiEndpoint("/User/Create", helloWorld, "POST",
-		Server.Middleware.MiddlewareValidParams("username", "email"),
+	Router.RegisterApiEndpoint("/User/Create", helloWorld, "POST",
+		Router.MiddlewareValidParams("username", "email"),
 	)
 
 	server := &http.Server{
 		Addr:    SERVER_PORT,
-		Handler: Server.Router,
+		Handler: Router.Router,
 	}
 
 	//dsn := Database.GetDSN(DB_ENGINE, HOST, PORT, USER, PASSWORD, DBNAME)

@@ -1,13 +1,12 @@
-package Server
+package Router
 
 import (
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/superg3m/stoic-go/core/Client"
 	"net/http"
 )
 
-type StoicHandlerFunc func(r *Client.StoicRequest, w StoicResponse)
+type StoicHandlerFunc func(r *StoicRequest, w StoicResponse)
 
 var prefix string
 var Router *mux.Router
@@ -25,7 +24,7 @@ func RegisterPrefix(newPrefix string) {
 
 func adaptHandler(handler StoicHandlerFunc, middlewareList []StoicMiddleware) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		stoicRequest := &Client.StoicRequest{Request: r}
+		stoicRequest := &StoicRequest{Request: r}
 		stoicResponse := StoicResponse{ResponseWriter: w}
 
 		finalHandler := chainMiddleware(handler, middlewareList)

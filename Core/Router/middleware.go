@@ -1,8 +1,7 @@
-package Server
+package Router
 
 import (
 	"fmt"
-	"github.com/superg3m/stoic-go/core/Client"
 	"net/http"
 	"reflect"
 )
@@ -15,22 +14,10 @@ import (
 
 type StoicMiddleware func(next StoicHandlerFunc) StoicHandlerFunc
 
-type AuthLevel int
-
-const (
-	USER AuthLevel = 1 << iota
-	MODERATOR
-	ADMIN
-)
-
-type StoicMiddlewareT struct{}
-
-var Middleware StoicMiddlewareT
-
-func (m *StoicMiddlewareT) MiddlewareValidParams(requiredParams ...string) StoicMiddleware {
+func MiddlewareValidParams(requiredParams ...string) StoicMiddleware {
 	return func(next StoicHandlerFunc) StoicHandlerFunc {
-		return func(req *Client.StoicRequest, res StoicResponse) {
-			var retParams = []string{}
+		return func(req *StoicRequest, res StoicResponse) {
+			var retParams []string
 			for _, param := range requiredParams {
 				if !req.Has(param) {
 					retParams = append(retParams, param)
@@ -41,15 +28,15 @@ func (m *StoicMiddlewareT) MiddlewareValidParams(requiredParams ...string) Stoic
 				res.SetError(fmt.Sprintf("Missing required parameters: %v", retParams))
 				return
 			}
+
 			next(req, res)
 		}
 	}
 }
 
-func (m *StoicMiddlewareT) MiddlewareCORS() StoicMiddleware {
+func MiddlewareCORS() StoicMiddleware {
 	return func(next StoicHandlerFunc) StoicHandlerFunc {
-		return func(req *Client.StoicRequest, res StoicResponse) {
-			// Add CORS headers
+		return func(req *StoicRequest, res StoicResponse) {
 			headers := res.Header()
 			headers.Add("Access-Control-Allow-Origin", "*")
 			headers.Add("Vary", "Origin")
@@ -68,16 +55,16 @@ func (m *StoicMiddlewareT) MiddlewareCORS() StoicMiddleware {
 	}
 }
 
-func (m *StoicMiddlewareT) MiddlewareLogger() StoicMiddleware {
+func MiddlewareLogger() StoicMiddleware {
 	return func(next StoicHandlerFunc) StoicHandlerFunc {
-		return func(req *Client.StoicRequest, res StoicResponse) {
+		return func(req *StoicRequest, res StoicResponse) {
 			fmt.Printf("Received request: Method=%s, Path=%s\n", req.Request.Method, req.Request.URL.Path)
 			next(req, res)
 		}
 	}
 }
 
-func (m *StoicMiddlewareT) RegisterCommonMiddleware(middlewares ...StoicMiddleware) {
+func MiddlewareRegisterCommon(middlewares ...StoicMiddleware) {
 	for _, middleware := range middlewares {
 		if !isMiddlewareRegistered(middleware) {
 			commonMiddlewares = append(commonMiddlewares, middleware)
@@ -91,6 +78,7 @@ func isMiddlewareRegistered(middleware StoicMiddleware) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -98,5 +86,6 @@ func chainMiddleware(handler StoicHandlerFunc, middlewares []StoicMiddleware) St
 	for i := len(middlewares) - 1; i >= 0; i-- {
 		handler = middlewares[i](handler)
 	}
+
 	return handler
 }

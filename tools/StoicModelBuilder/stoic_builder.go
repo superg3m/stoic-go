@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/superg3m/stoic-go/core/Utility"
+	"github.com/superg3m/stoic-go/Core/Utility"
 	"html/template"
 	"os"
 )

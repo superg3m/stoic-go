@@ -1,8 +1,8 @@
 package __1
 
 import (
-	"github.com/superg3m/stoic-go/core/Client"
-	"github.com/superg3m/stoic-go/core/Server"
+	"github.com/superg3m/stoic-go/Core/Client"
+	"github.com/superg3m/stoic-go/Core/Server"
 )
 
 func sendUserMetrics(r *Client.StoicRequest, w Server.StoicResponse) {

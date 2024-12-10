@@ -13,7 +13,7 @@ Hey I need to write the usage code first this is the first of many rewrites!
 Just start with the main package and then you can abstract when you need to!
 
 - Stoic Services
-    - StoicRouter Package (Use gorilla mux)
+    - Router Package (Use gorilla mux)
 	    - router.go
 		    - NewRouter()
 		    - RegisterPrefix(newPrefix string)
@@ -47,3 +47,5 @@ Just start with the main package and then you can abstract when you need to!
 ORM
 STRIPE
 DATABASE
+Mailer
+Utility
