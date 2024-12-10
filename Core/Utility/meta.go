@@ -4,32 +4,39 @@ import (
 	"reflect"
 )
 
-func GetStructFieldNames(structure interface{}) []string {
-	val := reflect.ValueOf(structure)
-	typ := val.Type()
+func TypeIsStructure(structure any) bool {
+	typeKind := reflect.TypeOf(structure).Kind()
+
+	return typeKind == reflect.Struct
+}
+
+func GetStructMemberNames(structure interface{}) []string {
+	AssertMsg(TypeIsStructure(structure), "structure is not of type structure")
+
+	value := reflect.ValueOf(structure)
+	typeStruct := value.Type()
 
 	var fieldNames []string
-	for i := 0; i < typ.NumField(); i++ {
-		field := typ.Field(i)
+	for i := 0; i < typeStruct.NumField(); i++ {
+		field := typeStruct.Field(i)
 
 		if field.Anonymous {
 			continue
 		}
 
-		dbTag := field.Tag.Get("db")
-		if dbTag != "" {
-			fieldNames = append(fieldNames, dbTag)
-		}
+		fieldNames = append(fieldNames, field.Name)
 	}
 
 	return fieldNames
 }
 
-func GetStructValues(structure interface{}) ([]interface{}, error) {
+func GetStructValues(structure any) []any {
+	AssertMsg(TypeIsStructure(structure), "structure is not of type structure")
+
 	val := reflect.ValueOf(structure)
 	typ := val.Type()
 
-	var values []interface{}
+	var values []any
 	for i := 0; i < typ.NumField(); i++ {
 		field := typ.Field(i)
 
@@ -40,5 +47,5 @@ func GetStructValues(structure interface{}) ([]interface{}, error) {
 		values = append(values, val.Field(i).Interface())
 	}
 
-	return values, nil
+	return values
 }

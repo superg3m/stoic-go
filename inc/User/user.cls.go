@@ -2,6 +2,7 @@ package User
 
 import (
 	"errors"
+	"github.com/superg3m/stoic-go/Core/Database"
 	"github.com/superg3m/stoic-go/Core/ORM"
 	"github.com/superg3m/stoic-go/Core/Utility"
 	"time"
@@ -16,11 +17,22 @@ type User struct {
 	ORM.StoicModel
 
 	ID             int
+	Username       string
+	Password       string
 	Email          string
 	EmailConfirmed bool
 	Joined         time.Time
 	LastActive     time.Time
 	LastLogin      time.Time
+}
+
+func New() *User {
+	return &User{
+		StoicModel: ORM.StoicModel{
+			DB:        Database.GetInstance(),
+			TableName: "User",
+		},
+	}
 }
 
 func FromID(id int) {

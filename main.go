@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/superg3m/stoic-go/Core/Database"
 	"github.com/superg3m/stoic-go/Core/Router"
 	"github.com/superg3m/stoic-go/Core/Utility"
 	"log"
@@ -51,16 +52,16 @@ func gracefulShutdown(server *http.Server) {
 const (
 	DB_ENGINE = "mysql"
 	HOST      = "localhost"
-	PORT      = 5432
-	USER      = "jacob"
-	PASSWORD  = "password"
-	DBNAME    = "bookstoreDB"
+	PORT      = 3306
+	USER      = "root"
+	PASSWORD  = "P@55word"
+	DBNAME    = ""
 )
 
 func main() {
 	const SERVER_PORT = ":8080"
 
-	//Core.RegisterPrefix("api/0.1")
+	//Core.RegisterPrefix("API/0.1")
 	Router.MiddlewareRegisterCommon(Router.MiddlewareCORS())
 
 	Router.RegisterApiEndpoint("/User/Create", helloWorld, "POST",
@@ -72,9 +73,9 @@ func main() {
 		Handler: Router.Router,
 	}
 
-	//dsn := Database.GetDSN(DB_ENGINE, HOST, PORT, USER, PASSWORD, DBNAME)
-	//db := Database.ConnectToDatabase(DB_ENGINE, dsn)
-	//defer db.Close()
+	dsn := Database.GetDSN(DB_ENGINE, HOST, PORT, USER, PASSWORD, DBNAME)
+	Database.Connect(DB_ENGINE, dsn)
+	defer Database.Close()
 
 	siteSettings := Utility.GetSiteSettings()
 	fmt.Println(siteSettings["settings"].(map[string]any)["dbHost"])

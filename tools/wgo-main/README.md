@@ -339,16 +339,16 @@ go install github.com/go-delve/delve/cmd/dlv@latest
 ### Start the delve debugger on port 2345 using wgo.
 
 ```shell
-$ wgo -file .go go build -o my_binary_name . :: sh -c 'while true; do dlv exec my_binary_name --headless --listen :2345 --api-version 2; done'
+$ wgo -file .go go build -o my_binary_name . :: sh -c 'while true; do dlv exec my_binary_name --headless --listen :2345 --API-version 2; done'
 
 # If you're on Windows:
-$ wgo -file .go go build -o my_binary_name . :: pwsh.exe -command 'while (1) { dlv exec my_binary_name --headless --listen :2345 --api-version 2 }'
+$ wgo -file .go go build -o my_binary_name . :: pwsh.exe -command 'while (1) { dlv exec my_binary_name --headless --listen :2345 --API-version 2 }'
 ```
 
 You should see something like this
 
 ```shell
-$ wgo -file .go go build -o my_binary_name . :: sh -c 'while true; do dlv exec my_binary_name --headless --listen :2345 --api-version 2; done'
+$ wgo -file .go go build -o my_binary_name . :: sh -c 'while true; do dlv exec my_binary_name --headless --listen :2345 --API-version 2; done'
 API server listening at: [::]:2345
 2024-12-01T01:18:13+08:00 warning layer=rpc Listening for remote connections (connections are not authenticated nor encrypted)
 ```

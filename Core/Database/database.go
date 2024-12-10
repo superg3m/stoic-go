@@ -2,6 +2,7 @@ package Database
 
 import (
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/superg3m/stoic-go/Core/Utility"
 	"strings"
@@ -13,16 +14,13 @@ import (
 // sql_lite
 
 func DeleteRecord(db *sqlx.DB, tableName string, model interface{}) error {
-	fieldNames := Utility.GetStructFieldNames(model)
+	fieldNames := Utility.GetStructMemberNames(model)
 	if len(fieldNames) == 0 {
 		return fmt.Errorf("no fields to use for DELETE condition in table '%s'", tableName)
 	}
 
 	var conditions []string
-	values, err := Utility.GetStructValues(model)
-	if err != nil {
-		return fmt.Errorf("failed to retrieve struct values: %w", err)
-	}
+	values := Utility.GetStructValues(model)
 
 	for _, fieldName := range fieldNames {
 		conditions = append(conditions, fmt.Sprintf("%s = ?", fieldName))
@@ -43,17 +41,14 @@ func DeleteRecord(db *sqlx.DB, tableName string, model interface{}) error {
 }
 
 func UpdateRecord(db *sqlx.DB, tableName string, model interface{}) error {
-	fieldNames := Utility.GetStructFieldNames(model)
+	fieldNames := Utility.GetStructMemberNames(model)
 	if len(fieldNames) <= 1 {
 		return fmt.Errorf("not enough fields to construct an UPDATE statement for table '%s'", tableName)
 	}
 
-	values, err := Utility.GetStructValues(model)
-	if err != nil {
-		return fmt.Errorf("failed to retrieve struct values: %w", err)
-	}
+	values := Utility.GetStructValues(model)
 
-	keyField := fieldNames[0]
+	keyField := fieldNames[0] // Get the primary key
 	updateFields := fieldNames[1:]
 	updateValues := values[1:]
 	keyValue := values[0]
@@ -79,7 +74,7 @@ func UpdateRecord(db *sqlx.DB, tableName string, model interface{}) error {
 }
 
 func InsertRecord(db *sqlx.DB, tableName string, model interface{}) error {
-	fieldNames := Utility.GetStructFieldNames(model)
+	fieldNames := Utility.GetStructMemberNames(model)
 	if len(fieldNames) == 0 {
 		return fmt.Errorf("no fields to insert for table '%s'", tableName)
 	}
@@ -89,10 +84,7 @@ func InsertRecord(db *sqlx.DB, tableName string, model interface{}) error {
 		placeholders[i] = "?"
 	}
 
-	values, err := Utility.GetStructValues(model)
-	if err != nil {
-		return fmt.Errorf("failed to retrieve struct values: %w", err)
-	}
+	values := Utility.GetStructValues(model)
 
 	query := fmt.Sprintf(
 		"INSERT INTO %s (%s) VALUES (%s)",
@@ -133,9 +125,32 @@ func GetDSN(dbEngine, host string, port int, user, password, dbname string) stri
 	}
 }
 
-func ConnectToDatabase(dbEngine, dsn string) *sqlx.DB {
-	db, err := sqlx.Connect(dbEngine, dsn)
-	Utility.AssertOnErrorMsg(err, "Failed to connect to database")
+var db *sqlx.DB
+
+func GetInstance() *sqlx.DB {
+	return db
+}
+
+func Connect(dbEngine, dsn string) *sqlx.DB {
+	if db != nil {
+		return db
+	}
+
+	dbNew, err := sqlx.Connect(dbEngine, dsn)
+	Utility.AssertOnError(err)
+
+	db = dbNew
 
 	return db
+}
+
+func Close() {
+	Utility.AssertMsg(db != nil, "Database Must have a active connection first before attempting to close")
+
+	err := db.Close()
+	if err != nil {
+		return
+	}
+
+	db = nil
 }

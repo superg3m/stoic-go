@@ -5,7 +5,6 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/superg3m/stoic-go/Core/Database"
 	"github.com/superg3m/stoic-go/Core/Utility"
-	"reflect"
 )
 
 type InterfaceCanCRUD interface {
@@ -17,68 +16,49 @@ type InterfaceCanCRUD interface {
 type StoicModel struct {
 	InterfaceCanCRUD
 
-	db        *sqlx.DB
-	tableName string
+	DB        *sqlx.DB
+	TableName string
 	isCreated bool
 }
 
-func (model *StoicModel) Update() error {
-	Utility.AssertMsg(model.isCreated, fmt.Sprintf("%s Model must be created first before attempting to update!", model.tableName))
+func (model *StoicModel) Update() {
+	Utility.AssertMsg(model.isCreated, fmt.Sprintf("%s Model must be created first before attempting to update!", model.TableName))
+	Utility.AssertMsg(model.InterfaceCanCRUD.canUpdate(), "canUpdate() returned false")
 
-	if !model.InterfaceCanCRUD.canUpdate() {
-		return fmt.Errorf("update not allowed for this model")
+	MemberNames := Utility.GetStructMemberNames(model)
+	for _, memberName := range MemberNames {
+		fieldMeta, exists := getAttribute(model.TableName, memberName)
+		Utility.Assert(exists)
+		Utility.AssertMsg(fieldMeta.isUpdatable(), fmt.Sprintf("field '%s' is not updatable", memberName))
 	}
 
-	val := reflect.ValueOf(model).Elem()
-	for i := 0; i < val.NumField(); i++ {
-		field := val.Type().Field(i)
-		fieldMeta, exists := getAttribute(model.tableName, field.Name)
-		if !exists {
-			continue
-		}
-
-		Utility.AssertMsg(fieldMeta.isUpdatable(), fmt.Sprintf("field '%s' is not updatable", field.Name))
-	}
-
-	err := Database.UpdateRecord(model.db, model.tableName, model)
+	err := Database.UpdateRecord(model.DB, model.TableName, model)
 	Utility.AssertOnError(err)
-
-	return nil
 }
 
-func (model *StoicModel) Create() error {
-	if !model.InterfaceCanCRUD.canCreate() {
-		return fmt.Errorf("canCreate() returned false")
-	}
+func (model *StoicModel) Create() {
+	Utility.AssertMsg(model.InterfaceCanCRUD.canCreate(), "canCreate() returned false")
 
-	val := reflect.ValueOf(model).Elem()
-	for i := 0; i < val.NumField(); i++ {
-		field := val.Type().Field(i)
-		_, exists := getAttribute(model.tableName, field.Name)
-		if !exists {
-			continue
-		}
+	MemberNames := Utility.GetStructMemberNames(model)
+	for _, memberName := range MemberNames {
+		_, exists := getAttribute(model.TableName, memberName)
+		Utility.Assert(exists)
 	}
 
 	model.isCreated = true
 
-	err := Database.InsertRecord(model.db, model.tableName, model)
-	Utility.AssertOnError(err)
+	err := Database.InsertRecord(model.DB, model.TableName, model) // THIS MUST SET THE PRIMARY KEY!
 
-	return nil
+	// figureOut primary keys and sure you update them accordingly for example if its an ID then you need to
+	// do the last generated id from sql!
+
+	Utility.AssertOnError(err)
 }
 
-func (model *StoicModel) Delete() error {
-	if !model.InterfaceCanCRUD.canDelete() {
-		return fmt.Errorf("canDelete() returned false")
-	}
+func (model *StoicModel) Delete() {
+	Utility.AssertMsg(model.InterfaceCanCRUD.canDelete(), "canDelete() returned false")
+	Utility.AssertMsg(model.isCreated, fmt.Sprintf("%s Model must be created first before attempting to delete!", model.TableName))
 
-	Utility.AssertMsg(model.isCreated, fmt.Sprintf("%s Model must be created first before attempting to delete!", model.tableName))
-
-	err := Database.DeleteRecord(model.db, model.tableName, model)
+	err := Database.DeleteRecord(model.DB, model.TableName, model)
 	Utility.AssertOnError(err)
-
-	// actual create logic ...
-
-	return nil
 }

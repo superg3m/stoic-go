@@ -189,7 +189,7 @@ $($coreCompose)
 
 function StartDocker([string] $ProjectName, [string] $WebContainer) {
 	Push-Location ./docker
-	docker compose -f docker-compose.yml -p $ProjectName up -d
+	    docker compose -f docker-compose.yml -p $ProjectName up -d
 	Pop-Location
 
 	UpdateDocker -ProjectName $ProjectName -WebContainer $WebContainer
