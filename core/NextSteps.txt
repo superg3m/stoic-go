@@ -7,3 +7,6 @@ Make a single package called Core
 - StoicCore.ORM
 - StoicCore.Database
 - StoicCore.Utility
+
+
+Hey I need to write the usage code first this is the first of many rewrites!
