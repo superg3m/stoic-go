@@ -1,11 +1,10 @@
 package __1
 
 import (
-	"github.com/superg3m/stoic-go/Core/Client"
-	"github.com/superg3m/stoic-go/Core/Server"
+	"github.com/superg3m/stoic-go/Core/Router"
 )
 
-func sendUserMetrics(r *Client.StoicRequest, w Server.StoicResponse) {
+func sendUserMetrics(r *Router.StoicRequest, w Router.StoicResponse) {
 	if !r.Has("data") {
 		w.SetError("No user data")
 	}
@@ -17,5 +16,5 @@ func sendUserMetrics(r *Client.StoicRequest, w Server.StoicResponse) {
 }
 
 func init() {
-	Server.RegisterApiEndpoint("User/Metric", sendUserMetrics, "POST")
+	Router.RegisterApiEndpoint("User/Metric", sendUserMetrics, "POST")
 }

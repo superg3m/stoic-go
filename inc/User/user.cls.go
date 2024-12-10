@@ -13,7 +13,7 @@ var ( // ERRORS
 )
 
 type User struct {
-	ORM.BaseStoicTable
+	ORM.StoicModel
 
 	ID             int
 	Email          string
