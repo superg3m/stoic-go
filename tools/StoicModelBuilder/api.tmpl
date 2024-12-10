@@ -4,14 +4,8 @@ import (
 	"github.com/superg3m/stoic-go/Core/Router"
 )
 
-// Example CRUD operation handlers for {{ .TableName }}
-
-func Get(request *Router.StoicRequest, response Router.StoicResponse) {
+func Get{{ .TableName }}(request *Router.StoicRequest, response Router.StoicResponse) {
 	id := request.GetIntParam("id")
-	if id == 0 {
-		response.SetError("ID is required")
-		return
-	}
 
 	record, err := {{ .TableName }}.FindByID(id)
 	if err != nil {
@@ -22,7 +16,7 @@ func Get(request *Router.StoicRequest, response Router.StoicResponse) {
 	response.SetData(record)
 }
 
-func Create(request *Router.StoicRequest, response Router.StoicResponse) {
+func Create{{ .TableName }}(request *Router.StoicRequest, response Router.StoicResponse) {
 	// Instantiate a new model object
 	entity := {{ .TableName }}.New() // Adjust to match your actual constructor
 
@@ -35,12 +29,8 @@ func Create(request *Router.StoicRequest, response Router.StoicResponse) {
 	response.SetData(fmt.Sprintf("{{ .TableName }} created successfully with ID %d", entity.ID))
 }
 
-func Update(request *Router.StoicRequest, response Router.StoicResponse) {
+func Update{{ .TableName }}(request *Router.StoicRequest, response Router.StoicResponse) {
 	id := request.GetIntParam("id")
-	if id == 0 {
-		response.SetError("ID is required")
-		return
-	}
 
 	// Fetch existing record
 	entity, err := {{ .TableName }}.FindByID(id)
@@ -61,29 +51,24 @@ func Update(request *Router.StoicRequest, response Router.StoicResponse) {
 	response.SetData(fmt.Sprintf("{{ .TableName }} with ID %d updated successfully", id))
 }
 
-func Delete(request *Router.StoicRequest, response Router.StoicResponse) {
+func Delete{{ .TableName }}(request *Router.StoicRequest, response Router.StoicResponse) {
 	id := request.GetIntParam("id")
-	if id == 0 {
-		response.SetError("ID is required")
-		return
-	}
 
 	err := {{ .TableName }}.DeleteByID(id) // Dynamic DeleteByID
 	response.SetData(fmt.Sprintf("{{ .TableName }} with ID %d deleted successfully", id))
 }
 
-// Register endpoints
 func init() {
-	Router.RegisterApiEndpoint("{{ .TableName }}/Get", Get, "GET",
-		Router.MiddlewareValidParams("id")
+	Router.RegisterApiEndpoint("{{ .TableName }}/Get", Get{{ .TableName }}, "GET",
+		Router.MiddlewareValidParams("id"),
 	)
-	Router.RegisterApiEndpoint("{{ .TableName }}/Create", Create, "POST",
-		Router.MiddlewareValidParams({{ range .Attributes }}"{{ .Name }}", {{ end }})
+	Router.RegisterApiEndpoint("{{ .TableName }}/Create", Create{{ .TableName }}, "POST",
+		Router.MiddlewareValidParams({{ range .Attributes }}"{{ .Name }}", {{ end }}),
 	)
-	Router.RegisterApiEndpoint("{{ .TableName }}/Update", Update, "PUT",
-		Router.MiddlewareValidParams("id", {{ range .Attributes }}"{{ .Name }}", {{ end }})
+	Router.RegisterApiEndpoint("{{ .TableName }}/Update", Update{{ .TableName }}, "PUT",
+		Router.MiddlewareValidParams("id", {{ range .Attributes }}"{{ .Name }}", {{ end }}),
 	)
-	Router.RegisterApiEndpoint("{{ .TableName }}/Delete", Delete, "DELETE",
-		Router.MiddlewareValidParams("id") // Only ID required for deletion
+	Router.RegisterApiEndpoint("{{ .TableName }}/Delete", Delete{{ .TableName }}, "DELETE",
+		Router.MiddlewareValidParams("id"),
 	)
 }

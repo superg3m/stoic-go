@@ -1,6 +1,7 @@
 package {{ .TableName }}
 
 import (
+    "fmt"
 	"github.com/superg3m/stoic-go/Core/ORM"
 	"time"
 )
@@ -10,11 +11,10 @@ type {{ .TableName }} struct {
 	ORM.StoicModel
 
 	{{- range .Attributes }}
-	{{ .Name }} {{ .Type }} // Description for {{ .Name }}
+	{{ .Name }} {{ .Type }}
 	{{- end }}
 }
 
-// Implement the setupTable function for {{ .TableName }}
 func init() {
 	ORM.RegisterTableName("{{ .TableName }}")
 
