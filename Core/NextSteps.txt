@@ -49,3 +49,7 @@ STRIPE
 DATABASE
 Mailer
 Utility
+
+Auto Increment
+Timestamps
+Composite Keys

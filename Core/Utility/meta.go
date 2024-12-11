@@ -10,7 +10,23 @@ func TypeIsStructure(structure any) bool {
 	return typeKind == reflect.Struct
 }
 
-func GetStructMemberNames(structure interface{}) []string {
+func TypeIsPointer(structure any) bool {
+	typeKind := reflect.TypeOf(structure).Kind()
+
+	return typeKind == reflect.Ptr
+}
+
+func DereferencePointer(input any) any {
+	val := reflect.ValueOf(input)
+	if val.Kind() != reflect.Ptr && val.Kind() == reflect.Struct {
+		return input
+	}
+
+	return val.Elem().Interface()
+}
+
+func GetStructMemberNames(structure any) []string {
+	structure = DereferencePointer(structure)
 	AssertMsg(TypeIsStructure(structure), "structure is not of type structure")
 
 	value := reflect.ValueOf(structure)

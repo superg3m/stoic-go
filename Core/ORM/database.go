@@ -1,4 +1,4 @@
-package Database
+package ORM
 
 import (
 	"fmt"
@@ -73,13 +73,26 @@ func UpdateRecord(db *sqlx.DB, tableName string, model interface{}) error {
 	return nil
 }
 
-func InsertRecord(db *sqlx.DB, tableName string, model interface{}) error {
+func getDBColumnNames(tableName string, fieldNames []string) []string {
+	var ret []string
+	for _, fieldName := range fieldNames {
+		attr, exists := getAttribute(tableName, fieldName)
+		Utility.Assert(exists)
+		ret = append(ret, attr.ColumnName)
+	}
+
+	return ret
+}
+
+func InsertRecord(db *sqlx.DB, tableName string, model any) error {
 	fieldNames := Utility.GetStructMemberNames(model)
 	if len(fieldNames) == 0 {
 		return fmt.Errorf("no fields to insert for table '%s'", tableName)
 	}
 
-	placeholders := make([]string, len(fieldNames))
+	dbNames := getDBColumnNames(tableName, fieldNames)
+
+	placeholders := make([]string, len(dbNames))
 	for i := range placeholders {
 		placeholders[i] = "?"
 	}
@@ -89,7 +102,7 @@ func InsertRecord(db *sqlx.DB, tableName string, model interface{}) error {
 	query := fmt.Sprintf(
 		"INSERT INTO %s (%s) VALUES (%s)",
 		tableName,
-		strings.Join(fieldNames, ", "),
+		strings.Join(dbNames, ", "),
 		strings.Join(placeholders, ", "),
 	)
 
@@ -128,6 +141,7 @@ func GetDSN(dbEngine, host string, port int, user, password, dbname string) stri
 var db *sqlx.DB
 
 func GetInstance() *sqlx.DB {
+	Utility.Assert(db != nil)
 	return db
 }
 

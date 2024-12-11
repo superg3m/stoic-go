@@ -2,10 +2,8 @@ package User
 
 import (
 	"errors"
-	"github.com/superg3m/stoic-go/Core/Database"
 	"github.com/superg3m/stoic-go/Core/ORM"
 	"github.com/superg3m/stoic-go/Core/Utility"
-	"time"
 )
 
 var (
@@ -21,9 +19,31 @@ type User struct {
 	Password       string
 	Email          string
 	EmailConfirmed bool
-	Joined         time.Time
-	LastActive     time.Time
-	LastLogin      time.Time
+	// Joined         time.Time
+	// LastActive     time.Time
+	// LastLogin      time.Time
+}
+
+func (u *User) CanCreate() bool {
+	return true
+}
+
+func (u *User) CanUpdate() bool {
+	return true
+}
+
+func (u *User) CanDelete() bool {
+	return true
+}
+
+var _ ORM.InterfaceCRUD = (*User)(nil)
+
+func New() *User {
+	user := new(User)
+	user.DB = ORM.GetInstance()
+	user.TableName = "User"
+
+	return user
 }
 
 func FromID(id int) (*User, error) {
@@ -34,10 +54,8 @@ func FromID(id int) (*User, error) {
 	}
 
 	query := "SELECT * FROM User WHERE id = ?"
-	err := user.DB.QueryRow(query, id).Scan(&user.ID, &user.Username, &user.Email, &user.EmailConfirmed, &user.Joined, &user.LastActive, &user.LastLogin)
-	if err != nil {
-		return nil, err
-	}
+	row := ORM.GetInstance().QueryRowx(query, id)
+	user = ORM.Fetch[User](row)
 
 	return &user, nil
 }
@@ -48,11 +66,8 @@ func FromEmail(email string) (*User, error) {
 	}
 
 	query := "SELECT * FROM User WHERE email = ?"
-	row := Database.GetInstance().QueryRowx(query, email)
-	user, err := ORM.Fetch[User](row)
-	if err != nil {
-		return nil, err
-	}
+	row := ORM.GetInstance().QueryRowx(query, email)
+	user := ORM.Fetch[User](row)
 
 	return &user, nil
 }
@@ -60,10 +75,12 @@ func FromEmail(email string) (*User, error) {
 // Register ORM metadata
 func init() {
 	ORM.RegisterTableName("User")
-	ORM.RegisterTableColumn("ID", "user_id", ORM.PRIMARY_KEY)
-	ORM.RegisterTableColumn("Email", "email_address", ORM.UNIQUE)
+	ORM.RegisterTableColumn("ID", "id", ORM.PRIMARY_KEY)
+	ORM.RegisterTableColumn("Email", "email", ORM.UNIQUE)
+	ORM.RegisterTableColumn("EmailConfirmed", "email_confirmed", ORM.UPDATABLE)
 	ORM.RegisterTableColumn("Username", "username", ORM.NULLABLE|ORM.UPDATABLE)
-	ORM.RegisterTableColumn("Joined", "joined", ORM.NULLABLE)
-	ORM.RegisterTableColumn("LastActive", "last_active", ORM.NULLABLE)
-	ORM.RegisterTableColumn("LastLogin", "last_login", ORM.NULLABLE)
+	ORM.RegisterTableColumn("Password", "password", ORM.UPDATABLE)
+	// ORM.RegisterTableColumn("Joined", "joined", ORM.NULLABLE)
+	// ORM.RegisterTableColumn("LastActive", "last_active", ORM.NULLABLE)
+	// ORM.RegisterTableColumn("LastLogin", "last_login", ORM.NULLABLE)
 }

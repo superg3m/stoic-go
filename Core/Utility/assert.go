@@ -23,7 +23,7 @@ func AssertOnErrorMsg(err error, msg string) {
 
 func Assert(condition bool) {
 	if !condition {
-		LogFatal("[FAssert Triggered]")
+		LogFatal("[Assert Triggered]")
 		printCallStack()
 		os.Exit(-1)
 	}

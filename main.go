@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/superg3m/stoic-go/Core/Database"
+	_ "github.com/superg3m/stoic-go/API/0.1"
+	"github.com/superg3m/stoic-go/Core/ORM"
+	_ "github.com/superg3m/stoic-go/Core/ORM"
 	"github.com/superg3m/stoic-go/Core/Router"
 	"github.com/superg3m/stoic-go/Core/Utility"
 	"log"
@@ -15,24 +17,17 @@ import (
 	"time"
 )
 
-func helloWorld(request *Router.StoicRequest, response Router.StoicResponse) {
-	username := request.GetStringParam("username")
-
-	if len(username) < 8 {
-		response.SetError("Username must be at least 8 characters long")
-		return
-	}
-
-	if username != "superg3m" {
-		response.SetError("Wrong Password")
-		return
-	}
-
-	_, err := fmt.Fprintf(response, "Hello %s", username)
-	if err != nil {
-		return
-	}
+type InterfaceTest interface {
+	Speak()
 }
+
+type Person struct {
+	InterfaceTest
+
+	Name string
+}
+
+var _ InterfaceTest = Person{}
 
 func gracefulShutdown(server *http.Server) {
 	stop := make(chan os.Signal, 1)
@@ -55,27 +50,22 @@ const (
 	PORT      = 3306
 	USER      = "root"
 	PASSWORD  = "P@55word"
-	DBNAME    = ""
+	DBNAME    = "stoic"
 )
 
 func main() {
 	const SERVER_PORT = ":8080"
 
 	//Core.RegisterPrefix("API/0.1")
-	Router.MiddlewareRegisterCommon(Router.MiddlewareCORS())
-
-	Router.RegisterApiEndpoint("/User/Create", helloWorld, "POST",
-		Router.MiddlewareValidParams("username", "email"),
-	)
 
 	server := &http.Server{
 		Addr:    SERVER_PORT,
 		Handler: Router.Router,
 	}
 
-	dsn := Database.GetDSN(DB_ENGINE, HOST, PORT, USER, PASSWORD, DBNAME)
-	Database.Connect(DB_ENGINE, dsn)
-	defer Database.Close()
+	dsn := ORM.GetDSN(DB_ENGINE, HOST, PORT, USER, PASSWORD, DBNAME)
+	ORM.Connect(DB_ENGINE, dsn)
+	defer ORM.Close()
 
 	siteSettings := Utility.GetSiteSettings()
 	fmt.Println(siteSettings["settings"].(map[string]any)["dbHost"])
