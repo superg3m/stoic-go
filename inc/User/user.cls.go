@@ -13,11 +13,6 @@ var (
 	ERROR_INVALID_ID    = errors.New("Invalid ID")
 )
 
-var (
-	ERROR_INVALID_EMAIL = errors.New("Invalid Email")
-	ERROR_INVALID_ID    = errors.New("Invalid ID")
-)
-
 type User struct {
 	ORM.StoicModel
 
