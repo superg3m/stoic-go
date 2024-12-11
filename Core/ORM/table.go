@@ -13,15 +13,23 @@ func RegisterTableName(tableName string) {
 	tempTableName = tableName
 }
 
-func RegisterTableColumn(structMemberName string, attributeName string, flags ORM_FLAG) {
-	globalTable[tempTableName][structMemberName] = Attribute{
-		name:  attributeName,
-		flags: flags,
+func RegisterTableColumn(memberName string, columnName string, flags ORM_FLAG) {
+	globalTable[tempTableName][memberName] = Attribute{
+		ColumnName: columnName,
+		Flags:      flags,
 	}
+
+	tempTableName = ""
 }
 
-func getAttribute(tableName string, structMemberName string) (Attribute, bool) {
-	meta, exists := globalTable[tableName][structMemberName]
+func GetAttributes(tableName string) (map[string]Attribute, bool) {
+	attributes, exists := globalTable[tableName]
 	Utility.Assert(exists)
-	return meta, exists
+	return attributes, exists
+}
+
+func getAttribute(tableName string, memberName string) (Attribute, bool) {
+	attribute, exists := globalTable[tableName][memberName]
+	Utility.Assert(exists)
+	return attribute, exists
 }

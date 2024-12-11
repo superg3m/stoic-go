@@ -8,7 +8,12 @@ import (
 	"time"
 )
 
-var ( // ERRORS
+var (
+	ERROR_INVALID_EMAIL = errors.New("Invalid Email")
+	ERROR_INVALID_ID    = errors.New("Invalid ID")
+)
+
+var (
 	ERROR_INVALID_EMAIL = errors.New("Invalid Email")
 	ERROR_INVALID_ID    = errors.New("Invalid ID")
 )
@@ -26,34 +31,44 @@ type User struct {
 	LastLogin      time.Time
 }
 
-func New() *User {
-	return &User{
-		StoicModel: ORM.StoicModel{
-			DB:        Database.GetInstance(),
-			TableName: "User",
-		},
+func FromID(id int) (*User, error) {
+	var user User
+
+	if id <= 0 {
+		return nil, ERROR_INVALID_ID
 	}
+
+	query := "SELECT * FROM User WHERE id = ?"
+	err := user.DB.QueryRow(query, id).Scan(&user.ID, &user.Username, &user.Email, &user.EmailConfirmed, &user.Joined, &user.LastActive, &user.LastLogin)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }
 
-func FromID(id int) {
-
-}
-
-func FromEmail(email string) (User, error) {
-	var ret User
-
+func FromEmail(email string) (*User, error) {
 	if !Utility.ValidEmail(email) {
-		return User{}, ERROR_INVALID_EMAIL
+		return nil, ERROR_INVALID_EMAIL
 	}
 
-	return ret, nil
+	query := "SELECT * FROM User WHERE email = ?"
+	row := Database.GetInstance().QueryRowx(query, email)
+	user, err := ORM.Fetch[User](row)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }
 
+// Register ORM metadata
 func init() {
 	ORM.RegisterTableName("User")
-	ORM.RegisterTableColumn("ID", "user_id", ORM.PRIMARY_KEY) // Using reflection to know the type!
-	ORM.RegisterTableColumn("Email", "email_address", ORM.PRIMARY_KEY)
-	ORM.RegisterTableColumn("Name", "full_name", ORM.NULLABLE|ORM.UPDATABLE)
-	ORM.RegisterTableColumn("Age", "age", ORM.PRIMARY_KEY)
 	ORM.RegisterTableColumn("ID", "user_id", ORM.PRIMARY_KEY)
+	ORM.RegisterTableColumn("Email", "email_address", ORM.UNIQUE)
+	ORM.RegisterTableColumn("Username", "username", ORM.NULLABLE|ORM.UPDATABLE)
+	ORM.RegisterTableColumn("Joined", "joined", ORM.NULLABLE)
+	ORM.RegisterTableColumn("LastActive", "last_active", ORM.NULLABLE)
+	ORM.RegisterTableColumn("LastLogin", "last_login", ORM.NULLABLE)
 }
