@@ -22,6 +22,7 @@ type StoicModel struct {
 }
 
 func (model *StoicModel) Update() {
+	Utility.AssertMsg(model.DB != nil, fmt.Sprintf("%s Model have a valid DB connection for table: %s", model.TableName))
 	Utility.AssertMsg(model.isCreated, fmt.Sprintf("%s Model must be created first before attempting to update!", model.TableName))
 	Utility.AssertMsg(model.InterfaceCanCRUD.canUpdate(), "canUpdate() returned false")
 
@@ -37,6 +38,7 @@ func (model *StoicModel) Update() {
 }
 
 func (model *StoicModel) Create() {
+	Utility.AssertMsg(model.DB != nil, fmt.Sprintf("%s Model have a valid DB connection for table: %s", model.TableName))
 	Utility.AssertMsg(model.InterfaceCanCRUD.canCreate(), "canCreate() returned false")
 
 	MemberNames := Utility.GetStructMemberNames(model)
@@ -56,6 +58,7 @@ func (model *StoicModel) Create() {
 }
 
 func (model *StoicModel) Delete() {
+	Utility.AssertMsg(model.DB != nil, fmt.Sprintf("%s Model have a valid DB connection for table: %s", model.TableName))
 	Utility.AssertMsg(model.InterfaceCanCRUD.canDelete(), "canDelete() returned false")
 	Utility.AssertMsg(model.isCreated, fmt.Sprintf("%s Model must be created first before attempting to delete!", model.TableName))
 

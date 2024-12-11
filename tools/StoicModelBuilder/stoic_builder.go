@@ -37,13 +37,13 @@ func main() {
 		Attributes: attributes,
 	}
 
-	tmplFile := "CLS.tmpl"
+	tmplFile := "cls.tmpl"
 	tmpl, err := template.New(tmplFile).ParseFiles(tmplFile)
 	if err != nil {
 		panic(err)
 	}
 
-	filePtr, err := os.Create("./user.api.go")
+	filePtr, err := os.Create("./user.cls.go")
 	Utility.AssertOnError(err)
 
 	err = tmpl.Execute(filePtr, templateData)
@@ -51,13 +51,15 @@ func main() {
 		panic(err)
 	}
 
-	tmplFile = "API.tmpl"
+	// --------------------------------------------------------
+
+	tmplFile = "api.tmpl"
 	tmpl, err = template.New(tmplFile).ParseFiles(tmplFile)
 	if err != nil {
 		panic(err)
 	}
 
-	filePtr, err = os.Create("./user.cls.go")
+	filePtr, err = os.Create("./user.api.go")
 	Utility.AssertOnError(err)
 
 	err = tmpl.Execute(filePtr, templateData)

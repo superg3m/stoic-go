@@ -1,6 +1,7 @@
 package API
 
 import (
+    "fmt"
 	"github.com/superg3m/stoic-go/Core/Router"
 	"github.com/superg3m/stoic-go/inc/{{ .TableName }}"
 )
@@ -19,12 +20,21 @@ func Get{{ .TableName }}(request *Router.StoicRequest, response Router.StoicResp
 
 func Create{{ .TableName }}(request *Router.StoicRequest, response Router.StoicResponse) {
 	// Instantiate a new model object
-	entity := {{ .TableName }}.New() // Adjust to match your actual constructor
+	entity := {{ .TableName }}.New()
 
-	// Dynamically assign values from request to the model
-	{{- range .Attributes }}
-	entity.{{ .Name }} = request.GetStringParam("{{ .Name }}") // Adjust for attribute types if needed
-	{{- end }}
+    {{- range .Attributes }}
+    {{- if eq .Type "string" }}
+    entity.{{ .Name }} = request.GetStringParam("{{ .Name }}")
+    {{- else if eq .Type "int" }}
+    entity.{{ .Name }} = request.GetIntParam("{{ .Name }}")
+    {{- else if eq .Type "bool" }}
+    entity.{{ .Name }} = request.GetBoolParam("{{ .Name }}")
+    {{- else if eq .Type "float" }}
+    entity.{{ .Name }} = request.GetFloatParam("{{ .Name }}")
+    {{- else }}
+    request.GetJsonParam("{{ .Name }}", &entity.{{ .Name }})
+    {{- end }}
+    {{- end }}
 
 	entity.Create()
 	response.SetData(fmt.Sprintf("{{ .TableName }} created successfully with ID %d", entity.ID))
@@ -33,19 +43,25 @@ func Create{{ .TableName }}(request *Router.StoicRequest, response Router.StoicR
 func Update{{ .TableName }}(request *Router.StoicRequest, response Router.StoicResponse) {
 	id := request.GetIntParam("id")
 
-	// Fetch existing record
 	entity, err := {{ .TableName }}.FindByID(id)
 	if err != nil {
 		response.SetError(fmt.Sprintf("Error fetching {{ .TableName }}: %s", err))
 		return
 	}
 
-	// Update fields dynamically
-	{{- range .Attributes }}
-	if request.Has("{{ .Name }}") {
-		entity.{{ .Name }} = request.GetStringParam("{{ .Name }}") // The GetStringParam get get determined by the type!
-	}
-	{{- end }}
+    {{- range .Attributes }}
+    {{- if eq .Type "string" }}
+    entity.{{ .Name }} = request.GetStringParam("{{ .Name }}")
+    {{- else if eq .Type "int" }}
+    entity.{{ .Name }} = request.GetIntParam("{{ .Name }}")
+    {{- else if eq .Type "bool" }}
+    entity.{{ .Name }} = request.GetBoolParam("{{ .Name }}")
+    {{- else if eq .Type "float" }}
+    entity.{{ .Name }} = request.GetFloatParam("{{ .Name }}")
+    {{- else }}
+    request.GetJsonParam("{{ .Name }}", &entity.{{ .Name }})
+    {{- end }}
+    {{- end }}
 
 	entity.Update()
 

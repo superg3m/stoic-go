@@ -1,9 +1,11 @@
 package Router
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/superg3m/stoic-go/Core/Utility"
 	"net/http"
+	"reflect"
 )
 
 type StoicResponse struct {
@@ -19,12 +21,29 @@ func (response *StoicResponse) SetError(msg string) {
 }
 
 func (response *StoicResponse) SetData(data any) {
+	contentType := "text/plain"
 
-	// should use reflection to determine if the header response needs to be text, json an other stuff
+	switch reflect.TypeOf(data).Kind() {
+	case reflect.Struct, reflect.Map, reflect.Slice, reflect.Array:
+		contentType = "application/json"
+		response.Header().Set("Content-Type", contentType)
 
-	response.WriteHeader(http.StatusOK)
-	_, err := fmt.Fprintf(response, "%+v", data)
-	if err != nil {
-		Utility.Assert(false)
+		jsonData, err := json.Marshal(data)
+		if err != nil {
+			Utility.AssertOnErrorMsg(err, "failed to marshal data to JSON")
+		}
+		_, err = response.Write(jsonData)
+		if err != nil {
+			Utility.Assert(false)
+		}
+		return
+	default:
+		contentType = "text/plain"
+		response.Header().Set("Content-Type", contentType)
+
+		_, err := fmt.Fprintf(response, "%+v", data)
+		if err != nil {
+			Utility.Assert(false)
+		}
 	}
 }
