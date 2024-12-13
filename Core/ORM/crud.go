@@ -46,10 +46,12 @@ func Update[T InterfaceCRUD](model *T) {
 	for _, memberName := range MemberNames {
 		fieldMeta, exists := getAttribute(stoicModel.TableName, memberName)
 		Utility.Assert(exists)
-		Utility.AssertMsg(fieldMeta.isUpdatable(), fmt.Sprintf("field '%s' is not updatable", memberName))
+		Utility.AssertMsg(fieldMeta.isUpdatable(), "field '%s' is not updatable", memberName)
 	}
 
-	err := UpdateRecord(stoicModel.DB, stoicModel.TableName, model)
+	updateStoicModel(model)
+
+	_, err := UpdateRecord(stoicModel.DB, stoicModel.TableName, model)
 	Utility.AssertOnError(err)
 }
 
@@ -60,22 +62,26 @@ func Create[T InterfaceCRUD](model *T) {
 	Utility.AssertMsg(crud.CanCreate(), "canCreate() returned false")
 
 	MemberNames := Utility.GetStructMemberNames(*model)
+	hasAutoIncrement := false
 	for _, memberName := range MemberNames {
 		attribute, exists := getAttribute(stoicModel.TableName, memberName)
 
 		if attribute.isAutoIncrement() {
-			sql := "SELECT MAX(?) FROM ?"
-			primaryKey := -1 // this should be updating model.field
-			GetInstance().QueryRowx(sql, attribute.ColumnName, stoicModel.TableName).Scan(&primaryKey)
-			primaryKey += 1
+			hasAutoIncrement = true
 		}
 
 		Utility.Assert(exists)
 	}
 
-	stoicModel.isCreated = true
+	updateStoicModel(model)
+	result, err := InsertRecord(stoicModel.DB, stoicModel.TableName, model)
 
-	err := InsertRecord(stoicModel.DB, stoicModel.TableName, model)
+	if hasAutoIncrement {
+		id, _ := result.LastInsertId()
+		updateIDField(model, id)
+	}
+	// somehow I need to update model
+	// *model = afterInsertModel
 
 	// Ensure the primary key is updated, e.g., retrieve the last generated ID if applicable
 	Utility.AssertOnError(err) // This doesn't make sense I should return an error code instead
@@ -90,6 +96,6 @@ func Delete[T InterfaceCRUD](model *T) {
 	Utility.AssertMsg(stoicModel.isCreated, fmt.Sprintf("%s Model must be created first before attempting to delete!", stoicModel.TableName))
 	Utility.AssertMsg(crud.CanDelete(), "canDelete() returned false")
 
-	err := DeleteRecord(stoicModel.DB, stoicModel.TableName, model)
+	_, err := DeleteRecord(stoicModel.DB, stoicModel.TableName, model)
 	Utility.AssertOnError(err)
 }

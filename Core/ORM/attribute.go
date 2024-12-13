@@ -3,7 +3,7 @@ package ORM
 type ORM_FLAG int
 
 const ( // ORM_Flags
-	PRIMARY_KEY    ORM_FLAG = 1 << iota // 1 << 0 = 1 (bit 0)
+	KEY            ORM_FLAG = 1 << iota // 1 << 0 = 1 (bit 0)
 	UPDATABLE                           // 1 << 2 = 4 (bit 2)
 	AUTO_INCREMENT                      // 1 << 4 = 16 (bit 4)
 )
@@ -12,11 +12,10 @@ type Attribute struct {
 	MemberName string
 	ColumnName string   // The name of the column in the database
 	Flags      ORM_FLAG // Bit flag to store Nullable, Updatable, etc.
-	TypeStr    string
 }
 
 func (attribute *Attribute) isPrimaryKey() bool {
-	return attribute.Flags&PRIMARY_KEY != 0
+	return attribute.Flags&KEY != 0
 }
 
 func (attribute *Attribute) isUpdatable() bool {

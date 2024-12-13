@@ -9,7 +9,6 @@ import (
 type MemberAttributeMap map[string]Attribute // Key: StructMemberName
 
 var tempTableName string
-var tempTableTypes map[string]string
 var globalTable map[string]MemberAttributeMap // Key: TableName
 
 func init() {
@@ -17,14 +16,8 @@ func init() {
 	globalTable = make(map[string]MemberAttributeMap)
 }
 
-func RegisterTableName(table InterfaceCRUD, tableName string) {
+func RegisterTableName(tableName string) {
 	tempTableName = tableName
-	tempTableTypes = Utility.GetStructMemberTypes(table)
-}
-
-func ensureAttributesAreValid(attribute Attribute) {
-	msg := fmt.Sprintf("Not allowed to apply auto increment attribute when type is not numeric! Member %s is of type %s", attribute.MemberName, attribute.TypeStr)
-	Utility.AssertMsg(attribute.TypeStr != "int" && attribute.isAutoIncrement(), msg)
 }
 
 func RegisterTableColumn(memberName string, columnName string, flags ...ORM_FLAG) {
@@ -38,18 +31,16 @@ func RegisterTableColumn(memberName string, columnName string, flags ...ORM_FLAG
 	}
 
 	attribute := Attribute{
-		ColumnName: columnName,
-		Flags:      finalFlag,
-	}
-
-	globalTable[tempTableName][memberName] = Attribute{
 		MemberName: memberName,
 		ColumnName: columnName,
 		Flags:      finalFlag,
-		TypeStr:    tempTableTypes[memberName],
 	}
 
-	ensureAttributesAreValid(attribute)
+	if attribute.isPrimaryKey() && !attribute.isAutoIncrement() {
+		Utility.AssertMsg(false, "Stoic-Go does not support models where auto increment is not primary key as well")
+	}
+
+	globalTable[tempTableName][memberName] = attribute
 }
 
 func GetAttributes(tableName string) (map[string]Attribute, bool) {

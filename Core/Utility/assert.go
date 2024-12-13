@@ -29,9 +29,15 @@ func Assert(condition bool) {
 	}
 }
 
-func AssertMsg(condition bool, msg string) {
+func AssertMsg(condition bool, format string, args ...any) {
 	if !condition {
-		LogFatal(fmt.Sprint("[Assert Triggered]: ", msg))
+		msg := fmt.Sprintf(format, args)
+		msg2 := format
+		if len(args) != 0 {
+			LogFatal(fmt.Sprint("[Assert Triggered]: ", msg))
+		} else {
+			LogFatal(fmt.Sprint("[Assert Triggered]: ", msg2))
+		}
 		printCallStack()
 		os.Exit(-1)
 	}

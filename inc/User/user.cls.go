@@ -71,8 +71,8 @@ func FromEmail(email string) *User {
 
 // Register ORM metadata
 func init() {
-	ORM.RegisterTableName(User{}, "User")
-	ORM.RegisterTableColumn("ID", "id", ORM.PRIMARY_KEY)
+	ORM.RegisterTableName("User")
+	ORM.RegisterTableColumn("ID", "id", ORM.KEY, ORM.AUTO_INCREMENT)
 	ORM.RegisterTableColumn("Email", "email")
 	ORM.RegisterTableColumn("EmailConfirmed", "email_confirmed", ORM.UPDATABLE)
 	ORM.RegisterTableColumn("Username", "username", ORM.UPDATABLE)

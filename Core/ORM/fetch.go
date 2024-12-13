@@ -16,7 +16,7 @@ func Fetch[T InterfaceCRUD](row *sqlx.Row) *T {
 	Utility.AssertMsg(v.Kind() != reflect.Struct, fmt.Sprintf("Fetch: type %T is not a struct", dest))
 
 	err := row.StructScan(&dest)
-	Utility.AssertOnErrorMsg(err, fmt.Sprintf("Fetch: failed to scan row into struct: %w", err))
+	Utility.AssertOnErrorMsg(err, fmt.Sprintf("Fetch: failed to scan row into struct: %s", err))
 
 	return &dest
 }
@@ -28,14 +28,14 @@ func FetchAll[T InterfaceCRUD](rows *sqlx.Rows) ([]*T, error) {
 		var dest T
 
 		if err := rows.StructScan(&dest); err != nil {
-			return nil, fmt.Errorf("FetchAll: failed to scan row into struct: %w", err)
+			return nil, fmt.Errorf("FetchAll: failed to scan row into struct: %s", err)
 		}
 
 		results = append(results, &dest)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("FetchAll: error during rows iteration: %w", err)
+		return nil, fmt.Errorf("FetchAll: error during rows iteration: %s", err)
 	}
 
 	return results, nil

@@ -1,7 +1,9 @@
 package ORM
 
 import (
+	"database/sql"
 	"fmt"
+	"reflect"
 	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -14,11 +16,9 @@ import (
 // postgres
 // sql_lite
 
-func DeleteRecord[T InterfaceCRUD](db *sqlx.DB, tableName string, model *T) error {
+func DeleteRecord[T InterfaceCRUD](db *sqlx.DB, tableName string, model *T) (sql.Result, error) {
 	fieldNames := Utility.GetStructMemberNames(model)
-	if len(fieldNames) == 0 {
-		return fmt.Errorf("no fields to use for DELETE condition in table '%s'", tableName)
-	}
+	Utility.Assert(len(fieldNames) > 0)
 
 	var conditions []string
 	values := Utility.GetStructValues(model)
@@ -33,19 +33,17 @@ func DeleteRecord[T InterfaceCRUD](db *sqlx.DB, tableName string, model *T) erro
 		strings.Join(conditions, " AND "),
 	)
 
-	_, execErr := db.Exec(query, values...)
+	result, execErr := db.Exec(query, values...)
 	if execErr != nil {
-		return fmt.Errorf("failed to execute query: %w", execErr)
+		return result, fmt.Errorf("failed to execute query: %w", execErr)
 	}
 
-	return nil
+	return result, nil
 }
 
-func UpdateRecord[T InterfaceCRUD](db *sqlx.DB, tableName string, model *T) error {
+func UpdateRecord[T InterfaceCRUD](db *sqlx.DB, tableName string, model *T) (sql.Result, error) {
 	fieldNames := Utility.GetStructMemberNames(model)
-	if len(fieldNames) <= 1 {
-		return fmt.Errorf("not enough fields to construct an UPDATE statement for table '%s'", tableName)
-	}
+	Utility.Assert(len(fieldNames) > 0)
 
 	values := Utility.GetStructValues(model)
 
@@ -66,19 +64,57 @@ func UpdateRecord[T InterfaceCRUD](db *sqlx.DB, tableName string, model *T) erro
 		keyField,
 	)
 
-	_, execErr := db.Exec(query, append(updateValues, keyValue)...)
+	result, execErr := db.Exec(query, append(updateValues, keyValue)...)
 	if execErr != nil {
-		return fmt.Errorf("failed to execute query: %w", execErr)
+		return result, fmt.Errorf("failed to execute query: %w", execErr)
 	}
 
-	return nil
+	return result, nil
 }
 
-func InsertRecord[T InterfaceCRUD](db *sqlx.DB, tableName string, model *T) error {
-	fieldNames := Utility.GetStructMemberNames(model)
-	if len(fieldNames) == 0 {
-		return fmt.Errorf("no fields to insert for table '%s'", tableName)
+func updateStoicModel[T InterfaceCRUD](model *T) {
+	v := reflect.ValueOf(model)
+	if v.Kind() != reflect.Ptr || v.Elem().Kind() != reflect.Struct {
+		panic("model must be a pointer to a struct")
 	}
+
+	structValue := v.Elem()
+
+	stoicModelField := structValue.FieldByName("StoicModel")
+	if !stoicModelField.IsValid() {
+		Utility.AssertMsg(false, "Embedded StoicModel is missing from the struct")
+	}
+
+	if stoicModelField.Kind() == reflect.Struct && stoicModelField.CanSet() {
+		isCreatedField := stoicModelField.FieldByName("isCreated")
+		if isCreatedField.IsValid() && isCreatedField.CanSet() && isCreatedField.Kind() == reflect.Bool {
+			isCreatedField.SetBool(true)
+		} else {
+			Utility.AssertMsg(false, "isCreated field in StoicModel is missing, not settable, or not of type bool")
+		}
+	} else {
+		Utility.AssertMsg(false, "StoicModel is not a struct or is not settable")
+	}
+}
+
+func updateIDField[T InterfaceCRUD](model *T, id int64) {
+	v := reflect.ValueOf(model)
+	if v.Kind() != reflect.Ptr || v.Elem().Kind() != reflect.Struct {
+		panic("model must be a pointer to a struct")
+	}
+
+	structValue := v.Elem()
+	field := structValue.FieldByName("ID")
+	if field.IsValid() && field.CanSet() && field.Kind() == reflect.Int64 {
+		field.SetInt(id)
+	} else {
+		Utility.AssertMsg(false, "ID field is missing, not settable, or not of type int64")
+	}
+}
+
+func InsertRecord[T InterfaceCRUD](db *sqlx.DB, tableName string, model *T) (sql.Result, error) {
+	fieldNames := Utility.GetStructMemberNames(model)
+	Utility.Assert(len(fieldNames) > 0)
 
 	dbNames := getDBColumnNames(tableName, fieldNames)
 
@@ -96,12 +132,12 @@ func InsertRecord[T InterfaceCRUD](db *sqlx.DB, tableName string, model *T) erro
 		strings.Join(placeholders, ", "),
 	)
 
-	_, execErr := db.Exec(query, values...)
+	result, execErr := db.Exec(query, values...)
 	if execErr != nil {
-		return fmt.Errorf("failed to execute query: %w", execErr)
+		return result, fmt.Errorf("failed to execute query: %w", execErr)
 	}
 
-	return nil
+	return result, nil
 }
 
 func GetDSN(dbEngine, host string, port int, user, password, dbname string) string {
