@@ -53,3 +53,5 @@ Utility
 Auto Increment
 Timestamps
 Composite Keys
+
+Make errors a bigger part the setError should take an error and I should be able to format it easily
