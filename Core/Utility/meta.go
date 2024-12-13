@@ -46,6 +46,45 @@ func GetStructMemberNames(structure any) []string {
 	return fieldNames
 }
 
+func GetStructMemberType(structure any, memberName string) string {
+	structure = DereferencePointer(structure)
+	AssertMsg(TypeIsStructure(structure), "structure is not of type structure")
+
+	value := reflect.ValueOf(structure)
+	typeStruct := value.Type()
+
+	for i := 0; i < typeStruct.NumField(); i++ {
+		field := typeStruct.Field(i)
+		if field.Name != memberName {
+			return field.Type.String()
+		}
+	}
+
+	Assert(false) // memberName is no in the struct
+	return ""
+}
+
+func GetStructMemberTypes(structure any) []string {
+	structure = DereferencePointer(structure)
+	AssertMsg(TypeIsStructure(structure), "structure is not of type structure")
+
+	value := reflect.ValueOf(structure)
+	typeStruct := value.Type()
+
+	var typeStrs []string
+	for i := 0; i < typeStruct.NumField(); i++ {
+		field := typeStruct.Field(i)
+
+		if field.Anonymous {
+			continue
+		}
+
+		typeStrs = append(typeStrs, field.Type.String())
+	}
+
+	return typeStrs
+}
+
 func GetStructValues(structure any) []any {
 	AssertMsg(TypeIsStructure(structure), "structure is not of type structure")
 

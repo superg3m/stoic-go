@@ -2,9 +2,10 @@ package ORM
 
 import (
 	"fmt"
+	"reflect"
+
 	"github.com/jmoiron/sqlx"
 	"github.com/superg3m/stoic-go/Core/Utility"
-	"reflect"
 )
 
 type InterfaceCRUD interface {
@@ -67,8 +68,13 @@ func Create(model any) {
 	MemberNames := Utility.GetStructMemberNames(model)
 	for _, memberName := range MemberNames {
 		_, exists := getAttribute(stoicModel.TableName, memberName)
+
+		// queryForAutoIncrement
+
 		Utility.Assert(exists)
 	}
+
+	// find all auto increment
 
 	stoicModel.isCreated = true
 

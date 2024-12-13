@@ -4,30 +4,19 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	_ "github.com/superg3m/stoic-go/API/0.1"
-	"github.com/superg3m/stoic-go/Core/ORM"
-	_ "github.com/superg3m/stoic-go/Core/ORM"
-	"github.com/superg3m/stoic-go/Core/Router"
-	"github.com/superg3m/stoic-go/Core/Utility"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	_ "github.com/superg3m/stoic-go/API/0.1"
+	"github.com/superg3m/stoic-go/Core/ORM"
+	_ "github.com/superg3m/stoic-go/Core/ORM"
+	"github.com/superg3m/stoic-go/Core/Router"
+	"github.com/superg3m/stoic-go/Core/Utility"
 )
-
-type InterfaceTest interface {
-	Speak()
-}
-
-type Person struct {
-	InterfaceTest
-
-	Name string
-}
-
-var _ InterfaceTest = Person{}
 
 func gracefulShutdown(server *http.Server) {
 	stop := make(chan os.Signal, 1)

@@ -2,6 +2,7 @@ package User
 
 import (
 	"errors"
+
 	"github.com/superg3m/stoic-go/Core/ORM"
 	"github.com/superg3m/stoic-go/Core/Utility"
 )
@@ -24,19 +25,19 @@ type User struct {
 	// LastLogin      time.Time
 }
 
-func (u *User) CanCreate() bool {
+func (u User) CanCreate() bool {
 	return true
 }
 
-func (u *User) CanUpdate() bool {
+func (u User) CanUpdate() bool {
 	return true
 }
 
-func (u *User) CanDelete() bool {
+func (u User) CanDelete() bool {
 	return true
 }
 
-var _ ORM.InterfaceCRUD = (*User)(nil)
+var _ ORM.InterfaceCRUD = User{}
 
 func New() *User {
 	user := new(User)
@@ -74,11 +75,11 @@ func FromEmail(email string) (*User, error) {
 
 // Register ORM metadata
 func init() {
-	ORM.RegisterTableName("User")
+	ORM.RegisterTableName(User{}, "User")
 	ORM.RegisterTableColumn("ID", "id", ORM.PRIMARY_KEY)
-	ORM.RegisterTableColumn("Email", "email", ORM.UNIQUE)
+	ORM.RegisterTableColumn("Email", "email")
 	ORM.RegisterTableColumn("EmailConfirmed", "email_confirmed", ORM.UPDATABLE)
-	ORM.RegisterTableColumn("Username", "username", ORM.NULLABLE|ORM.UPDATABLE)
+	ORM.RegisterTableColumn("Username", "username", ORM.UPDATABLE)
 	ORM.RegisterTableColumn("Password", "password", ORM.UPDATABLE)
 	// ORM.RegisterTableColumn("Joined", "joined", ORM.NULLABLE)
 	// ORM.RegisterTableColumn("LastActive", "last_active", ORM.NULLABLE)
