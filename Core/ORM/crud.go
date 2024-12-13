@@ -67,9 +67,14 @@ func Create(model any) {
 
 	MemberNames := Utility.GetStructMemberNames(model)
 	for _, memberName := range MemberNames {
-		_, exists := getAttribute(stoicModel.TableName, memberName)
+		attribute, exists := getAttribute(stoicModel.TableName, memberName)
 
-		// queryForAutoIncrement
+		if attribute.isAutoIncrement() {
+			sql := "SELECT MAX(?) FROM ?"
+			primaryKey := -1
+			GetInstance().QueryRowx(sql, attribute.ColumnName, stoicModel.TableName).Scan(&primaryKey)
+			primaryKey += 1
+		}
 
 		Utility.Assert(exists)
 	}
@@ -78,7 +83,7 @@ func Create(model any) {
 
 	stoicModel.isCreated = true
 
-	err := InsertRecord(stoicModel.DB, stoicModel.TableName, model) // THIS MUST SET THE PRIMARY KEY!
+	err := InsertRecord(stoicModel.DB, stoicModel.TableName, model)
 
 	// Ensure the primary key is updated, e.g., retrieve the last generated ID if applicable
 	Utility.AssertOnError(err)
@@ -88,7 +93,7 @@ func Delete(model any) {
 	stoicModel, crud := extractModelComponents(model)
 	model = Utility.DereferencePointer(model)
 
-	Utility.AssertMsg(stoicModel.DB != nil, fmt.Sprintf("%s Model must have a valid DB connection for table: %s", stoicModel.TableName))
+	Utility.AssertMsg(stoicModel.DB != nil, fmt.Sprintf("%s Model must have a valid DB connection", stoicModel.TableName))
 	Utility.AssertMsg(stoicModel.isCreated, fmt.Sprintf("%s Model must be created first before attempting to delete!", stoicModel.TableName))
 	Utility.AssertMsg(crud.CanDelete(), "canDelete() returned false")
 
