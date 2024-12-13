@@ -56,7 +56,7 @@ func GetStructMemberType(structure any, memberName string) string {
 	for i := 0; i < typeStruct.NumField(); i++ {
 		field := typeStruct.Field(i)
 		if field.Name != memberName {
-			return field.Type.String()
+			return field.Type.Name()
 		}
 	}
 
@@ -64,14 +64,14 @@ func GetStructMemberType(structure any, memberName string) string {
 	return ""
 }
 
-func GetStructMemberTypes(structure any) []string {
+func GetStructMemberTypes(structure any) map[string]string {
 	structure = DereferencePointer(structure)
 	AssertMsg(TypeIsStructure(structure), "structure is not of type structure")
 
 	value := reflect.ValueOf(structure)
 	typeStruct := value.Type()
 
-	var typeStrs []string
+	ret := make(map[string]string, typeStruct.NumField())
 	for i := 0; i < typeStruct.NumField(); i++ {
 		field := typeStruct.Field(i)
 
@@ -79,10 +79,10 @@ func GetStructMemberTypes(structure any) []string {
 			continue
 		}
 
-		typeStrs = append(typeStrs, field.Type.String())
+		ret[field.Name] = field.Type.Name()
 	}
 
-	return typeStrs
+	return ret
 }
 
 func GetStructValues(structure any) []any {

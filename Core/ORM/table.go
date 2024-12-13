@@ -9,8 +9,7 @@ import (
 type MemberAttributeMap map[string]Attribute // Key: StructMemberName
 
 var tempTableName string
-var tempTableTypes []string
-var tempTableTypeIndex int
+var tempTableTypes map[string]string
 var globalTable map[string]MemberAttributeMap // Key: TableName
 
 func init() {
@@ -23,9 +22,9 @@ func RegisterTableName(table InterfaceCRUD, tableName string) {
 	tempTableTypes = Utility.GetStructMemberTypes(table)
 }
 
-func ensureFlagsAreValid(memberName string, attribute Attribute, typeStr string) {
-	msg := fmt.Sprintf("Not allowed to apply auto increment attribute when type is not numeric! Member %s is of type %s", memberName, typeStr)
-	Utility.AssertMsg(typeStr != "int" && attribute.isAutoIncrement(), msg)
+func ensureAttributesAreValid(attribute Attribute) {
+	msg := fmt.Sprintf("Not allowed to apply auto increment attribute when type is not numeric! Member %s is of type %s", attribute.MemberName, attribute.TypeStr)
+	Utility.AssertMsg(attribute.TypeStr != "int" && attribute.isAutoIncrement(), msg)
 }
 
 func RegisterTableColumn(memberName string, columnName string, flags ...ORM_FLAG) {
@@ -44,13 +43,13 @@ func RegisterTableColumn(memberName string, columnName string, flags ...ORM_FLAG
 	}
 
 	globalTable[tempTableName][memberName] = Attribute{
+		MemberName: memberName,
 		ColumnName: columnName,
 		Flags:      finalFlag,
+		TypeStr:    tempTableTypes[memberName],
 	}
 
-	ensureFlagsAreValid(memberName, attribute, tempTableTypes[tempTableTypeIndex])
-
-	tempTableTypeIndex += 1
+	ensureAttributesAreValid(attribute)
 }
 
 func GetAttributes(tableName string) (map[string]Attribute, bool) {

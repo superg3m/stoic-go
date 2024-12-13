@@ -9,8 +9,10 @@ const ( // ORM_Flags
 )
 
 type Attribute struct {
+	MemberName string
 	ColumnName string   // The name of the column in the database
 	Flags      ORM_FLAG // Bit flag to store Nullable, Updatable, etc.
+	TypeStr    string
 }
 
 func (attribute *Attribute) isPrimaryKey() bool {
