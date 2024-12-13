@@ -20,7 +20,7 @@ type StoicModel struct {
 	isCreated bool
 }
 
-func extractModelComponents(model any) (StoicModel, InterfaceCRUD) {
+func extractModelComponents[T InterfaceCRUD](model *T) (StoicModel, InterfaceCRUD) {
 	val := reflect.ValueOf(model)
 	if val.Kind() != reflect.Ptr || val.IsNil() {
 		Utility.AssertMsg(false, "Model must be a non-nil pointer")
@@ -32,18 +32,13 @@ func extractModelComponents(model any) (StoicModel, InterfaceCRUD) {
 	stoicModel, ok := stoicModelField.Interface().(StoicModel)
 	Utility.Assert(ok)
 
-	// Check if the model implements the InterfaceCRUD interface
-	crud, ok := model.(InterfaceCRUD)
-	Utility.Assert(ok)
-
-	return stoicModel, crud
+	return stoicModel, *model
 }
 
-func Update(model any) {
+func Update[T InterfaceCRUD](model *T) {
 	stoicModel, crud := extractModelComponents(model)
-	model = Utility.DereferencePointer(model)
 
-	Utility.AssertMsg(stoicModel.DB != nil, fmt.Sprintf("%s Model must have a valid DB connection for table: %s", stoicModel.TableName))
+	Utility.AssertMsg(stoicModel.DB != nil, fmt.Sprintf("%s Model must have a valid DB connection", stoicModel.TableName))
 	Utility.AssertMsg(stoicModel.isCreated, fmt.Sprintf("%s Model must be created first before attempting to update!", stoicModel.TableName))
 	Utility.AssertMsg(crud.CanUpdate(), "canUpdate() returned false")
 
@@ -58,20 +53,19 @@ func Update(model any) {
 	Utility.AssertOnError(err)
 }
 
-func Create(model any) {
+func Create[T InterfaceCRUD](model *T) {
 	stoicModel, crud := extractModelComponents(model)
-	model = Utility.DereferencePointer(model)
 
 	Utility.AssertMsg(stoicModel.DB != nil, fmt.Sprintf("Model must have a valid DB connection for table: %s", stoicModel.TableName))
 	Utility.AssertMsg(crud.CanCreate(), "canCreate() returned false")
 
-	MemberNames := Utility.GetStructMemberNames(model)
+	MemberNames := Utility.GetStructMemberNames(*model)
 	for _, memberName := range MemberNames {
 		attribute, exists := getAttribute(stoicModel.TableName, memberName)
 
 		if attribute.isAutoIncrement() {
 			sql := "SELECT MAX(?) FROM ?"
-			primaryKey := -1
+			primaryKey := -1 // this should be updating model.field
 			GetInstance().QueryRowx(sql, attribute.ColumnName, stoicModel.TableName).Scan(&primaryKey)
 			primaryKey += 1
 		}
@@ -79,19 +73,18 @@ func Create(model any) {
 		Utility.Assert(exists)
 	}
 
-	// find all auto increment
-
 	stoicModel.isCreated = true
 
 	err := InsertRecord(stoicModel.DB, stoicModel.TableName, model)
 
 	// Ensure the primary key is updated, e.g., retrieve the last generated ID if applicable
-	Utility.AssertOnError(err)
+	Utility.AssertOnError(err) // This doesn't make sense I should return an error code instead
+	// maybe I should assert here but only if create is gaurenteed to succeed which mean that
+	// can Create should cover that stuff
 }
 
-func Delete(model any) {
+func Delete[T InterfaceCRUD](model *T) {
 	stoicModel, crud := extractModelComponents(model)
-	model = Utility.DereferencePointer(model)
 
 	Utility.AssertMsg(stoicModel.DB != nil, fmt.Sprintf("%s Model must have a valid DB connection", stoicModel.TableName))
 	Utility.AssertMsg(stoicModel.isCreated, fmt.Sprintf("%s Model must be created first before attempting to delete!", stoicModel.TableName))

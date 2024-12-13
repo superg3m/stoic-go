@@ -5,7 +5,7 @@ import (
 	"github.com/superg3m/stoic-go/Core/Utility"
 )
 
-func AllFromEmail(email string) ([]User, error) {
+func AllFromEmail(email string) ([]*User, error) {
 	if !Utility.ValidEmail(email) {
 		return nil, ERROR_INVALID_EMAIL
 	}
@@ -17,10 +17,7 @@ func AllFromEmail(email string) ([]User, error) {
 	}
 	defer rows.Close()
 
-	users, err := ORM.FetchAll[User](rows)
-	if err != nil {
-		return nil, err
-	}
+	users, _ := ORM.FetchAll[User](rows)
 
 	return users, nil
 }

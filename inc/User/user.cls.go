@@ -47,30 +47,26 @@ func New() *User {
 	return user
 }
 
-func FromID(id int) (*User, error) {
-	var user User
-
+func FromID(id int) *User {
 	if id <= 0 {
-		return nil, ERROR_INVALID_ID
+		return nil
 	}
 
 	query := "SELECT * FROM User WHERE id = ?"
 	row := ORM.GetInstance().QueryRowx(query, id)
-	user = ORM.Fetch[User](row)
 
-	return &user, nil
+	return ORM.Fetch[User](row)
 }
 
-func FromEmail(email string) (*User, error) {
+func FromEmail(email string) *User {
 	if !Utility.ValidEmail(email) {
-		return nil, ERROR_INVALID_EMAIL
+		return nil
 	}
 
 	query := "SELECT * FROM User WHERE email = ?"
 	row := ORM.GetInstance().QueryRowx(query, email)
-	user := ORM.Fetch[User](row)
 
-	return &user, nil
+	return ORM.Fetch[User](row)
 }
 
 // Register ORM metadata

@@ -2,13 +2,14 @@ package ORM
 
 import (
 	"fmt"
+	"reflect"
+
 	"github.com/jmoiron/sqlx"
 	"github.com/superg3m/stoic-go/Core/Utility"
-	"reflect"
 )
 
 // Fetch maps database row to the destination struct (dest).
-func Fetch[T any](row *sqlx.Row) T {
+func Fetch[T InterfaceCRUD](row *sqlx.Row) *T {
 	var dest T
 
 	v := reflect.ValueOf(&dest).Elem()
@@ -17,11 +18,11 @@ func Fetch[T any](row *sqlx.Row) T {
 	err := row.StructScan(&dest)
 	Utility.AssertOnErrorMsg(err, fmt.Sprintf("Fetch: failed to scan row into struct: %w", err))
 
-	return dest
+	return &dest
 }
 
-func FetchAll[T any](rows *sqlx.Rows) ([]T, error) {
-	var results []T
+func FetchAll[T InterfaceCRUD](rows *sqlx.Rows) ([]*T, error) {
+	var results []*T
 
 	for rows.Next() {
 		var dest T
@@ -30,7 +31,7 @@ func FetchAll[T any](rows *sqlx.Rows) ([]T, error) {
 			return nil, fmt.Errorf("FetchAll: failed to scan row into struct: %w", err)
 		}
 
-		results = append(results, dest)
+		results = append(results, &dest)
 	}
 
 	if err := rows.Err(); err != nil {

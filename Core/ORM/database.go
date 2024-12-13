@@ -2,10 +2,11 @@ package ORM
 
 import (
 	"fmt"
+	"strings"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/superg3m/stoic-go/Core/Utility"
-	"strings"
 )
 
 // mysql
@@ -13,7 +14,7 @@ import (
 // postgres
 // sql_lite
 
-func DeleteRecord(db *sqlx.DB, tableName string, model interface{}) error {
+func DeleteRecord[T InterfaceCRUD](db *sqlx.DB, tableName string, model *T) error {
 	fieldNames := Utility.GetStructMemberNames(model)
 	if len(fieldNames) == 0 {
 		return fmt.Errorf("no fields to use for DELETE condition in table '%s'", tableName)
@@ -40,7 +41,7 @@ func DeleteRecord(db *sqlx.DB, tableName string, model interface{}) error {
 	return nil
 }
 
-func UpdateRecord(db *sqlx.DB, tableName string, model interface{}) error {
+func UpdateRecord[T InterfaceCRUD](db *sqlx.DB, tableName string, model *T) error {
 	fieldNames := Utility.GetStructMemberNames(model)
 	if len(fieldNames) <= 1 {
 		return fmt.Errorf("not enough fields to construct an UPDATE statement for table '%s'", tableName)
@@ -73,18 +74,7 @@ func UpdateRecord(db *sqlx.DB, tableName string, model interface{}) error {
 	return nil
 }
 
-func getDBColumnNames(tableName string, fieldNames []string) []string {
-	var ret []string
-	for _, fieldName := range fieldNames {
-		attr, exists := getAttribute(tableName, fieldName)
-		Utility.Assert(exists)
-		ret = append(ret, attr.ColumnName)
-	}
-
-	return ret
-}
-
-func InsertRecord(db *sqlx.DB, tableName string, model any) error {
+func InsertRecord[T InterfaceCRUD](db *sqlx.DB, tableName string, model *T) error {
 	fieldNames := Utility.GetStructMemberNames(model)
 	if len(fieldNames) == 0 {
 		return fmt.Errorf("no fields to insert for table '%s'", tableName)
@@ -167,4 +157,15 @@ func Close() {
 	}
 
 	db = nil
+}
+
+func getDBColumnNames(tableName string, fieldNames []string) []string {
+	var ret []string
+	for _, fieldName := range fieldNames {
+		attr, exists := getAttribute(tableName, fieldName)
+		Utility.Assert(exists)
+		ret = append(ret, attr.ColumnName)
+	}
+
+	return ret
 }
