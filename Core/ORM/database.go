@@ -17,11 +17,11 @@ import (
 // sql_lite
 
 func DeleteRecord[T InterfaceCRUD](db *sqlx.DB, tableName string, model *T) (sql.Result, error) {
-	fieldNames := Utility.GetStructMemberNames(model)
+	fieldNames := getDBColumnNames(tableName, *model)
 	Utility.Assert(len(fieldNames) > 0)
 
 	var conditions []string
-	values := Utility.GetStructValues(model)
+	values := Utility.GetStructValues(*model)
 
 	for _, fieldName := range fieldNames {
 		conditions = append(conditions, fmt.Sprintf("%s = ?", fieldName))
@@ -116,7 +116,7 @@ func InsertRecord[T InterfaceCRUD](db *sqlx.DB, tableName string, model *T) (sql
 	fieldNames := Utility.GetStructMemberNames(*model)
 	Utility.Assert(len(fieldNames) > 0)
 
-	dbNames := getDBColumnNames(tableName, fieldNames)
+	dbNames := getDBColumnNames(tableName, *model)
 	placeholders := make([]string, len(dbNames))
 	for i := range placeholders {
 		placeholders[i] = "?"
@@ -208,8 +208,10 @@ func Close() {
 	db = nil
 }
 
-func getDBColumnNames(tableName string, fieldNames []string) []string {
+func getDBColumnNames[T InterfaceCRUD](tableName string, model T) []string {
 	var ret []string
+
+	fieldNames := Utility.GetStructMemberNames(model)
 	for _, fieldName := range fieldNames {
 		attr, exists := getAttribute(tableName, fieldName)
 		Utility.Assert(exists)

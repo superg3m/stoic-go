@@ -9,12 +9,12 @@ import (
 type MemberAttributeMap map[string]Attribute // Key: StructMemberName
 
 var tempTableName string
+var tempAutoIncrementFound bool
 var globalTable map[string]MemberAttributeMap // Key: TableName
-var lastInsertIdMap map[string]int64          // Key: TableName
 
 func init() {
 	globalTable = make(map[string]MemberAttributeMap)
-	lastInsertIdMap = make(map[string]int64)
+	tempAutoIncrementFound = false
 }
 
 func RegisterTableName(tableName string) {
@@ -37,8 +37,12 @@ func RegisterTableColumn(memberName string, columnName string, flags ...ORM_FLAG
 		Flags:      finalFlag,
 	}
 
-	if attribute.isPrimaryKey() && !attribute.isAutoIncrement() {
+	if !tempAutoIncrementFound && (attribute.isAutoIncrement() && !attribute.isPrimaryKey()) {
 		Utility.AssertMsg(false, "Stoic-Go does not support models where auto increment is not primary key as well")
+	}
+
+	if attribute.isAutoIncrement() {
+		tempAutoIncrementFound = true
 	}
 
 	globalTable[tempTableName][memberName] = attribute

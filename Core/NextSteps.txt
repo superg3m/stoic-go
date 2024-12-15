@@ -50,10 +50,12 @@ DATABASE
 Mailer
 Utility
 
-Auto Increment
 Timestamps
 Composite Keys
 
 - Make errors a bigger part the setError should take an error and I should be able to format it easily
 Remove all individual panics
 - trasfer Utility.AssertMsg() to not use a format function as second arg anymore
+
+Create and Delete works!
+Delete might only want to delete on the priary key but idk we will see right now it checks all fields

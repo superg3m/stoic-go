@@ -73,7 +73,7 @@ func GetStructMemberTypes(structure StackAny) map[string]string {
 	return ret
 }
 
-func GetStructValues(structure any) []any {
+func GetStructValues(structure StackAny) []any {
 	AssertMsg(TypeIsStructure(structure), "structure is not of type structure")
 
 	val := reflect.ValueOf(structure)

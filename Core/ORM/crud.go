@@ -75,17 +75,11 @@ func Create[T InterfaceCRUD](model *T) {
 
 	updateStoicModel(model)
 
-	_, exists := lastInsertIdMap[stoicModel.TableName]
-	if !exists && hasAutoIncrement {
-		lastInsertIdMap[stoicModel.TableName] = manuallyGetLastInsertID(tempTableName, "id")
-		updateIDField(model, lastInsertIdMap[stoicModel.TableName])
-	}
-
 	result, err := InsertRecord(stoicModel.DB, stoicModel.TableName, model)
 
 	if hasAutoIncrement && err == nil {
-		lastInsertIdMap[stoicModel.TableName], _ = result.LastInsertId()
-		updateIDField(model, lastInsertIdMap[stoicModel.TableName])
+		id, _ := result.LastInsertId()
+		updateIDField(model, id)
 	}
 	// somehow I need to update model
 	// *model = afterInsertModel
@@ -96,19 +90,13 @@ func Create[T InterfaceCRUD](model *T) {
 	// can Create should cover that stuff
 }
 
-func (model *StoicModel) Delete() {
-	memberNames := Utility.GetStructMemberNames(*model)
-	Utility.LogDebug("Delete Triggered: %v", memberNames)
+func Delete[T InterfaceCRUD](model *T) {
+	stoicModel, crud := extractModelComponents(model)
 
-	/*
+	Utility.AssertMsg(stoicModel.DB != nil, fmt.Sprintf("%s Model must have a valid DB connection", stoicModel.TableName))
+	Utility.AssertMsg(stoicModel.IsCreated, fmt.Sprintf("%s Model must be created first before attempting to delete!", stoicModel.TableName))
+	Utility.AssertMsg(crud.CanDelete(), "canDelete() returned false")
 
-		stoicModel, crud := extractModelComponents(model)
-
-		Utility.AssertMsg(stoicModel.DB != nil, fmt.Sprintf("%s Model must have a valid DB connection", stoicModel.TableName))
-		Utility.AssertMsg(stoicModel.isCreated, fmt.Sprintf("%s Model must be created first before attempting to delete!", stoicModel.TableName))
-		Utility.AssertMsg(crud.CanDelete(), "canDelete() returned false")
-
-		_, err := DeleteRecord(stoicModel.DB, stoicModel.TableName, model)
-		Utility.AssertOnError(err)
-	*/
+	_, err := DeleteRecord(stoicModel.DB, stoicModel.TableName, model)
+	Utility.AssertOnError(err)
 }

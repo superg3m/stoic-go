@@ -55,3 +55,9 @@ a problem we can also consolidate it into something called StoicState and then i
 The only issue is that the Nice Namespacing that we get will be gone!
 
 clear ; ./tools/wgo-main/wgo run main.go -w "*.go"
+
+Auto increment works!
+
+
+I need to easily sperate runtime developer checks 
+- Register Column stuff
