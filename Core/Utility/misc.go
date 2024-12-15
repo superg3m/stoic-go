@@ -2,9 +2,11 @@ package Utility
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/mail"
 	"os"
+	"path/filepath"
 	"strconv"
 )
 
@@ -61,6 +63,8 @@ func CastAny[T any](v any) T {
 			result = strconv.FormatFloat(v, 'f', -1, 64)
 		case bool:
 			result = strconv.FormatBool(v)
+		case string:
+			result = v
 		default:
 			panic(fmt.Sprintf("unsupported conversion to string from type: %T", v))
 		}
@@ -101,14 +105,39 @@ func CastAny[T any](v any) T {
 	return result.(T)
 }
 
-func GetSiteSettings() map[string]any {
-	var ret map[string]any
+func findFileAtDepth(filename string, maxDepth int) (string, error) {
+	currentDir, err := os.Getwd()
+	if err != nil {
+		return "", fmt.Errorf("failed to get current directory: %w", err)
+	}
 
-	byteData, err := os.ReadFile("./siteSettings.json")
+	for depth := 0; depth <= maxDepth; depth++ {
+		filePath := filepath.Join(currentDir, filename)
+		if _, err := os.Stat(filePath); err == nil {
+			return filePath, nil // File found
+		} else if !errors.Is(err, os.ErrNotExist) {
+			return "", fmt.Errorf("error checking file %s: %w", filePath, err)
+		}
+
+		currentDir = filepath.Dir(currentDir)
+	}
+
+	return "", fmt.Errorf("file %s not found within %d directories", filename, maxDepth)
+}
+
+func GetSiteSettings() map[string]any {
+	filename := "siteSettings.json"
+	var MaxSearchDepth = 3
+
+	filePath, err := findFileAtDepth(filename, MaxSearchDepth)
 	AssertOnError(err)
 
-	err2 := json.Unmarshal(byteData, &ret)
-	AssertOnError(err2)
+	byteData, err := os.ReadFile(filePath)
+	AssertOnError(err)
 
-	return ret
+	var settings map[string]any
+	err = json.Unmarshal(byteData, &settings)
+	AssertOnError(err)
+
+	return settings
 }

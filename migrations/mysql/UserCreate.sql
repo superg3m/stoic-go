@@ -9,4 +9,4 @@ CREATE TABLE User (
 );
 
 -- StoicMigration Down
-IF EXISTS DROP TABLE User;
+DROP TABLE User;

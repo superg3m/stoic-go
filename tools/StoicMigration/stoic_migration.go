@@ -1,11 +1,14 @@
 package main
 
 import (
-	"errors"
 	"fmt"
-	"github.com/superg3m/stoic-go/Core/Utility"
+	"io/fs"
 	"os"
+	"path/filepath"
 	"strings"
+
+	"github.com/superg3m/stoic-go/Core/ORM"
+	"github.com/superg3m/stoic-go/Core/Utility"
 )
 
 const STOIC_MIGRATION_UP_STR = "-- StoicMigration Up"
@@ -35,35 +38,35 @@ func hasMigrationString(data []byte, migrationStr string) bool {
 	return strings.Contains(s, migrationStr)
 }
 
-func getSqlCommandsFromFile(mode MigrationMode, filePath string) []string {
-	ret := []string{}
-	migrationStr := []string{"-- StoicMigration Up", "-- StoicMigration Down"}
-
-	delimitor := ';' // This might change if you see DELIMITOR ~ or something
+func getSqlCommandsFromFile(mode MigrationMode, filePath string) ([]string, error) {
+	migrationStr := []string{"-- StoicMigration Up\n", "-- StoicMigration Down\n"}
+	delimitor := ';'
 
 	otherMode := int(mode)
 	Utility.ToggleBit(&otherMode, 0)
 
 	data, err := os.ReadFile(filePath)
-	Utility.AssertOnError(err)
-
-	if !hasMigrationString(data, migrationStr[mode]) {
-		err_string := fmt.Sprintf("Migration File doesn't' have %s", migrationStr[mode])
-		Utility.AssertOnError(errors.New(err_string))
-		return []string{}
+	if err != nil {
+		return nil, fmt.Errorf("failed to read file %s: %w", filePath, err)
 	}
 
-	strData := strings.Split(strings.ReplaceAll(string(data), "\r\n", "\n"), "\n")
+	if !strings.Contains(string(data), migrationStr[mode]) {
+		return nil, fmt.Errorf("migration file doesn't contain %s", migrationStr[mode])
+	}
 
-	charAccumulator := []byte{}
-	found := false
-	for _, line := range strData {
-		if line != migrationStr[mode] && !found {
+	lines := strings.SplitAfter(string(data), "\n")
+
+	var ret []string
+	var charAccumulator strings.Builder
+	insideMigration := false
+
+	for _, line := range lines {
+		if !insideMigration && line != migrationStr[mode] {
 			continue
 		}
 
 		if line == migrationStr[mode] {
-			found = true
+			insideMigration = true
 			continue
 		}
 
@@ -72,29 +75,91 @@ func getSqlCommandsFromFile(mode MigrationMode, filePath string) []string {
 		}
 
 		for _, c := range line {
-			charAccumulator = append(charAccumulator, byte(c))
+			charAccumulator.WriteByte(byte(c))
 			if c == delimitor {
-				ret = append(ret, string(charAccumulator))
-				charAccumulator = nil
+				ret = append(ret, charAccumulator.String())
+				charAccumulator.Reset()
 			}
 		}
 	}
 
-	return ret
+	return ret, nil
+}
+
+func findFilesWithExtension(root, ext string) ([]string, error) {
+	info, err := os.Stat(root)
+	Utility.AssertOnErrorMsg(err, "Failed to access the root directory")
+	if !info.IsDir() {
+		return nil, fmt.Errorf("provided root path is not a directory: %s", root)
+	}
+
+	var files []string
+
+	err = filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			Utility.AssertOnErrorMsg(err, fmt.Sprintf("Error accessing path: %s", path))
+		}
+
+		if d.IsDir() {
+			return nil
+		}
+
+		if filepath.Ext(d.Name()) == ext {
+			files = append(files, path)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return files, nil
 }
 
 func main() {
-	sqlUpCommands := getSqlCommandsFromFile(MIGRATION_MODE_UP, "../../../migrations/mysql/UserCreate.mysql")
-
-	for _, element := range sqlUpCommands {
-		Utility.LogPrint(element)
+	if len(os.Args) < 2 {
+		fmt.Println("Usage: <program> [up|down]")
+		os.Exit(1)
 	}
 
-	Utility.LogPrint("\n")
+	arg := os.Args[1]
+	mode := MIGRATION_MODE_DOWN
 
-	sqlDownCommands := getSqlCommandsFromFile(MIGRATION_MODE_DOWN, "../../../migrations/mysql/UserCreate.mysql")
+	switch arg {
+	case "up":
+		mode = MIGRATION_MODE_UP
+	case "down":
+		mode = MIGRATION_MODE_DOWN
+	default:
+		fmt.Printf("Invalid argument: %s\n", arg)
+		fmt.Println("Valid options are: 'up' or 'down'")
+		os.Exit(1)
+	}
 
-	for _, element := range sqlDownCommands {
-		Utility.LogPrint(element)
+	siteSettings := Utility.GetSiteSettings()
+	siteSettings = siteSettings["settings"].(map[string]any)
+	DB_ENGINE := Utility.CastAny[string](siteSettings["dbEngine"])
+	HOST := Utility.CastAny[string](siteSettings["dbHost"])
+	PORT := Utility.CastAny[int](siteSettings["dbPort"])
+	USER := Utility.CastAny[string](siteSettings["dbUser"])
+	PASSWORD := Utility.CastAny[string](siteSettings["dbPass"])
+	DBNAME := Utility.CastAny[string](siteSettings["dbName"])
+
+	dsn := ORM.GetDSN(DB_ENGINE, HOST, PORT, USER, PASSWORD, DBNAME)
+	ORM.Connect(DB_ENGINE, dsn)
+	defer ORM.Close()
+
+	files, _ := findFilesWithExtension(fmt.Sprintf("./migrations/%s", DB_ENGINE), ".sql")
+
+	for _, file := range files {
+		sqlUpCommands, _ := getSqlCommandsFromFile(mode, file)
+
+		Utility.LogSuccess("Migration: %s", file)
+		for _, element := range sqlUpCommands {
+			_, err := ORM.GetInstance().Exec(element)
+			Utility.AssertOnError(err)
+		}
 	}
 }
