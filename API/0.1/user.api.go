@@ -19,7 +19,7 @@ func createUser(request *Router.StoicRequest, response Router.StoicResponse) {
 	// user.Joined = time.Now()
 	ORM.Create(user)
 
-	ORM.Delete(user)
+	//ORM.Delete(user)
 
 	response.SetData("User Created Successfully!")
 }
