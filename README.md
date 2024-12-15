@@ -61,3 +61,6 @@ Auto increment works!
 
 I need to easily sperate runtime developer checks 
 - Register Column stuff
+
+clear ; go run ./tools/StoicMigration/stoic_migration.go up|down
+clear ; ./tools/wgo-main/wgo run main.go -w "*.go"  

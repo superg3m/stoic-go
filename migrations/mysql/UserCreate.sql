@@ -1,5 +1,5 @@
 -- StoicMigration Up
-CREATE TABLE User (
+CREATE TABLE IF NOT EXISTS User (
     id int AUTO_INCREMENT,
     username varchar(255) NOT NULL,
     password varchar(255) NOT NULL,
@@ -9,4 +9,4 @@ CREATE TABLE User (
 );
 
 -- StoicMigration Down
-DROP TABLE User;
+DROP TABLE IF EXISTS User;
