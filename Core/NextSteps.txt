@@ -54,4 +54,6 @@ Auto Increment
 Timestamps
 Composite Keys
 
-Make errors a bigger part the setError should take an error and I should be able to format it easily
+- Make errors a bigger part the setError should take an error and I should be able to format it easily
+Remove all individual panics
+- trasfer Utility.AssertMsg() to not use a format function as second arg anymore

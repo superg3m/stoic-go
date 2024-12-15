@@ -52,10 +52,9 @@ func FromID(id int) *User {
 		return nil
 	}
 
-	query := "SELECT * FROM User WHERE id = ?"
-	row := ORM.GetInstance().QueryRowx(query, id)
+	sql := "SELECT * FROM User WHERE id = ?"
 
-	return ORM.Fetch[User](row)
+	return ORM.Fetch[User](sql, id)
 }
 
 func FromEmail(email string) *User {
@@ -63,10 +62,9 @@ func FromEmail(email string) *User {
 		return nil
 	}
 
-	query := "SELECT * FROM User WHERE email = ?"
-	row := ORM.GetInstance().QueryRowx(query, email)
+	sql := "SELECT * FROM User WHERE email = ?"
 
-	return ORM.Fetch[User](row)
+	return ORM.Fetch[User](sql, email)
 }
 
 // Register ORM metadata
