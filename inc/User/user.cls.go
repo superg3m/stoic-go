@@ -37,6 +37,18 @@ func (u User) CanDelete() bool {
 	return true
 }
 
+func (u User) Create() {
+	ORM.Create(&u)
+}
+
+func (u User) Update() {
+	ORM.Update(&u)
+}
+
+func (u User) Delete() {
+	ORM.Delete(&u)
+}
+
 var _ ORM.InterfaceCRUD = User{}
 
 func New() *User {

@@ -1,7 +1,6 @@
 package API
 
 import (
-	"github.com/superg3m/stoic-go/Core/ORM"
 	"github.com/superg3m/stoic-go/Core/Router"
 	"github.com/superg3m/stoic-go/inc/User"
 )
@@ -17,7 +16,7 @@ func createUser(request *Router.StoicRequest, response Router.StoicResponse) {
 	user.Email = email
 	user.Password = password
 	// user.Joined = time.Now()
-	ORM.Create(user)
+	user.Create()
 
 	//ORM.Delete(user)
 

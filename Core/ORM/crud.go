@@ -12,6 +12,9 @@ type InterfaceCRUD interface {
 	CanCreate() bool
 	CanUpdate() bool
 	CanDelete() bool
+	Create()
+	Update()
+	Delete()
 }
 
 type StoicModel struct {
