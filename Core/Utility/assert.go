@@ -13,9 +13,10 @@ func AssertOnError(err error) {
 	}
 }
 
-func AssertOnErrorMsg(err error, msg string) {
+func AssertOnErrorMsg(err error, format string, args ...any) {
 	if err != nil {
-		LogFatal(fmt.Sprint("[Developer Error]: ", msg))
+		combined := fmt.Sprint("[Developer Error]: ", format)
+		LogFatal(fmt.Sprintf(combined, args...))
 		printCallStack()
 		os.Exit(-1)
 	}
@@ -31,7 +32,7 @@ func Assert(condition bool) {
 
 func AssertMsg(condition bool, format string, args ...any) {
 	if !condition {
-		msg := fmt.Sprintf(format, args)
+		msg := fmt.Sprintf(format, args...)
 		msg2 := format
 		if len(args) != 0 {
 			LogFatal(fmt.Sprint("[Assert Triggered]: ", msg))

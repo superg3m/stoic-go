@@ -41,8 +41,16 @@ var _ ORM.InterfaceCRUD = User{}
 
 func New() *User {
 	user := new(User)
+
 	user.DB = ORM.GetInstance()
+	user.IsCreated = false
 	user.TableName = "User"
+
+	user.ID = -1
+	user.Username = ""
+	user.Password = ""
+	user.Email = ""
+	user.EmailConfirmed = false
 
 	return user
 }
@@ -71,10 +79,11 @@ func FromEmail(email string) *User {
 func init() {
 	ORM.RegisterTableName("User")
 	ORM.RegisterTableColumn("ID", "id", ORM.KEY, ORM.AUTO_INCREMENT)
-	ORM.RegisterTableColumn("Email", "email")
+	ORM.RegisterTableColumn("Username", "username", ORM.NOT_NULLABLE, ORM.UPDATABLE)
+	ORM.RegisterTableColumn("Password", "password", ORM.NOT_NULLABLE)
+	ORM.RegisterTableColumn("Email", "email", ORM.NOT_NULLABLE)
 	ORM.RegisterTableColumn("EmailConfirmed", "email_confirmed", ORM.UPDATABLE)
-	ORM.RegisterTableColumn("Username", "username", ORM.UPDATABLE)
-	ORM.RegisterTableColumn("Password", "password", ORM.UPDATABLE)
+
 	// ORM.RegisterTableColumn("Joined", "joined", ORM.NULLABLE)
 	// ORM.RegisterTableColumn("LastActive", "last_active", ORM.NULLABLE)
 	// ORM.RegisterTableColumn("LastLogin", "last_login", ORM.NULLABLE)

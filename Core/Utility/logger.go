@@ -2,9 +2,10 @@ package Utility
 
 import (
 	"fmt"
-	"github.com/fatih/color"
 	"path/filepath"
 	"runtime"
+
+	"github.com/fatih/color"
 )
 
 var (
@@ -60,26 +61,26 @@ func LogOnError(err error, format string, args ...any) {
 	}
 }
 
-func LogPrint(msg string) {
-	log(msg)
+func LogPrint(msg string, args ...any) {
+	log(fmt.Sprintf(msg, args...))
 }
 
-func LogSuccess(msg string) {
-	log(COLOR_GREEN(msg))
+func LogSuccess(msg string, args ...any) {
+	log(COLOR_GREEN(fmt.Sprintf(msg, args...)))
 }
 
-func LogDebug(msg string) {
-	log(COLOR_BLUE(msg))
+func LogDebug(msg string, args ...any) {
+	log(COLOR_BLUE(fmt.Sprintf(msg, args...)))
 }
 
-func LogWarn(msg string) {
-	log(COLOR_MAGENTA(msg))
+func LogWarn(msg string, args ...any) {
+	log(COLOR_MAGENTA(fmt.Sprintf(msg, args...)))
 }
 
-func LogError(msg string) {
-	log(COLOR_RED(msg))
+func LogError(msg string, args ...any) {
+	log(COLOR_RED(fmt.Sprintf(msg, args...)))
 }
 
-func LogFatal(msg string) {
-	log(COLOR_BG_RED(msg))
+func LogFatal(msg string, args ...any) {
+	log(COLOR_BG_RED(fmt.Sprintf(msg, args...)))
 }

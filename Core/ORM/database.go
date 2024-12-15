@@ -86,11 +86,11 @@ func updateStoicModel[T InterfaceCRUD](model *T) {
 	}
 
 	if stoicModelField.Kind() == reflect.Struct && stoicModelField.CanSet() {
-		isCreatedField := stoicModelField.FieldByName("isCreated")
+		isCreatedField := stoicModelField.FieldByName("IsCreated")
 		if isCreatedField.IsValid() && isCreatedField.CanSet() && isCreatedField.Kind() == reflect.Bool {
 			isCreatedField.SetBool(true)
 		} else {
-			Utility.AssertMsg(false, "isCreated field in StoicModel is missing, not settable, or not of type bool")
+			Utility.AssertMsg(false, "IsCreated field in StoicModel is missing, not settable, or not of type bool")
 		}
 	} else {
 		Utility.AssertMsg(false, "StoicModel is not a struct or is not settable")
@@ -105,36 +105,49 @@ func updateIDField[T InterfaceCRUD](model *T, id int64) {
 
 	structValue := v.Elem()
 	field := structValue.FieldByName("ID")
-	if field.IsValid() && field.CanSet() && field.Kind() == reflect.Int64 {
+	if field.IsValid() && field.CanSet() && field.Kind() == reflect.Int {
 		field.SetInt(id)
 	} else {
-		Utility.AssertMsg(false, "ID field is missing, not settable, or not of type int64")
+		Utility.AssertMsg(false, "ID field is missing, not settable, or not of type int")
 	}
 }
 
 func InsertRecord[T InterfaceCRUD](db *sqlx.DB, tableName string, model *T) (sql.Result, error) {
-	fieldNames := Utility.GetStructMemberNames(model)
+	fieldNames := Utility.GetStructMemberNames(*model)
 	Utility.Assert(len(fieldNames) > 0)
 
 	dbNames := getDBColumnNames(tableName, fieldNames)
-
 	placeholders := make([]string, len(dbNames))
 	for i := range placeholders {
 		placeholders[i] = "?"
 	}
 
-	values := Utility.GetStructValues(model)
+	values := Utility.GetStructValues(*model)
+
+	var newDbNames []string
+	var newPlaceholders []string
+	var newValues []interface{}
+
+	for i, fieldName := range fieldNames {
+		attribute := globalTable[tableName][fieldName]
+		if attribute.isAutoIncrement() {
+			continue
+		}
+		newDbNames = append(newDbNames, dbNames[i])
+		newPlaceholders = append(newPlaceholders, placeholders[i])
+		newValues = append(newValues, values[i])
+	}
 
 	query := fmt.Sprintf(
 		"INSERT INTO %s (%s) VALUES (%s)",
 		tableName,
-		strings.Join(dbNames, ", "),
-		strings.Join(placeholders, ", "),
+		strings.Join(newDbNames, ", "),
+		strings.Join(newPlaceholders, ", "),
 	)
 
-	result, execErr := db.Exec(query, values...)
+	result, execErr := db.Exec(query, newValues...)
 	if execErr != nil {
-		return result, fmt.Errorf("failed to execute query: %w", execErr)
+		return result, fmt.Errorf("failed to execute query: %s\nError: %w", query, execErr)
 	}
 
 	return result, nil

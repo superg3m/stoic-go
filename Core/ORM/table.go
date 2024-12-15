@@ -10,10 +10,11 @@ type MemberAttributeMap map[string]Attribute // Key: StructMemberName
 
 var tempTableName string
 var globalTable map[string]MemberAttributeMap // Key: TableName
+var lastInsertIdMap map[string]int64          // Key: TableName
 
 func init() {
-	Utility.LogDebug("ORM_TABLE")
 	globalTable = make(map[string]MemberAttributeMap)
+	lastInsertIdMap = make(map[string]int64)
 }
 
 func RegisterTableName(tableName string) {

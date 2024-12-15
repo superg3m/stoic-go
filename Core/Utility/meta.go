@@ -16,17 +16,7 @@ func TypeIsPointer(structure any) bool {
 	return typeKind == reflect.Ptr
 }
 
-func DereferencePointer(input any) any {
-	val := reflect.ValueOf(input)
-	if val.Kind() != reflect.Ptr && val.Kind() == reflect.Struct {
-		return input
-	}
-
-	return val.Elem().Interface()
-}
-
-func GetStructMemberNames(structure any) []string {
-	structure = DereferencePointer(structure)
+func GetStructMemberNames(structure StackAny) []string {
 	AssertMsg(TypeIsStructure(structure), "structure is not of type structure")
 
 	value := reflect.ValueOf(structure)
@@ -46,8 +36,7 @@ func GetStructMemberNames(structure any) []string {
 	return fieldNames
 }
 
-func GetStructMemberType(structure any, memberName string) string {
-	structure = DereferencePointer(structure)
+func GetStructMemberType(structure StackAny, memberName string) string {
 	AssertMsg(TypeIsStructure(structure), "structure is not of type structure")
 
 	value := reflect.ValueOf(structure)
@@ -64,8 +53,7 @@ func GetStructMemberType(structure any, memberName string) string {
 	return ""
 }
 
-func GetStructMemberTypes(structure any) map[string]string {
-	structure = DereferencePointer(structure)
+func GetStructMemberTypes(structure StackAny) map[string]string {
 	AssertMsg(TypeIsStructure(structure), "structure is not of type structure")
 
 	value := reflect.ValueOf(structure)

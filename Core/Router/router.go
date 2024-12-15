@@ -2,9 +2,10 @@ package Router
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/gorilla/mux"
 	"github.com/superg3m/stoic-go/Core/Utility"
-	"net/http"
 )
 
 type StoicHandlerFunc func(r *StoicRequest, w StoicResponse)
@@ -14,7 +15,6 @@ var Router *mux.Router
 var commonMiddlewares []StoicMiddleware
 
 func init() {
-	Utility.LogError("ROUTER")
 	Router = mux.NewRouter()
 	prefix = ""
 	commonMiddlewares = nil
@@ -40,8 +40,6 @@ func RegisterApiEndpoint(path string, handler StoicHandlerFunc, method string, m
 
 	resolvedPath := fmt.Sprintf("%s%s", prefix, path)
 	middlewareList := append(commonMiddlewares, middlewares...)
-
-	Utility.LogSuccess(resolvedPath)
 
 	Router.HandleFunc(resolvedPath, adaptHandler(handler, middlewareList)).Methods(method, "OPTIONS")
 }
