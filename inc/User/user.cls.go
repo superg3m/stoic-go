@@ -13,9 +13,7 @@ var (
 )
 
 type User struct {
-	ORM.StoicModel
-
-	ID             int
+	id             int
 	Username       string
 	Password       string
 	Email          string
@@ -28,11 +26,7 @@ type User struct {
 func New() *User {
 	user := new(User)
 
-	user.DB = ORM.GetInstance()
-	user.IsCreated = false
-	user.TableName = "User"
-
-	user.ID = -1
+	user.id = 0
 	user.Username = ""
 	user.Password = ""
 	user.Email = ""
@@ -48,12 +42,7 @@ func FromID(id int) *User {
 
 	sql := "SELECT * FROM User WHERE id = ?"
 
-	user := ORM.Fetch[User](sql, id)
-	user.DB = ORM.GetInstance()
-	user.IsCreated = true
-	user.TableName = "User"
-
-	return user
+	return ORM.Fetch[User](sql, id)
 }
 
 func FromEmail(email string) *User {
@@ -70,9 +59,9 @@ func FromEmail(email string) *User {
 func init() {
 	ORM.RegisterTableName("User")
 	ORM.RegisterTableColumn("ID", "id", ORM.KEY, ORM.AUTO_INCREMENT)
-	ORM.RegisterTableColumn("Username", "username", ORM.NOT_NULLABLE, ORM.UPDATABLE)
-	ORM.RegisterTableColumn("Password", "password", ORM.NOT_NULLABLE)
-	ORM.RegisterTableColumn("Email", "email", ORM.NOT_NULLABLE)
+	ORM.RegisterTableColumn("Username", "username", ORM.UPDATABLE)
+	ORM.RegisterTableColumn("Password", "password", ORM.UPDATABLE)
+	ORM.RegisterTableColumn("Email", "email", ORM.UPDATABLE)
 	ORM.RegisterTableColumn("EmailConfirmed", "email_confirmed", ORM.UPDATABLE)
 
 	// ORM.RegisterTableColumn("Joined", "joined", ORM.NULLABLE)

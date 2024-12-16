@@ -6,7 +6,6 @@ const ( // ORM_Flags
 	KEY            ORM_FLAG = 1 << iota // 1 << 0 = 1 (bit 0)
 	UPDATABLE                           // 1 << 1 = 2 (bit 1)
 	AUTO_INCREMENT                      // 1 << 2 = 4 (bit 2)
-	NOT_NULLABLE                        // 1 << 3 = 8 (bit 3)
 )
 
 type Attribute struct {
@@ -25,8 +24,4 @@ func (attribute *Attribute) isUpdatable() bool {
 
 func (attribute *Attribute) isAutoIncrement() bool {
 	return attribute.Flags&AUTO_INCREMENT != 0
-}
-
-func (attribute *Attribute) isNotNullable() bool {
-	return attribute.Flags&NOT_NULLABLE != 0
 }

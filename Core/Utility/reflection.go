@@ -82,6 +82,12 @@ func GetStructMemberTypes(structure StackAny) map[string]string {
 	return ret
 }
 
+func GetTypeName(s StackAny) string {
+	val := reflect.ValueOf(s)
+
+	return val.Type().Name()
+}
+
 func GetStructValues(structure StackAny) []any {
 	AssertMsg(TypeIsStructure(structure), "structure is not of type structure")
 

@@ -11,7 +11,6 @@ func createUser(request *Router.StoicRequest, response Router.StoicResponse) {
 	password := request.GetStringParam("password")
 
 	user := User.New()
-	user.ID = 2
 	user.Username = username
 	user.Email = email
 	user.Password = password

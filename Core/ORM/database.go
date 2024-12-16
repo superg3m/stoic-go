@@ -16,7 +16,8 @@ import (
 // postgres
 // sql_lite
 
-func DeleteRecord[T InterfaceCRUD](db *sqlx.DB, tableName string, model *T) (sql.Result, error) {
+func DeleteRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
+	tableName := Utility.GetTypeName(model)
 	fieldNames := getDBColumnNames(tableName, *model)
 	Utility.Assert(len(fieldNames) > 0)
 
@@ -41,7 +42,8 @@ func DeleteRecord[T InterfaceCRUD](db *sqlx.DB, tableName string, model *T) (sql
 	return result, nil
 }
 
-func UpdateRecord[T InterfaceCRUD](db *sqlx.DB, tableName string, model *T) (sql.Result, error) {
+func UpdateRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
+	tableName := Utility.GetTypeName(*model)
 	fieldNames := getDBColumnNames(tableName, *model)
 	Utility.Assert(len(fieldNames) > 0)
 
@@ -104,7 +106,7 @@ func updateIDField[T InterfaceCRUD](model *T, id int64) {
 	}
 
 	structValue := v.Elem()
-	field := structValue.FieldByName("ID")
+	field := structValue.FieldByName("id")
 	if field.IsValid() && field.CanSet() && field.Kind() == reflect.Int {
 		field.SetInt(id)
 	} else {
@@ -112,7 +114,8 @@ func updateIDField[T InterfaceCRUD](model *T, id int64) {
 	}
 }
 
-func InsertRecord[T InterfaceCRUD](db *sqlx.DB, tableName string, model *T) (sql.Result, error) {
+func InsertRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
+	tableName := Utility.GetTypeName(model)
 	fieldNames := Utility.GetStructMemberNames(*model)
 	Utility.Assert(len(fieldNames) > 0)
 

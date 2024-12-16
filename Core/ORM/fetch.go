@@ -7,7 +7,6 @@ import (
 	"github.com/superg3m/stoic-go/Core/Utility"
 )
 
-// Fetch maps database row to the destination struct (dest).
 func Fetch[T InterfaceCRUD](sql string, bindParams ...any) *T {
 	var dest T
 

@@ -59,3 +59,7 @@ func getAttribute(tableName string, memberName string) (Attribute, bool) {
 	Utility.AssertMsg(exists, fmt.Sprintf("Table: %s, Member: %s | Doesn't exist", tableName, memberName))
 	return attribute, exists
 }
+
+func getPrimaryKeys() []Attribute {
+	return nil
+}
