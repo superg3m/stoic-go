@@ -1,15 +1,8 @@
 package User
 
 import (
-	"errors"
-
 	"github.com/superg3m/stoic-go/Core/ORM"
 	"github.com/superg3m/stoic-go/Core/Utility"
-)
-
-var (
-	ERROR_INVALID_EMAIL = errors.New("Invalid Email")
-	ERROR_INVALID_ID    = errors.New("Invalid ID")
 )
 
 type User struct {
@@ -24,32 +17,6 @@ type User struct {
 	// LastActive     time.Time
 	// LastLogin      time.Time
 }
-
-func (u User) CanCreate() bool {
-	return true
-}
-
-func (u User) CanUpdate() bool {
-	return true
-}
-
-func (u User) CanDelete() bool {
-	return true
-}
-
-func (u User) Create() {
-	ORM.Create(&u)
-}
-
-func (u User) Update() {
-	ORM.Update(&u)
-}
-
-func (u User) Delete() {
-	ORM.Delete(&u)
-}
-
-var _ ORM.InterfaceCRUD = User{}
 
 func New() *User {
 	user := new(User)

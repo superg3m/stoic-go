@@ -14,6 +14,46 @@ type {{ .TableName }} struct {
 	{{- end }}
 }
 
+func (model {{ .TableName }}) CanCreate() bool {
+	return true
+}
+
+func (model {{ .TableName }}) CanUpdate() bool {
+	return true
+}
+
+func (model {{ .TableName }}) CanDelete() bool {
+	return true
+}
+
+func (model {{ .TableName }}) Create() {
+	ORM.Create(&model)
+}
+
+func (model {{ .TableName }}) Update() {
+	ORM.Update(&model)
+}
+
+func (model {{ .TableName }}) Delete() {
+	ORM.Delete(&model)
+}
+
+var _ ORM.InterfaceCRUD = {{ .TableName }}{}
+
+func New() *{{ .TableName }} {
+	ret := new({{ .TableName }})
+
+	ret.DB = ORM.GetInstance()
+	ret.IsCreated = false
+	ret.TableName = "{{ .TableName }}"
+
+	{{- range .Attributes }}
+	{{ .Name }} {{ .Type }} = ""
+	{{- end }}
+
+	return user
+}
+
 func init() {
 	ORM.RegisterTableName("{{ .TableName }}")
 

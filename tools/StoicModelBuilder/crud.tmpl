@@ -1,0 +1,28 @@
+package {{ .TableName }}
+import "github.com/superg3m/stoic-go/Core/ORM"
+
+func (model {{ .TableName }}) CanCreate() bool {
+	return true
+}
+
+func (model {{ .TableName }}) CanUpdate() bool {
+	return true
+}
+
+func (model {{ .TableName }}) CanDelete() bool {
+	return true
+}
+
+func (model {{ .TableName }}) Create() {
+	ORM.Create(&model)
+}
+
+func (model {{ .TableName }}) Update() {
+	ORM.Update(&model)
+}
+
+func (model {{ .TableName }}) Delete() {
+	ORM.Delete(&model)
+}
+
+var _ ORM.InterfaceCRUD = {{ .TableName }}{}
