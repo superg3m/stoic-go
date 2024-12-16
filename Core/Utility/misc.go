@@ -40,6 +40,8 @@ func CastAny[T any](v any) T {
 	switch any(new(T)).(type) {
 	case *int:
 		switch v := v.(type) {
+		case int:
+			result = v
 		case string:
 			intValue, err := strconv.Atoi(v)
 			AssertOnError(err)
@@ -53,7 +55,7 @@ func CastAny[T any](v any) T {
 				result = 0
 			}
 		default:
-			panic(fmt.Sprintf("unsupported conversion to int from type: %T", v))
+			AssertMsg(false, "unsupported conversion to int from type: %T", v)
 		}
 	case *string:
 		switch v := v.(type) {
@@ -66,10 +68,12 @@ func CastAny[T any](v any) T {
 		case string:
 			result = v
 		default:
-			panic(fmt.Sprintf("unsupported conversion to string from type: %T", v))
+			AssertMsg(false, "unsupported conversion to string from type: %T", v)
 		}
 	case *bool:
 		switch v := v.(type) {
+		case bool:
+			result = v
 		case string:
 			boolValue, err := strconv.ParseBool(v)
 			AssertOnError(err)
@@ -79,10 +83,12 @@ func CastAny[T any](v any) T {
 		case float64:
 			result = v != 0.0
 		default:
-			panic(fmt.Sprintf("unsupported conversion to bool from type: %T", v))
+			AssertMsg(false, "unsupported conversion to bool from type: %T", v)
 		}
 	case *float64:
 		switch v := v.(type) {
+		case float64:
+			result = v
 		case string:
 			floatValue, err := strconv.ParseFloat(v, 64)
 			AssertOnError(err)
@@ -96,10 +102,10 @@ func CastAny[T any](v any) T {
 				result = 0.0
 			}
 		default:
-			panic(fmt.Sprintf("unsupported conversion to float64 from type: %T", v))
+			AssertMsg(false, "unsupported conversion to float64 from type: %T", v)
 		}
 	default:
-		panic(fmt.Sprintf("unsupported target type: %T", any(new(T))))
+		AssertMsg(false, "unsupported target type: %T", any(new(T)))
 	}
 
 	return result.(T)

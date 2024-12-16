@@ -28,11 +28,13 @@ func updateUser(request *Router.StoicRequest, response Router.StoicResponse) {
 	username := request.GetStringParam("username")
 	email := request.GetStringParam("email")
 	password := request.GetStringParam("password")
+	emailConfirmed := request.GetBoolParam("emailConfirmed")
 
 	user := User.FromID(id)
 	user.Username = username
 	user.Email = email
 	user.Password = password
+	user.EmailConfirmed = emailConfirmed
 	user.Update()
 
 	response.SetData("User Updated Successfully!")
@@ -48,7 +50,7 @@ func init() {
 	)
 
 	Router.RegisterApiEndpoint("/User/Update", updateUser, "POST",
-		Router.MiddlewareValidParams("id", "username", "email", "password"),
+		Router.MiddlewareValidParams("id", "username", "email", "password", "emailConfirmed"),
 	)
 
 	Router.RegisterApiEndpoint("/User/Metric", sendUserMetrics, "POST")
