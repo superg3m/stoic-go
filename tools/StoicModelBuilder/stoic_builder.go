@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/superg3m/stoic-go/Core/Utility"
 	"html/template"
 	"os"
+
+	"github.com/superg3m/stoic-go/Core/Utility"
 )
 
 // ./cmd/bin/builder dsn password username dbname Table to build
@@ -25,6 +26,25 @@ type TemplateDataType struct {
 }
 
 func main() {
+	/*
+		siteSettings := Utility.GetSiteSettings()
+		siteSettings = siteSettings["settings"].(map[string]any)
+		DB_ENGINE := Utility.CastAny[string](siteSettings["dbEngine"])
+		HOST := Utility.CastAny[string](siteSettings["dbHost"])
+		PORT := Utility.CastAny[int](siteSettings["dbPort"])
+		USER := Utility.CastAny[string](siteSettings["dbUser"])
+		PASSWORD := Utility.CastAny[string](siteSettings["dbPass"])
+		DBNAME := Utility.CastAny[string](siteSettings["dbName"])
+
+		dsn := ORM.GetDSN(DB_ENGINE, HOST, PORT, USER, PASSWORD, DBNAME)
+		ORM.Connect(DB_ENGINE, dsn)
+		defer ORM.Close()
+
+
+		// Describe the database now for a specifc table use command line
+		// Or mabye use input()
+	*/
+
 	tableName := "User"
 	attributes := []Attribute{
 		{"ID", "int", "user_id", "ORM.PRIMARY_KEY"},
@@ -60,6 +80,22 @@ func main() {
 	}
 
 	filePtr, err = os.Create("./user.api.go")
+	Utility.AssertOnError(err)
+
+	err = tmpl.Execute(filePtr, templateData)
+	if err != nil {
+		panic(err)
+	}
+
+	// --------------------------------------------------------
+
+	tmplFile = "crud.tmpl"
+	tmpl, err = template.New(tmplFile).ParseFiles(tmplFile)
+	if err != nil {
+		panic(err)
+	}
+
+	filePtr, err = os.Create("./user.crud.go")
 	Utility.AssertOnError(err)
 
 	err = tmpl.Execute(filePtr, templateData)
