@@ -8,16 +8,17 @@ import (
 )
 
 // Fetch maps database row to the destination struct (dest).
-func Fetch[T any](sql string, bindParams ...any) *T {
+func Fetch[T InterfaceCRUD](sql string, bindParams ...any) *T {
 	var dest T
 
 	v := reflect.ValueOf(&dest).Elem()
-	Utility.AssertMsg(v.Kind() != reflect.Struct, fmt.Sprintf("Fetch: type %T is not a struct", dest))
-
+	Utility.AssertMsg(v.Kind() == reflect.Struct, "Fetch: type %T is not a struct", dest)
 	row := GetInstance().QueryRowx(sql, bindParams...)
 
-	err := row.StructScan(&dest)
-	Utility.AssertOnErrorMsg(err, fmt.Sprintf("Fetch: failed to scan row into struct: %s", err))
+	pointers := Utility.GetStructMemberPointer(&dest)
+
+	err := row.Scan(pointers...)
+	Utility.AssertOnErrorMsg(err, "Fetch: failed to scan row into map: %s", err)
 
 	return &dest
 }

@@ -36,21 +36,30 @@ func GetStructMemberNames(structure StackAny) []string {
 	return fieldNames
 }
 
-func GetStructMemberType(structure StackAny, memberName string) string {
-	AssertMsg(TypeIsStructure(structure), "structure is not of type structure")
-
+func GetStructMemberPointer(structure HeapAny) []any {
 	value := reflect.ValueOf(structure)
+	if value.Kind() == reflect.Ptr {
+		value = value.Elem()
+	} else {
+		AssertMsg(false, "structure must be a pointer")
+	}
+
 	typeStruct := value.Type()
+	var pointers []any
 
 	for i := 0; i < typeStruct.NumField(); i++ {
 		field := typeStruct.Field(i)
-		if field.Name != memberName {
-			return field.Type.Name()
+
+		if field.Anonymous {
+			continue
+		}
+
+		if value.Field(i).CanAddr() {
+			pointers = append(pointers, value.Field(i).Addr().Interface())
 		}
 	}
 
-	Assert(false) // memberName is no in the struct
-	return ""
+	return pointers
 }
 
 func GetStructMemberTypes(structure StackAny) map[string]string {

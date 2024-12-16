@@ -42,10 +42,10 @@ func DeleteRecord[T InterfaceCRUD](db *sqlx.DB, tableName string, model *T) (sql
 }
 
 func UpdateRecord[T InterfaceCRUD](db *sqlx.DB, tableName string, model *T) (sql.Result, error) {
-	fieldNames := Utility.GetStructMemberNames(model)
+	fieldNames := getDBColumnNames(tableName, *model)
 	Utility.Assert(len(fieldNames) > 0)
 
-	values := Utility.GetStructValues(model)
+	values := Utility.GetStructValues(*model)
 
 	keyField := fieldNames[0] // Get the primary key
 	updateFields := fieldNames[1:]

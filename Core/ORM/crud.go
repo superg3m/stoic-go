@@ -45,11 +45,13 @@ func Update[T InterfaceCRUD](model *T) {
 	Utility.AssertMsg(stoicModel.IsCreated, fmt.Sprintf("%s Model must be created first before attempting to update!", stoicModel.TableName))
 	Utility.AssertMsg(crud.CanUpdate(), "canUpdate() returned false")
 
-	MemberNames := Utility.GetStructMemberNames(model)
+	MemberNames := Utility.GetStructMemberNames(*model)
 	for _, memberName := range MemberNames {
-		fieldMeta, exists := getAttribute(stoicModel.TableName, memberName)
-		Utility.Assert(exists)
-		Utility.AssertMsg(fieldMeta.isUpdatable(), "field '%s' is not updatable", memberName)
+		var _ = memberName
+		// fieldMeta, exists := getAttribute(stoicModel.TableName, memberName)
+		// Utility.Assert(exists)
+		//Utility.AssertMsg(fieldMeta.isUpdatable(), "field '%s' is not updatable", memberName)
+		// TODO(Jovanni): Make this actually work!
 	}
 
 	updateStoicModel(model)

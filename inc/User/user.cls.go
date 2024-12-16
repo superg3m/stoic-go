@@ -48,7 +48,12 @@ func FromID(id int) *User {
 
 	sql := "SELECT * FROM User WHERE id = ?"
 
-	return ORM.Fetch[User](sql, id)
+	user := ORM.Fetch[User](sql, id)
+	user.DB = ORM.GetInstance()
+	user.IsCreated = true
+	user.TableName = "User"
+
+	return user
 }
 
 func FromEmail(email string) *User {
