@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/superg3m/stoic-go/Core/Utility"
 	"io"
 	"net/http"
+
+	"github.com/superg3m/stoic-go/Core/Utility"
 )
 
 type StoicRequest struct {
@@ -90,15 +91,15 @@ func (r *StoicRequest) GetStringParam(name string) string {
 }
 
 func (r *StoicRequest) GetIntParam(name string) int {
-	return Utility.CastAny[int](r.GetStringParam(name))
+	return Utility.CastAny[int](r.GetParamMap()[name])
 }
 
 func (r *StoicRequest) GetBoolParam(name string) bool {
-	return Utility.CastAny[bool](r.GetStringParam(name))
+	return Utility.CastAny[bool](r.GetParamMap()[name])
 }
 
 func (r *StoicRequest) GetFloatParam(name string) float64 {
-	return Utility.CastAny[float64](r.GetStringParam(name))
+	return Utility.CastAny[float64](r.GetParamMap()[name])
 }
 
 func (r *StoicRequest) GetJsonParam(name string, target any) {

@@ -23,6 +23,21 @@ func createUser(request *Router.StoicRequest, response Router.StoicResponse) {
 	response.SetData("User Created Successfully!")
 }
 
+func updateUser(request *Router.StoicRequest, response Router.StoicResponse) {
+	id := request.GetIntParam("id")
+	username := request.GetStringParam("username")
+	email := request.GetStringParam("email")
+	password := request.GetStringParam("password")
+
+	user := User.FromID(id)
+	user.Username = username
+	user.Email = email
+	user.Password = password
+	user.Update()
+
+	response.SetData("User Updated Successfully!")
+}
+
 func sendUserMetrics(request *Router.StoicRequest, response Router.StoicResponse) {
 	// w.SetData(data)
 }
@@ -30,6 +45,10 @@ func sendUserMetrics(request *Router.StoicRequest, response Router.StoicResponse
 func init() {
 	Router.RegisterApiEndpoint("/User/Create", createUser, "POST",
 		Router.MiddlewareValidParams("username", "email", "password"),
+	)
+
+	Router.RegisterApiEndpoint("/User/Update", updateUser, "POST",
+		Router.MiddlewareValidParams("id", "username", "email", "password"),
 	)
 
 	Router.RegisterApiEndpoint("/User/Metric", sendUserMetrics, "POST")

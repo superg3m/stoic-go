@@ -10,8 +10,8 @@ import (
 	"strconv"
 )
 
-type StackAny any
-type HeapAny any
+type StackAny = any
+type HeapAny = any
 
 func GetBit(number int, bit_to_check int) int {
 	return ((number & (1 << bit_to_check)) >> bit_to_check)
