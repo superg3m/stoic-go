@@ -59,3 +59,5 @@ Remove all individual panics
 
 Create and Delete works!
 Delete might only want to delete on the priary key but idk we will see right now it checks all fields
+
+Update now works
