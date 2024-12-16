@@ -1,8 +1,15 @@
 package User
 
 import (
+	"errors"
+
 	"github.com/superg3m/stoic-go/Core/ORM"
 	"github.com/superg3m/stoic-go/Core/Utility"
+)
+
+var (
+	ERROR_INVALID_EMAIL = errors.New("Invalid Email")
+	ERROR_INVALID_ID    = errors.New("Invalid ID")
 )
 
 type User struct {
