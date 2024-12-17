@@ -1,13 +1,15 @@
 package {{ .TableName }}
 
 import (
+	"github.com/jmoiron/sqlx"
 	"github.com/superg3m/stoic-go/Core/ORM"
+	"github.com/superg3m/stoic-go/Core/Utility"
 	"time"
 )
 
 
 type {{ .TableName }} struct {
-	ORM.StoicModel
+	DB *sqlx.DB
 
 	{{- range .Attributes }}
 	{{ .Name }} {{ .Type }}
@@ -17,9 +19,7 @@ type {{ .TableName }} struct {
 func New() *{{ .TableName }} {
 	ret := new({{ .TableName }})
 
-	ret.DB = ORM.GetInstance()
-	ret.IsCreated = false
-	ret.TableName = "{{ .TableName }}"
+	//ret.DB = ORM.GetInstance()
 
 	{{- range .Attributes }}
 	{{ .Name }} {{ .Type }} = ""

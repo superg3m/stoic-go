@@ -31,14 +31,14 @@ func (u User) Delete() {
 }
 
 func (u User) SetCache() {
-	checkUser = u
+	cache = u
 }
 
 func (u User) GetCacheDiff() []string {
 	var mismatchedFields []string
 
 	v1 := reflect.ValueOf(u)
-	v2 := reflect.ValueOf(checkUser)
+	v2 := reflect.ValueOf(cache)
 	userType := v1.Type()
 
 	for i := 0; i < v1.NumField(); i++ {
@@ -54,4 +54,4 @@ func (u User) GetCacheDiff() []string {
 }
 
 var _ ORM.InterfaceCRUD = User{}
-var checkUser User
+var cache User
