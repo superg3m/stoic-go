@@ -1,2 +1,8 @@
 cmd/src/wgo/
 .idea/
+
+ui/admin/.pnpm-store/
+ui/admin/pnpm-lock.yaml
+
+ui/front/.pnpm-store/
+ui/front/pnpm-lock.yaml
