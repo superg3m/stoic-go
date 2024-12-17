@@ -2,6 +2,7 @@ package Utility
 
 import (
 	"reflect"
+	"slices"
 )
 
 func UpdateMemberValue(structure HeapAny, memberName string, data HeapAny) {
@@ -59,7 +60,7 @@ func TypeIsPointer(structure any) bool {
 	return typeKind == reflect.Ptr
 }
 
-func GetStructMemberNames(structure StackAny) []string {
+func GetStructMemberNames(structure StackAny, excludeList ...string) []string {
 	AssertMsg(TypeIsStructure(structure), "structure is not of type structure")
 
 	value := reflect.ValueOf(structure)
@@ -69,7 +70,7 @@ func GetStructMemberNames(structure StackAny) []string {
 	for i := 0; i < typeStruct.NumField(); i++ {
 		field := typeStruct.Field(i)
 
-		if field.Anonymous {
+		if field.Anonymous || slices.Contains(excludeList, field.Name) {
 			continue
 		}
 
@@ -79,7 +80,7 @@ func GetStructMemberNames(structure StackAny) []string {
 	return fieldNames
 }
 
-func GetStructMemberPointer(structure HeapAny) []any {
+func GetStructMemberPointer(structure HeapAny, excludeList ...string) []any {
 	value := reflect.ValueOf(structure)
 	if value.Kind() == reflect.Ptr {
 		value = value.Elem()
@@ -93,7 +94,7 @@ func GetStructMemberPointer(structure HeapAny) []any {
 	for i := 0; i < typeStruct.NumField(); i++ {
 		field := typeStruct.Field(i)
 
-		if field.Anonymous {
+		if field.Anonymous || slices.Contains(excludeList, field.Name) {
 			continue
 		}
 
@@ -105,7 +106,7 @@ func GetStructMemberPointer(structure HeapAny) []any {
 	return pointers
 }
 
-func GetStructMemberTypes(structure StackAny) map[string]string {
+func GetStructMemberTypes(structure StackAny, excludeList ...string) map[string]string {
 	AssertMsg(TypeIsStructure(structure), "structure is not of type structure")
 
 	value := reflect.ValueOf(structure)
@@ -131,7 +132,7 @@ func GetTypeName(s StackAny) string {
 	return val.Type().Name()
 }
 
-func GetStructValues(structure StackAny) []any {
+func GetStructValues(structure StackAny, excludeList ...string) []any {
 	AssertMsg(TypeIsStructure(structure), "structure is not of type structure")
 
 	val := reflect.ValueOf(structure)
@@ -141,7 +142,7 @@ func GetStructValues(structure StackAny) []any {
 	for i := 0; i < typ.NumField(); i++ {
 		field := typ.Field(i)
 
-		if field.Anonymous {
+		if field.Anonymous || slices.Contains(excludeList, field.Name) {
 			continue
 		}
 

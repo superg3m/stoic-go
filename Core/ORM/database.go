@@ -21,7 +21,7 @@ func DeleteRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
 	Utility.Assert(len(fieldNames) > 0)
 
 	var conditions []string
-	values := Utility.GetStructValues(*model)
+	values := Utility.GetStructValues(*model, excludeList...)
 
 	for _, fieldName := range fieldNames {
 		conditions = append(conditions, fmt.Sprintf("%s = ?", fieldName))
@@ -46,7 +46,7 @@ func UpdateRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
 	fieldNames := getDBColumnNames(tableName, *model)
 	Utility.Assert(len(fieldNames) > 0)
 
-	values := Utility.GetStructValues(*model)
+	values := Utility.GetStructValues(*model, excludeList...)
 
 	keyField := fieldNames[0] // Get the primary key
 	updateFields := fieldNames[1:]
@@ -75,7 +75,7 @@ func UpdateRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
 
 func InsertRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
 	tableName := Utility.GetTypeName(*model)
-	fieldNames := Utility.GetStructMemberNames(*model)
+	fieldNames := Utility.GetStructMemberNames(*model, excludeList...)
 	Utility.Assert(len(fieldNames) > 0)
 
 	dbNames := getDBColumnNames(tableName, *model)
@@ -84,7 +84,7 @@ func InsertRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
 		placeholders[i] = "?"
 	}
 
-	values := Utility.GetStructValues(*model)
+	values := Utility.GetStructValues(*model, excludeList...)
 
 	var newDbNames []string
 	var newPlaceholders []string
@@ -173,7 +173,7 @@ func Close() {
 func getDBColumnNames[T InterfaceCRUD](tableName string, model T) []string {
 	var ret []string
 
-	fieldNames := Utility.GetStructMemberNames(model)
+	fieldNames := Utility.GetStructMemberNames(model, excludeList...)
 	for _, fieldName := range fieldNames {
 		attr, exists := getAttribute(tableName, fieldName)
 		Utility.Assert(exists)

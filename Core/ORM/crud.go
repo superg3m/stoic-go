@@ -15,6 +15,8 @@ type InterfaceCRUD interface {
 	GetCacheDiff() []string
 }
 
+var excludeList = []string{"DB"}
+
 func Update[T InterfaceCRUD](model *T) {
 	Utility.AssertMsg((*model).CanUpdate(), "CanUpdate() returned false")
 
@@ -33,7 +35,7 @@ func Update[T InterfaceCRUD](model *T) {
 func Create[T InterfaceCRUD](model *T) {
 	Utility.AssertMsg((*model).CanCreate(), "CanCreate() returned false")
 
-	MemberNames := Utility.GetStructMemberNames(*model)
+	MemberNames := Utility.GetStructMemberNames(*model, excludeList...)
 	hasAutoIncrement := false
 	tableName := Utility.GetTypeName(*model)
 	for _, memberName := range MemberNames {

@@ -3,6 +3,7 @@ package User
 import (
 	"errors"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/superg3m/stoic-go/Core/ORM"
 	"github.com/superg3m/stoic-go/Core/Utility"
 )
@@ -13,6 +14,8 @@ var (
 )
 
 type User struct {
+	DB *sqlx.DB
+
 	ID             int // Not updatable
 	Username       string
 	Password       string
@@ -25,6 +28,8 @@ type User struct {
 
 func New() *User {
 	user := new(User)
+
+	//user.DB = db
 
 	user.ID = 0
 	user.Username = ""
