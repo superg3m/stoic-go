@@ -18,6 +18,8 @@ func Fetch[T InterfaceCRUD](sql string, bindParams ...any) *T {
 	err := row.Scan(pointers...)
 	Utility.AssertOnErrorMsg(err, "Fetch: failed to scan row into map: %s", err)
 
+	dest.SetCache()
+
 	return &dest
 }
 
