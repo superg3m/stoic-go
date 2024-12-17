@@ -74,7 +74,7 @@ func UpdateRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
 }
 
 func InsertRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
-	tableName := Utility.GetTypeName(model)
+	tableName := Utility.GetTypeName(*model)
 	fieldNames := Utility.GetStructMemberNames(*model)
 	Utility.Assert(len(fieldNames) > 0)
 

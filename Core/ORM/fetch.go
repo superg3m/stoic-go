@@ -14,7 +14,8 @@ func Fetch[T InterfaceCRUD](sql string, bindParams ...any) *T {
 	Utility.AssertMsg(v.Kind() == reflect.Struct, "Fetch: type %T is not a struct", dest)
 	row := GetInstance().QueryRowx(sql, bindParams...)
 
-	err := row.StructScan(&dest)
+	pointers := Utility.GetStructMemberPointer(&dest)
+	err := row.Scan(pointers...)
 	Utility.AssertOnErrorMsg(err, "Fetch: failed to scan row into map: %s", err)
 
 	return &dest
@@ -33,7 +34,8 @@ func FetchAll[T InterfaceCRUD](sql string, bindParams ...any) ([]*T, error) {
 	for rows.Next() {
 		var dest T
 
-		err := rows.StructScan(&dest)
+		pointers := Utility.GetStructMemberPointer(&dest)
+		err := rows.Scan(pointers...)
 		Utility.AssertOnErrorMsg(err, fmt.Sprintf("Fetch: failed to scan row into struct: %s", err))
 
 		results = append(results, &dest)

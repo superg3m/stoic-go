@@ -13,7 +13,7 @@ var (
 )
 
 type User struct {
-	id             int
+	ID             int // Not updatable
 	Username       string
 	Password       string
 	Email          string
@@ -26,7 +26,7 @@ type User struct {
 func New() *User {
 	user := new(User)
 
-	user.id = 0
+	user.ID = 0
 	user.Username = ""
 	user.Password = ""
 	user.Email = ""

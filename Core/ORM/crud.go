@@ -40,7 +40,7 @@ func Create[T InterfaceCRUD](model *T) {
 
 	if hasAutoIncrement && err == nil {
 		id, _ := result.LastInsertId()
-		Utility.UpdateMemberValue(model, "id", id)
+		Utility.UpdateMemberValue(model, "ID", id)
 	}
 
 	// Ensure the primary key is updated, e.g., retrieve the last generated ID if applicable
