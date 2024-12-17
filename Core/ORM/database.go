@@ -3,7 +3,6 @@ package ORM
 import (
 	"database/sql"
 	"fmt"
-	"reflect"
 	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -72,46 +71,6 @@ func UpdateRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
 	}
 
 	return result, nil
-}
-
-func updateStoicModel[T InterfaceCRUD](model *T) {
-	v := reflect.ValueOf(model)
-	if v.Kind() != reflect.Ptr || v.Elem().Kind() != reflect.Struct {
-		panic("model must be a pointer to a struct")
-	}
-
-	structValue := v.Elem()
-
-	stoicModelField := structValue.FieldByName("StoicModel")
-	if !stoicModelField.IsValid() {
-		Utility.AssertMsg(false, "Embedded StoicModel is missing from the struct")
-	}
-
-	if stoicModelField.Kind() == reflect.Struct && stoicModelField.CanSet() {
-		isCreatedField := stoicModelField.FieldByName("IsCreated")
-		if isCreatedField.IsValid() && isCreatedField.CanSet() && isCreatedField.Kind() == reflect.Bool {
-			isCreatedField.SetBool(true)
-		} else {
-			Utility.AssertMsg(false, "IsCreated field in StoicModel is missing, not settable, or not of type bool")
-		}
-	} else {
-		Utility.AssertMsg(false, "StoicModel is not a struct or is not settable")
-	}
-}
-
-func updateIDField[T InterfaceCRUD](model *T, id int64) {
-	v := reflect.ValueOf(model)
-	if v.Kind() != reflect.Ptr || v.Elem().Kind() != reflect.Struct {
-		panic("model must be a pointer to a struct")
-	}
-
-	structValue := v.Elem()
-	field := structValue.FieldByName("id")
-	if field.IsValid() && field.CanSet() && field.Kind() == reflect.Int {
-		field.SetInt(id)
-	} else {
-		Utility.AssertMsg(false, "ID field is missing, not settable, or not of type int")
-	}
 }
 
 func InsertRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {

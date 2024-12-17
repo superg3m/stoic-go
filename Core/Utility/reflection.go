@@ -4,6 +4,49 @@ import (
 	"reflect"
 )
 
+func UpdateMemberValue(structure HeapAny, memberName string, data HeapAny) {
+	v := reflect.ValueOf(structure)
+
+	AssertMsg(TypeIsPointer(structure), "must be a pointer to a struct")
+
+	structValue := v.Elem()
+	field := structValue.FieldByName(memberName)
+	AssertMsg(field.IsValid(), "field '%s' not found in struct", memberName)
+
+	switch field.Kind() {
+	case reflect.Int:
+		field.SetInt(reflect.ValueOf(data).Int())
+	case reflect.Int8:
+		field.SetInt(int64(reflect.ValueOf(data).Int()))
+	case reflect.Int16:
+		field.SetInt(int64(reflect.ValueOf(data).Int()))
+	case reflect.Int32:
+		field.SetInt(int64(reflect.ValueOf(data).Int()))
+	case reflect.Int64:
+		field.SetInt(reflect.ValueOf(data).Int())
+	case reflect.Uint:
+		field.SetUint(uint64(reflect.ValueOf(data).Uint()))
+	case reflect.Uint8:
+		field.SetUint(uint64(reflect.ValueOf(data).Uint()))
+	case reflect.Uint16:
+		field.SetUint(uint64(reflect.ValueOf(data).Uint()))
+	case reflect.Uint32:
+		field.SetUint(uint64(reflect.ValueOf(data).Uint()))
+	case reflect.Uint64:
+		field.SetUint(reflect.ValueOf(data).Uint())
+	case reflect.Float32:
+		field.SetFloat(reflect.ValueOf(data).Float())
+	case reflect.Float64:
+		field.SetFloat(reflect.ValueOf(data).Float())
+	case reflect.String:
+		field.SetString(reflect.ValueOf(data).String())
+	case reflect.Bool:
+		field.SetBool(reflect.ValueOf(data).Bool())
+	default:
+		AssertMsg(false, "unsupported field type: %v", field.Kind())
+	}
+}
+
 func TypeIsStructure(structure any) bool {
 	typeKind := reflect.TypeOf(structure).Kind()
 

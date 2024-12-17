@@ -14,25 +14,14 @@ type InterfaceCRUD interface {
 }
 
 func Update[T InterfaceCRUD](model *T) {
-	Utility.AssertMsg((*model).CanUpdate(), "canUpdate() returned false")
-
-	MemberNames := Utility.GetStructMemberNames(*model)
-	for _, memberName := range MemberNames {
-		var _ = memberName
-		// fieldMeta, exists := getAttribute(stoicModel.TableName, memberName)
-		// Utility.Assert(exists)
-		//Utility.AssertMsg(fieldMeta.isUpdatable(), "field '%s' is not updatable", memberName)
-		// TODO(Jovanni): Make this actually work!
-	}
-
-	updateStoicModel(model)
+	Utility.AssertMsg((*model).CanUpdate(), "CanUpdate() returned false")
 
 	_, err := UpdateRecord(GetInstance(), model)
 	Utility.AssertOnError(err)
 }
 
 func Create[T InterfaceCRUD](model *T) {
-	Utility.AssertMsg((*model).CanCreate(), "canCreate() returned false")
+	Utility.AssertMsg((*model).CanCreate(), "CanCreate() returned false")
 
 	MemberNames := Utility.GetStructMemberNames(*model)
 	hasAutoIncrement := false
@@ -47,13 +36,11 @@ func Create[T InterfaceCRUD](model *T) {
 		Utility.Assert(exists)
 	}
 
-	updateStoicModel(model)
-
 	result, err := InsertRecord(GetInstance(), model)
 
 	if hasAutoIncrement && err == nil {
 		id, _ := result.LastInsertId()
-		updateIDField(model, id)
+		Utility.UpdateMemberValue(model, "id", id)
 	}
 
 	// Ensure the primary key is updated, e.g., retrieve the last generated ID if applicable
@@ -61,7 +48,7 @@ func Create[T InterfaceCRUD](model *T) {
 }
 
 func Delete[T InterfaceCRUD](model *T) {
-	Utility.AssertMsg((*model).CanDelete(), "canDelete() returned false")
+	Utility.AssertMsg((*model).CanDelete(), "CanDelete() returned false")
 
 	_, err := DeleteRecord(GetInstance(), model)
 	Utility.AssertOnError(err)
