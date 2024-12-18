@@ -66,41 +66,4 @@ clear ; go run ./tools/StoicMigration/stoic_migration.go up|down
 clear ; ./tools/wgo-main/wgo run main.go -w "*.go"  
 
 # TODO
-Remove stoic model it should look just like this 
-type User struct {
-	id             int // not updatable
-	Username       string
-	Password       string
-	Email          string
-	EmailConfirmed bool
-	// Joined         time.Time
-	// LastActive     time.Time
-	// LastLogin      time.Time
-}
-
-func (u *User) GetID() int {
-    return u.id
-}
-
-user.GetID()
-
-func New(id int) *User {
-	user := new(User)
-
-	user.id = id
-	user.Username = ""
-	user.Password = ""
-	user.Email = ""
-	user.EmailConfirmed = false
-
-	return user
-}
-
-Then I should be able to Get the table name from the type name string
-
-Type safty is really important
-
-Get
-
-StackAny
-HeapAny
+Add the rest of the models from stoic-php
