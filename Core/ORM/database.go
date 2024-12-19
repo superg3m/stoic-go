@@ -2,6 +2,7 @@ package ORM
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -57,16 +58,39 @@ func CreateRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
 	return result, nil
 }
 
-func ReadRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
+func ReadRecord[T InterfaceCRUD](db *sqlx.DB, model *T) error {
 	tableName := Utility.GetTypeName(*model)
 	fieldNames := Utility.GetStructMemberNames(*model, excludeList...)
 	Utility.Assert(len(fieldNames) > 0)
 
 	pKeyQuery, uniqueQueries, _ := buildSQLReadQueries(db, model)
-	pPointer := getPrimaryKeyPointers(tableName, *model)
-	*model = Fetch[T](pKeyQuery, pPointer...)
 
-	return result, nil
+	// ----------------------------------------------------------
+
+	{
+		pPointer := getPrimaryKeyPointers(tableName, *model)
+		fetch := Fetch[T](pKeyQuery, pPointer...)
+		if fetch == nil {
+			model = Fetch[T](pKeyQuery, pPointer...)
+			return nil
+		}
+	}
+
+	// ----------------------------------------------------------
+
+	{
+		uPointer := getUniquePointers(tableName, *model)
+		for i, pointer := range uPointer {
+			query := uniqueQueries[i]
+			fetch := Fetch[T](query, pointer)
+			if fetch == nil {
+				model = Fetch[T](query, pointer)
+				return nil
+			}
+		}
+	}
+
+	return errors.New("failed to fetch record")
 }
 
 func UpdateRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {

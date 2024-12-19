@@ -16,7 +16,9 @@ func Fetch[T InterfaceCRUD](sql string, bindParams ...any) *T {
 
 	pointers := Utility.GetStructMemberPointer(&dest, excludeList...)
 	err := row.Scan(pointers...)
-	Utility.AssertOnErrorMsg(err, "Fetch: failed to scan row into map: %s", err)
+	if err != nil {
+		return nil
+	}
 
 	dest.SetCache()
 

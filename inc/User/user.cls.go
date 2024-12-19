@@ -47,7 +47,6 @@ func FromID(id int) *User {
 	}
 
 	sql := "SELECT * FROM User WHERE id = ?"
-
 	return ORM.Fetch[User](sql, id)
 }
 

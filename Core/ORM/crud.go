@@ -10,10 +10,10 @@ type InterfaceCRUD interface {
 	CanUpdate() bool
 	CanDelete() bool
 
-	Create()
-	Read()
-	Update()
-	Delete()
+	Create() bool
+	Read() bool
+	Update() bool
+	Delete() bool
 
 	SetCache()
 	GetCacheDiff() []string
@@ -21,30 +21,7 @@ type InterfaceCRUD interface {
 
 var excludeList = []string{"DB"}
 
-func Read[T InterfaceCRUD](model *T) {
-	Utility.AssertMsg((*model).CanRead(), "CanRead() returned false")
-
-	_, err := ReadRecord(GetInstance(), model)
-
-	Utility.AssertOnError(err)
-}
-
-func Update[T InterfaceCRUD](model *T) {
-	Utility.AssertMsg((*model).CanUpdate(), "CanUpdate() returned false")
-
-	tableName := Utility.GetTypeName(*model)
-	membersChanged := (*model).GetCacheDiff()
-
-	for _, member := range membersChanged {
-		attribute, _ := getAttribute(tableName, member)
-		Utility.AssertMsg(attribute.isUpdatable(), "%s.%s is not updatable", tableName, member)
-	}
-
-	_, err := UpdateRecord(GetInstance(), model)
-	Utility.AssertOnError(err)
-}
-
-func Create[T InterfaceCRUD](model *T) {
+func Create[T InterfaceCRUD](model *T) bool {
 	Utility.AssertMsg((*model).CanCreate(), "CanCreate() returned false")
 
 	MemberNames := Utility.GetStructMemberNames(*model, excludeList...)
@@ -69,13 +46,34 @@ func Create[T InterfaceCRUD](model *T) {
 
 	(*model).SetCache()
 
-	// Ensure the primary key is updated, e.g., retrieve the last generated ID if applicable
-	Utility.AssertOnError(err) // This doesn't make sense I should return an error code instead
+	return err == nil
 }
 
-func Delete[T InterfaceCRUD](model *T) {
+func Read[T InterfaceCRUD](model *T) bool {
+	Utility.AssertMsg((*model).CanRead(), "CanRead() returned false")
+
+	err := ReadRecord(GetInstance(), model)
+	return err == nil
+}
+
+func Update[T InterfaceCRUD](model *T) bool {
+	Utility.AssertMsg((*model).CanUpdate(), "CanUpdate() returned false")
+
+	tableName := Utility.GetTypeName(*model)
+	membersChanged := (*model).GetCacheDiff()
+
+	for _, member := range membersChanged {
+		attribute, _ := getAttribute(tableName, member)
+		Utility.AssertMsg(attribute.isUpdatable(), "%s.%s is not updatable", tableName, member)
+	}
+
+	_, err := UpdateRecord(GetInstance(), model)
+	return err == nil
+}
+
+func Delete[T InterfaceCRUD](model *T) bool {
 	Utility.AssertMsg((*model).CanDelete(), "CanDelete() returned false")
 
 	_, err := DeleteRecord(GetInstance(), model)
-	Utility.AssertOnError(err)
+	return err == nil
 }
