@@ -7,7 +7,7 @@ import (
 	"github.com/superg3m/stoic-go/Core/Utility"
 )
 
-func Fetch[T InterfaceCRUD](sql string, bindParams ...any) *T {
+func Fetch[T InterfaceCRUD](sql string, bindParams ...any) (*T, error) {
 	var dest T
 
 	v := reflect.ValueOf(&dest).Elem()
@@ -17,12 +17,12 @@ func Fetch[T InterfaceCRUD](sql string, bindParams ...any) *T {
 	pointers := Utility.GetStructMemberPointer(&dest, excludeList...)
 	err := row.Scan(pointers...)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	dest.SetCache()
 
-	return &dest
+	return &dest, nil
 }
 
 func FetchAll[T InterfaceCRUD](sql string, bindParams ...any) ([]*T, error) {

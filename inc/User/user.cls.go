@@ -54,7 +54,13 @@ func FromID(id int) *User {
 
 	user := New()
 	user.ID = id
-	user.Read()
+	read := user.Read()
+
+	if read.IsBad() {
+		return nil
+	}
+
+	User.SetCache(*user)
 
 	return user
 }
@@ -70,7 +76,13 @@ func FromEmail(email string) *User {
 
 	user := New()
 	user.Email = email
-	user.Read()
+	read := user.Read()
+
+	if read.IsBad() {
+		return nil
+	}
+
+	User.SetCache(*user)
 
 	return user
 }

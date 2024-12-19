@@ -3,7 +3,9 @@ package API
 import (
 	"fmt"
 	"github.com/superg3m/stoic-go/Core/Router"
+	"github.com/superg3m/stoic-go/Core/Utility"
 	"github.com/superg3m/stoic-go/inc/User"
+	"time"
 )
 
 func createUser(request *Router.StoicRequest, response Router.StoicResponse) {
@@ -33,10 +35,16 @@ func updateUser(request *Router.StoicRequest, response Router.StoicResponse) {
 	emailConfirmed := request.GetBoolParam("emailConfirmed")
 
 	user := User.FromID(id)
+	if user == nil {
+		response.SetError(fmt.Sprint("User does not exists"))
+		return
+	}
+
 	user.Username = username
 	user.Email = email
 	user.Password = password
 	user.EmailConfirmed = emailConfirmed
+	user.LastLogin = Utility.NewTime(time.Now())
 	user.Update()
 
 	response.SetData("User Updated Successfully!")

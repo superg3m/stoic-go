@@ -74,9 +74,9 @@ func ReadRecord[T InterfaceCRUD](db *sqlx.DB, model *T) error {
 
 	{
 		pPointer := getPrimaryKeyPointers(tableName, *model)
-		fetch := Fetch[T](pKeyQuery, pPointer...)
-		if fetch == nil {
-			model = Fetch[T](pKeyQuery, pPointer...)
+		_, err := Fetch[T](pKeyQuery, pPointer...)
+		if err == nil {
+			model, _ = Fetch[T](pKeyQuery, pPointer...)
 			return nil
 		}
 	}
@@ -87,9 +87,9 @@ func ReadRecord[T InterfaceCRUD](db *sqlx.DB, model *T) error {
 		uPointer := getUniquePointers(tableName, *model)
 		for i, pointer := range uPointer {
 			query := uniqueQueries[i]
-			fetch := Fetch[T](query, pointer)
-			if fetch == nil {
-				model = Fetch[T](query, pointer)
+			_, err := Fetch[T](query, pointer)
+			if err == nil {
+				model, _ = Fetch[T](query, pointer)
 				return nil
 			}
 		}
@@ -287,7 +287,7 @@ func getUniqueDBNames[T InterfaceCRUD](tableName string, model T) []string {
 func getPrimaryKeyPointers[T InterfaceCRUD](tableName string, model T) []any {
 	var ret []any
 
-	pointers := Utility.GetStructMemberPointer(model, excludeList...)
+	pointers := Utility.GetStructMemberPointer(&model, excludeList...)
 	names := Utility.GetStructMemberNames(model, excludeList...)
 	attributes, _ := GetAttributes(tableName)
 	for i, pointer := range pointers {
@@ -304,7 +304,7 @@ func getPrimaryKeyPointers[T InterfaceCRUD](tableName string, model T) []any {
 func getUniquePointers[T InterfaceCRUD](tableName string, model T) []any {
 	var ret []any
 
-	pointers := Utility.GetStructMemberPointer(model, excludeList...)
+	pointers := Utility.GetStructMemberPointer(&model, excludeList...)
 	names := Utility.GetStructMemberNames(model, excludeList...)
 	attributes, _ := GetAttributes(tableName)
 	for i, pointer := range pointers {

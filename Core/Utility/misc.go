@@ -8,10 +8,18 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 )
 
 type StackAny any
 type HeapAny any
+
+func NewTime(newTime time.Time) *time.Time {
+	ret := new(time.Time)
+	*ret = newTime
+
+	return ret
+}
 
 func GetBit(number int, bit_to_check int) int {
 	return ((number & (1 << bit_to_check)) >> bit_to_check)
