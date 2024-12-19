@@ -1,10 +1,9 @@
 package main
 
 import (
+	"github.com/superg3m/stoic-go/Core/Utility"
 	"html/template"
 	"os"
-
-	"github.com/superg3m/stoic-go/Core/Utility"
 )
 
 // ./cmd/bin/builder dsn password username dbname Table to build
@@ -20,9 +19,16 @@ type Attribute struct {
 	Flags    string
 }
 
+type PairData struct {
+	Name string
+	Type string
+}
+
 type TemplateDataType struct {
-	TableName  string
-	Attributes []Attribute
+	TableName   string
+	Attributes  []Attribute
+	PrimaryKeys []PairData
+	UniqueKeys  []PairData
 }
 
 func main() {
@@ -47,14 +53,25 @@ func main() {
 
 	tableName := "User"
 	attributes := []Attribute{
-		{"ID", "int", "user_id", "ORM.PRIMARY_KEY"},
-		{"Email", "string", "email_address", "ORM.NULLABLE|ORM.UPDATABLE"},
-		{"Joined", "time.Time", "joined_at", "ORM.NULLABLE"},
+		{"ID", "int", "user_id", "ORM.KEY"},
+		{"Username", "string", "userName", "ORM.KEY"},
+		{"Joined", "time.Time", "joined", "ORM.UNIQUE"},
+		{"Email", "string", "email_address", "ORM.UNIQUE|ORM.UPDATABLE"},
+	}
+	primaryKeys := []PairData{
+		{"ID", "int"},
+		{"Username", "string"},
+	}
+	uniqueKeys := []PairData{
+		{"Email", "string"},
+		{"Joined", "time.Time"},
 	}
 
 	templateData := TemplateDataType{
-		TableName:  tableName,
-		Attributes: attributes,
+		TableName:   tableName,
+		Attributes:  attributes,
+		PrimaryKeys: primaryKeys,
+		UniqueKeys:  uniqueKeys,
 	}
 
 	tmplFile := "cls.tmpl"

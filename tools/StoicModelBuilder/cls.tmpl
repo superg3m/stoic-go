@@ -16,31 +16,53 @@ type {{ .TableName }} struct {
 	{{- end }}
 }
 
-{{- range .Attributes }}
-func From{{ .Name }} { // primaryKey(composite too)
-
-}
-ORM.RegisterTableColumn("{{ .Name }}", "{{ .DBColumn }}", {{ .Flags }})
-{{- end }}
-
-func From{{ .Name }} { // uniques (composite too)
-
-}
-
 func New() *{{ .TableName }} {
 	ret := new({{ .TableName }})
 
 	//ret.DB = ORM.GetInstance()
 
-	{{- range .Attributes }}
-	{{ .Name }} {{ .Type }} = ""
-	{{- end }}
+    {{- range .Attributes }}
+    {{- if eq .Type "string" }}
+    ret.{{ .Name }} = ""
+    {{- else if eq .Type "int" }}
+    ret.{{ .Name }} = 0
+    {{- else if eq .Type "bool" }}
+    ret.{{ .Name }} = false
+    {{- else if eq .Type "float" }}
+    ret.{{ .Name }} = 0.0
+    {{- else }}
+    ret.{{ .Name }} = time.Now()
+    {{- end }}
+    {{- end }}
 
-	return user
+	return ret
 }
 
+func From{{- range $index, $key := .PrimaryKeys }}{{ if $index }}_{{ end }}{{ $key.Name }}{{- end }}(
+    {{- range $index, $key := .PrimaryKeys }}{{ if $index }}, {{ end }}{{ $key.Name }} {{ $key.Type }}{{- end }}) *{{ .TableName }} {
+    ret := New()
+    {{- range $key := .PrimaryKeys }}
+    ret.{{ $key.Name }} = {{ $key.Name }}
+    {{- end }}
+
+    ret.Read()
+
+    return ret
+}
+
+{{- range .UniqueKeys }}
+func From{{ .Name }}({{ .Name }} {{ .Type }}) *{{ $.TableName }} {
+    ret := New()
+    ret.{{ .Name }} = {{ .Name }}
+
+    ret.Read()
+
+    return ret
+}
+{{- end }}
+
 func init() {
-	ORM.RegisterTableName("{{ .TableName }}")
+	ORM.RegisterTableName({{ .TableName }}{})
 
 	{{- range .Attributes }}
 	ORM.RegisterTableColumn("{{ .Name }}", "{{ .DBColumn }}", {{ .Flags }})

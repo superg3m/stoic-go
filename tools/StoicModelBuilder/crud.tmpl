@@ -17,20 +17,20 @@ func (model {{ .TableName }}) CanDelete() bool {
 	return true
 }
 
-func (model {{ .TableName }}) Create() {
-	ORM.Create(&model)
-
-
-func (model {{ .TableName }}) Read() {
-	ORM.Read(&model)
+func (model {{ .TableName }}) Create() bool {
+	return ORM.Create(&model)
 }
 
-func (model {{ .TableName }}) Update() {
-	ORM.Update(&model)
+func (model {{ .TableName }}) Read() bool {
+	return ORM.Read(&model)
 }
 
-func (model {{ .TableName }}) Delete() {
-	ORM.Delete(&model)
+func (model {{ .TableName }}) Update() bool {
+	return ORM.Update(&model)
+}
+
+func (model {{ .TableName }}) Delete() bool {
+	return ORM.Delete(&model)
 }
 
 func (u User) SetCache() {
