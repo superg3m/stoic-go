@@ -6,7 +6,6 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/superg3m/stoic-go/Core/ORM"
-	"github.com/superg3m/stoic-go/Core/Utility"
 )
 
 var (
@@ -42,22 +41,35 @@ func New() *User {
 }
 
 func FromID(id int) *User {
-	if id <= 0 {
-		return nil
-	}
+	/*
+		if id <= 0 {
+			return nil
+		}
+		// sql := "SELECT * FROM User WHERE id = ?"
+		// ORM.Fetch[User](sql, id)
+	*/
 
-	sql := "SELECT * FROM User WHERE id = ?"
-	return ORM.Fetch[User](sql, id)
+	user := New()
+	user.ID = id
+	user.Read()
+
+	return user
 }
 
 func FromEmail(email string) *User {
-	if !Utility.ValidEmail(email) {
-		return nil
-	}
+	/*
+		if !Utility.ValidEmail(email) {
+			return nil
+		}
+		// sql := "SELECT * FROM User WHERE email = ?"
+		// ORM.Fetch[User](sql, email)
+	*/
 
-	sql := "SELECT * FROM User WHERE email = ?"
+	user := New()
+	user.Email = email
+	user.Read()
 
-	return ORM.Fetch[User](sql, email)
+	return user
 }
 
 // Register ORM metadata

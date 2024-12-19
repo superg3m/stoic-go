@@ -15,6 +15,10 @@ func (u User) CanCreate() bool {
 	return true
 }
 
+func (u User) CanRead() bool {
+	return true
+}
+
 func (u User) CanUpdate() bool {
 	return true
 }
@@ -23,16 +27,20 @@ func (u User) CanDelete() bool {
 	return true
 }
 
-func (u User) Create() {
-	ORM.Create(&u)
+func (u User) Create() bool {
+	return ORM.Create(&u)
 }
 
-func (u User) Update() {
-	ORM.Update(&u)
+func (u User) Read() bool {
+	return ORM.Read(&u)
 }
 
-func (u User) Delete() {
-	ORM.Delete(&u)
+func (u User) Update() bool {
+	return ORM.Update(&u)
+}
+
+func (u User) Delete() bool {
+	return ORM.Delete(&u)
 }
 
 func (u User) SetCache() {
