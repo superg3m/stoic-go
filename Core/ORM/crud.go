@@ -10,10 +10,10 @@ type InterfaceCRUD interface {
 	CanUpdate() bool
 	CanDelete() bool
 
-	Create() bool
-	Read() bool
-	Update() bool
-	Delete() bool
+	Create() CrudReturn
+	Read() CrudReturn
+	Update() CrudReturn
+	Delete() CrudReturn
 
 	SetCache()
 	GetCacheDiff() []string
@@ -21,8 +21,12 @@ type InterfaceCRUD interface {
 
 var excludeList = []string{"DB"}
 
-func Create[T InterfaceCRUD](model *T) bool {
-	Utility.AssertMsg((*model).CanCreate(), "CanCreate() returned false")
+func Create[T InterfaceCRUD](model *T) CrudReturn {
+	ret := CreateCRUD()
+	if !(*model).CanCreate() {
+		ret.setErrorMsg("CanCreate() returned false")
+		return ret
+	}
 
 	MemberNames := Utility.GetStructMemberNames(*model, excludeList...)
 	hasAutoIncrement := false
@@ -38,6 +42,10 @@ func Create[T InterfaceCRUD](model *T) bool {
 	}
 
 	result, err := CreateRecord(GetInstance(), model)
+	if err != nil {
+		ret.setErrorMsg(err.Error())
+		return ret
+	}
 
 	if hasAutoIncrement && err == nil {
 		id, _ := result.LastInsertId()
@@ -46,18 +54,31 @@ func Create[T InterfaceCRUD](model *T) bool {
 
 	(*model).SetCache()
 
-	return err == nil
+	return ret
 }
 
-func Read[T InterfaceCRUD](model *T) bool {
-	Utility.AssertMsg((*model).CanRead(), "CanRead() returned false")
+func Read[T InterfaceCRUD](model *T) CrudReturn {
+	ret := CreateCRUD()
+	if !(*model).CanRead() {
+		ret.setErrorMsg("CanRead() returned false")
+		return ret
+	}
 
 	err := ReadRecord(GetInstance(), model)
-	return err == nil
+	if err != nil {
+		ret.setErrorMsg(err.Error())
+		return ret
+	}
+
+	return ret
 }
 
-func Update[T InterfaceCRUD](model *T) bool {
-	Utility.AssertMsg((*model).CanUpdate(), "CanUpdate() returned false")
+func Update[T InterfaceCRUD](model *T) CrudReturn {
+	ret := CreateCRUD()
+	if !(*model).CanUpdate() {
+		ret.setErrorMsg("CanUpdate() returned false")
+		return ret
+	}
 
 	tableName := Utility.GetTypeName(*model)
 	membersChanged := (*model).GetCacheDiff()
@@ -68,12 +89,23 @@ func Update[T InterfaceCRUD](model *T) bool {
 	}
 
 	_, err := UpdateRecord(GetInstance(), model)
-	return err == nil
+	if err != nil {
+		ret.setErrorMsg(err.Error())
+		return ret
+	}
+
+	return ret
 }
 
-func Delete[T InterfaceCRUD](model *T) bool {
+func Delete[T InterfaceCRUD](model *T) CrudReturn {
+	ret := CreateCRUD()
 	Utility.AssertMsg((*model).CanDelete(), "CanDelete() returned false")
 
 	_, err := DeleteRecord(GetInstance(), model)
-	return err == nil
+	if err != nil {
+		ret.setErrorMsg(err.Error())
+		return ret
+	}
+
+	return ret
 }

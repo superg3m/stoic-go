@@ -35,19 +35,19 @@ func (u User) CanDelete() bool {
 	return true
 }
 
-func (u User) Create() bool {
+func (u User) Create() ORM.CrudReturn {
 	return ORM.Create(&u)
 }
 
-func (u User) Read() bool {
+func (u User) Read() ORM.CrudReturn {
 	return ORM.Read(&u)
 }
 
-func (u User) Update() bool {
+func (u User) Update() ORM.CrudReturn {
 	return ORM.Update(&u)
 }
 
-func (u User) Delete() bool {
+func (u User) Delete() ORM.CrudReturn {
 	return ORM.Delete(&u)
 }
 

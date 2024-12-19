@@ -4,7 +4,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"reflect"
 	"strings"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -27,11 +29,14 @@ func CreateRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
 		placeholders[i] = "?"
 	}
 
-	values := Utility.GetStructValues(*model, excludeList...)
+	values, err := getCanonicalValues(model, fieldNames)
+	if err != nil {
+		return nil, err
+	}
 
 	var newDbNames []string
 	var newPlaceholders []string
-	var newValues []interface{}
+	var newValues []any
 
 	for i, fieldName := range fieldNames {
 		attribute := globalTable[tableName][fieldName]
@@ -344,4 +349,26 @@ func buildSQLReadQueries[T InterfaceCRUD](db *sqlx.DB, model *T) (primaryQuery s
 	}
 
 	return primaryQuery, uniqueQueries, nil
+}
+
+func getCanonicalValues[T InterfaceCRUD](model *T, fieldNames []string) ([]any, error) {
+	var formattedTimeValues []any
+	types := Utility.GetStructMemberTypes(*model, excludeList...)
+
+	for i, fieldName := range fieldNames {
+		fieldType, exists := types[fieldName]
+		Utility.Assert(exists)
+		if fieldType == "time.Time" || fieldType == "*time.Time" {
+			value := reflect.ValueOf(model).Elem().FieldByName(fieldName)
+			if value.IsValid() && value.Kind() == reflect.Struct && value.Type() == reflect.TypeOf(time.Time{}) {
+				formattedTime := value.Interface().(time.Time).Format(time.DateTime)
+				formattedTimeValues = append(formattedTimeValues, formattedTime)
+			}
+		} else {
+			originalValue := Utility.GetStructValues(*model, excludeList...)
+			formattedTimeValues = append(formattedTimeValues, originalValue[i])
+		}
+	}
+
+	return formattedTimeValues, nil
 }

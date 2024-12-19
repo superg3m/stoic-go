@@ -1,6 +1,7 @@
 package API
 
 import (
+	"fmt"
 	"github.com/superg3m/stoic-go/Core/Router"
 	"github.com/superg3m/stoic-go/inc/User"
 )
@@ -12,11 +13,14 @@ func createUser(request *Router.StoicRequest, response Router.StoicResponse) {
 
 	user := User.New()
 	user.Username = username
-	user.Email = email
 	user.Password = password
-	user.Create()
-
-	//ORM.Delete(user)
+	user.Email = email
+	create := user.Create()
+	if create.IsBad() {
+		msg := fmt.Sprint("Failed to create user | ", create.GetErrorMsg())
+		response.SetError(msg)
+		return
+	}
 
 	response.SetData("User Created Successfully!")
 }

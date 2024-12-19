@@ -22,8 +22,8 @@ type User struct {
 	Email          string
 	EmailConfirmed bool
 	Joined         time.Time
-	LastActive     time.Time
-	LastLogin      time.Time
+	LastActive     *time.Time
+	LastLogin      *time.Time
 }
 
 func New() *User {
@@ -37,6 +37,8 @@ func New() *User {
 	user.Email = ""
 	user.EmailConfirmed = false
 	user.Joined = time.Now()
+	user.LastActive = nil
+	user.LastLogin = nil
 
 	return user
 }
@@ -76,14 +78,12 @@ func FromEmail(email string) *User {
 // Register ORM metadata
 func init() {
 	ORM.RegisterTableName(User{})
-	ORM.RegisterTableColumn("ID", "id", ORM.KEY, ORM.AUTO_INCREMENT)
-	ORM.RegisterTableColumn("Username", "username", ORM.UPDATABLE)
-	ORM.RegisterTableColumn("Password", "password", ORM.UPDATABLE)
-	ORM.RegisterTableColumn("Email", "email", ORM.UPDATABLE, ORM.UNIQUE)
-	ORM.RegisterTableColumn("EmailConfirmed", "email_confirmed", ORM.UPDATABLE)
-	ORM.RegisterTableColumn("Joined", "joined", ORM.UPDATABLE)
-
-	// ORM.RegisterTableColumn("Joined", "joined", ORM.NULLABLE)
-	// ORM.RegisterTableColumn("LastActive", "last_active", ORM.NULLABLE)
-	// ORM.RegisterTableColumn("LastLogin", "last_login", ORM.NULLABLE)
+	ORM.RegisterTableColumn("ID", "ID", ORM.KEY, ORM.AUTO_INCREMENT)
+	ORM.RegisterTableColumn("Username", "Username", ORM.UPDATABLE)
+	ORM.RegisterTableColumn("Password", "Password", ORM.UPDATABLE)
+	ORM.RegisterTableColumn("Email", "Email", ORM.UPDATABLE, ORM.UNIQUE)
+	ORM.RegisterTableColumn("EmailConfirmed", "EmailConfirmed", ORM.UPDATABLE)
+	ORM.RegisterTableColumn("Joined", "Joined")
+	ORM.RegisterTableColumn("LastLogin", "LastLogin", ORM.UPDATABLE)
+	ORM.RegisterTableColumn("LastActive", "LastActive", ORM.UPDATABLE)
 }
