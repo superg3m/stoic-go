@@ -11,7 +11,8 @@ const ( // ORM_Flags
 
 type Attribute struct {
 	MemberName string
-	ColumnName string   // The name of the column in the database
+	ColumnName string // The name of the column in the database
+	TypeName   string
 	Flags      ORM_FLAG // Bit flag to store Nullable, Updatable, etc.
 }
 

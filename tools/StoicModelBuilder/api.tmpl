@@ -82,7 +82,7 @@ func init() {
 	Router.RegisterApiEndpoint("{{ .TableName }}/Create", Create{{ .TableName }}, "POST",
 		Router.MiddlewareValidParams({{ range .Attributes }}"{{ .Name }}", {{ end }}),
 	)
-	Router.RegisterApiEndpoint("{{ .TableName }}/Update", Update{{ .TableName }}, "PUT",
+	Router.RegisterApiEndpoint("{{ .TableName }}/Update", Update{{ .TableName }}, "PATCH",
 		Router.MiddlewareValidParams("id", {{ range .Attributes }}"{{ .Name }}", {{ end }}),
 	)
 	Router.RegisterApiEndpoint("{{ .TableName }}/Delete", Delete{{ .TableName }}, "DELETE",

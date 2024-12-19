@@ -16,6 +16,17 @@ type {{ .TableName }} struct {
 	{{- end }}
 }
 
+{{- range .Attributes }}
+func From{{ .Name }} { // primaryKey(composite too)
+
+}
+ORM.RegisterTableColumn("{{ .Name }}", "{{ .DBColumn }}", {{ .Flags }})
+{{- end }}
+
+func From{{ .Name }} { // uniques (composite too)
+
+}
+
 func New() *{{ .TableName }} {
 	ret := new({{ .TableName }})
 

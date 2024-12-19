@@ -5,6 +5,10 @@ func (model {{ .TableName }}) CanCreate() bool {
 	return true
 }
 
+func (model {{ .TableName }}) CanRead() bool {
+	return true
+}
+
 func (model {{ .TableName }}) CanUpdate() bool {
 	return true
 }
@@ -15,6 +19,10 @@ func (model {{ .TableName }}) CanDelete() bool {
 
 func (model {{ .TableName }}) Create() {
 	ORM.Create(&model)
+
+
+func (model {{ .TableName }}) Read() {
+	ORM.Read(&model)
 }
 
 func (model {{ .TableName }}) Update() {

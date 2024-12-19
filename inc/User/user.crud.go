@@ -16,7 +16,15 @@ func (u User) CanCreate() bool {
 }
 
 func (u User) CanRead() bool {
-	return true
+	if u.ID >= 1 {
+		return true
+	}
+
+	if Utility.ValidEmail(u.Email) {
+		return true
+	}
+
+	return false
 }
 
 func (u User) CanUpdate() bool {

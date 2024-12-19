@@ -9,6 +9,7 @@ import (
 type MemberAttributeMap map[string]Attribute // Key: StructMemberName
 
 var tempTableName string
+var tempTypes map[string]string
 var tempAutoIncrementFound bool
 var globalTable map[string]MemberAttributeMap // Key: TableName
 
@@ -17,8 +18,9 @@ func init() {
 	tempAutoIncrementFound = false
 }
 
-func RegisterTableName(tableName string) {
-	tempTableName = tableName
+func RegisterTableName(table InterfaceCRUD) {
+	tempTableName = Utility.GetTypeName(table)
+	tempTypes = Utility.GetStructMemberTypes(table, excludeList...)
 }
 
 func RegisterTableColumn(memberName string, columnName string, flags ...ORM_FLAG) {
@@ -34,6 +36,7 @@ func RegisterTableColumn(memberName string, columnName string, flags ...ORM_FLAG
 	attribute := Attribute{
 		MemberName: memberName,
 		ColumnName: columnName,
+		TypeName:   tempTypes[memberName],
 		Flags:      finalFlag,
 	}
 
