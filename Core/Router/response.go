@@ -12,8 +12,9 @@ type StoicResponse struct {
 	http.ResponseWriter
 }
 
-func (response *StoicResponse) SetError(msg string) {
+func (response *StoicResponse) SetError(fmtMessage string, args ...interface{}) {
 	response.WriteHeader(http.StatusInternalServerError)
+	msg := fmt.Sprintf(fmtMessage, args...)
 	_, err := fmt.Fprintf(response, "%s", msg)
 	if err != nil {
 		Utility.Assert(false)

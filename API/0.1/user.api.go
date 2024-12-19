@@ -36,7 +36,7 @@ func updateUser(request *Router.StoicRequest, response Router.StoicResponse) {
 
 	user := User.FromID(id)
 	if user == nil {
-		response.SetError(fmt.Sprint("User does not exists"))
+		response.SetError("User does not exists")
 		return
 	}
 
@@ -45,7 +45,10 @@ func updateUser(request *Router.StoicRequest, response Router.StoicResponse) {
 	user.Password = password
 	user.EmailConfirmed = emailConfirmed
 	user.LastLogin = Utility.NewTime(time.Now())
-	user.Update()
+	update := user.Update()
+	if update.IsBad() {
+		response.SetError("Failed to update user | %s", update.GetErrorMsg())
+	}
 
 	response.SetData("User Updated Successfully!")
 }
