@@ -14,7 +14,6 @@ func createUser(request *Router.StoicRequest, response Router.StoicResponse) {
 	user.Username = username
 	user.Email = email
 	user.Password = password
-	// user.Joined = time.Now()
 	user.Create()
 
 	//ORM.Delete(user)

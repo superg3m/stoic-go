@@ -156,7 +156,12 @@ func main() {
 	for _, file := range files {
 		sqlUpCommands, _ := getSqlCommandsFromFile(mode, file)
 
-		Utility.LogSuccess("Migration: %s", file)
+		if mode == MIGRATION_MODE_UP {
+			Utility.LogSuccess("Migration Up: %s", file)
+		} else {
+			Utility.LogDebug("Migration Down: %s", file)
+		}
+
 		for _, element := range sqlUpCommands {
 			_, err := ORM.GetInstance().Exec(element)
 			Utility.AssertOnError(err)

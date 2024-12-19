@@ -36,6 +36,7 @@ func New() *User {
 	user.Password = ""
 	user.Email = ""
 	user.EmailConfirmed = false
+	user.Joined = time.Now()
 
 	return user
 }
@@ -80,6 +81,7 @@ func init() {
 	ORM.RegisterTableColumn("Password", "password", ORM.UPDATABLE)
 	ORM.RegisterTableColumn("Email", "email", ORM.UPDATABLE, ORM.UNIQUE)
 	ORM.RegisterTableColumn("EmailConfirmed", "email_confirmed", ORM.UPDATABLE)
+	ORM.RegisterTableColumn("Joined", "joined", ORM.UPDATABLE)
 
 	// ORM.RegisterTableColumn("Joined", "joined", ORM.NULLABLE)
 	// ORM.RegisterTableColumn("LastActive", "last_active", ORM.NULLABLE)
