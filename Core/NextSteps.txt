@@ -61,3 +61,14 @@ Create and Delete works!
 Delete might only want to delete on the priary key but idk we will see right now it checks all fields
 
 Update now works
+
+
+BRO you can auto generate
+fromID
+fromEmail and all of that by using Read()
+
+The way you do it is by knowing what is primary key including composite keys
+then knowing what is unique. This is fucking massive btw
+
+I need to figure out how to name functions generated composite keys
+FromID_Email_Password() I think just put a underscore

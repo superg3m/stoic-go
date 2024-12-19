@@ -1,12 +1,17 @@
 package User
 
 import (
+	"github.com/superg3m/stoic-go/Core/Utility"
 	"reflect"
 
 	"github.com/superg3m/stoic-go/Core/ORM"
 )
 
 func (u User) CanCreate() bool {
+	if !Utility.ValidEmail(u.Email) {
+		return false
+	}
+
 	return true
 }
 

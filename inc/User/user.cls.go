@@ -2,6 +2,7 @@ package User
 
 import (
 	"errors"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/superg3m/stoic-go/Core/ORM"
@@ -16,14 +17,14 @@ var (
 type User struct {
 	DB *sqlx.DB
 
-	ID             int // Not updatable
+	ID             int
 	Username       string
 	Password       string
 	Email          string
 	EmailConfirmed bool
-	// Joined         time.Time
-	// LastActive     time.Time
-	// LastLogin      time.Time
+	Joined         time.Time
+	LastActive     time.Time
+	LastLogin      time.Time
 }
 
 func New() *User {
@@ -66,7 +67,7 @@ func init() {
 	ORM.RegisterTableColumn("ID", "id", ORM.KEY, ORM.AUTO_INCREMENT)
 	ORM.RegisterTableColumn("Username", "username", ORM.UPDATABLE)
 	ORM.RegisterTableColumn("Password", "password", ORM.UPDATABLE)
-	ORM.RegisterTableColumn("Email", "email", ORM.UPDATABLE)
+	ORM.RegisterTableColumn("Email", "email", ORM.UPDATABLE, ORM.UNIQUE)
 	ORM.RegisterTableColumn("EmailConfirmed", "email_confirmed", ORM.UPDATABLE)
 
 	// ORM.RegisterTableColumn("Joined", "joined", ORM.NULLABLE)

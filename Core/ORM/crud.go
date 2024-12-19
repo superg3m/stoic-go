@@ -6,16 +6,28 @@ import (
 
 type InterfaceCRUD interface {
 	CanCreate() bool
+	CanRead() bool
 	CanUpdate() bool
 	CanDelete() bool
+
 	Create()
+	Read()
 	Update()
 	Delete()
+
 	SetCache()
 	GetCacheDiff() []string
 }
 
 var excludeList = []string{"DB"}
+
+func Read[T InterfaceCRUD](model *T) {
+	Utility.AssertMsg((*model).CanRead(), "CanRead() returned false")
+
+	_, err := ReadRecord(GetInstance(), model)
+
+	Utility.AssertOnError(err)
+}
 
 func Update[T InterfaceCRUD](model *T) {
 	Utility.AssertMsg((*model).CanUpdate(), "CanUpdate() returned false")
@@ -48,7 +60,7 @@ func Create[T InterfaceCRUD](model *T) {
 		Utility.Assert(exists)
 	}
 
-	result, err := InsertRecord(GetInstance(), model)
+	result, err := CreateRecord(GetInstance(), model)
 
 	if hasAutoIncrement && err == nil {
 		id, _ := result.LastInsertId()

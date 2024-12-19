@@ -15,65 +15,7 @@ import (
 // postgres
 // sql_lite
 
-func DeleteRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
-	tableName := Utility.GetTypeName(model)
-	fieldNames := getDBColumnNames(tableName, *model)
-	Utility.Assert(len(fieldNames) > 0)
-
-	var conditions []string
-	values := Utility.GetStructValues(*model, excludeList...)
-
-	for _, fieldName := range fieldNames {
-		conditions = append(conditions, fmt.Sprintf("%s = ?", fieldName))
-	}
-
-	query := fmt.Sprintf(
-		"DELETE FROM %s WHERE %s",
-		tableName,
-		strings.Join(conditions, " AND "),
-	)
-
-	result, execErr := db.Exec(query, values...)
-	if execErr != nil {
-		return result, fmt.Errorf("failed to execute query: %w", execErr)
-	}
-
-	return result, nil
-}
-
-func UpdateRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
-	tableName := Utility.GetTypeName(*model)
-	fieldNames := getDBColumnNames(tableName, *model)
-	Utility.Assert(len(fieldNames) > 0)
-
-	values := Utility.GetStructValues(*model, excludeList...)
-
-	keyField := fieldNames[0] // Get the primary key
-	updateFields := fieldNames[1:]
-	updateValues := values[1:]
-	keyValue := values[0]
-
-	var updates []string
-	for _, fieldName := range updateFields {
-		updates = append(updates, fmt.Sprintf("%s = ?", fieldName))
-	}
-
-	query := fmt.Sprintf(
-		"UPDATE %s SET %s WHERE %s = ?",
-		tableName,
-		strings.Join(updates, ", "),
-		keyField,
-	)
-
-	result, execErr := db.Exec(query, append(updateValues, keyValue)...)
-	if execErr != nil {
-		return result, fmt.Errorf("failed to execute query: %w", execErr)
-	}
-
-	return result, nil
-}
-
-func InsertRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
+func CreateRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
 	tableName := Utility.GetTypeName(*model)
 	fieldNames := Utility.GetStructMemberNames(*model, excludeList...)
 	Utility.Assert(len(fieldNames) > 0)
@@ -110,6 +52,76 @@ func InsertRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
 	result, execErr := db.Exec(query, newValues...)
 	if execErr != nil {
 		return result, fmt.Errorf("failed to execute query: %s\nError: %w", query, execErr)
+	}
+
+	return result, nil
+}
+
+func ReadRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
+	tableName := Utility.GetTypeName(*model)
+	fieldNames := Utility.GetStructMemberNames(*model, excludeList...)
+	Utility.Assert(len(fieldNames) > 0)
+
+	pKeyQuery, uniqueQueries, _ := buildSQLReadQueries(db, model)
+	pPointer := getPrimaryKeyPointers(tableName, *model)
+	*model = Fetch[T](pKeyQuery, pPointer...)
+
+	return result, nil
+}
+
+func UpdateRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
+	tableName := Utility.GetTypeName(*model)
+	fieldNames := getDBColumnNames(tableName, *model)
+	Utility.Assert(len(fieldNames) > 0)
+
+	values := Utility.GetStructValues(*model, excludeList...)
+
+	keyField := fieldNames[0] // Get the primary key
+	updateFields := fieldNames[1:]
+	updateValues := values[1:]
+	keyValue := values[0]
+
+	var updates []string
+	for _, fieldName := range updateFields {
+		updates = append(updates, fmt.Sprintf("%s = ?", fieldName))
+	}
+
+	query := fmt.Sprintf(
+		"UPDATE %s SET %s WHERE %s = ?",
+		tableName,
+		strings.Join(updates, ", "),
+		keyField,
+	)
+
+	result, execErr := db.Exec(query, append(updateValues, keyValue)...)
+	if execErr != nil {
+		return result, fmt.Errorf("failed to execute query: %w", execErr)
+	}
+
+	return result, nil
+}
+
+func DeleteRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
+	tableName := Utility.GetTypeName(model)
+	fieldNames := getDBColumnNames(tableName, *model)
+	Utility.Assert(len(fieldNames) > 0)
+
+	var conditions []string
+	values := Utility.GetStructValues(*model, excludeList...)
+
+	for _, fieldName := range fieldNames {
+		conditions = append(conditions, fmt.Sprintf("%s = ?", fieldName))
+	}
+
+	query := fmt.Sprintf(
+		"DELETE FROM %s WHERE %s",
+		tableName,
+		strings.Join(conditions, " AND "),
+	)
+
+	result, execErr := db.Exec(query, values...)
+	if execErr != nil {
+		return result, fmt.Errorf("failed to execute query: %w", execErr)
 	}
 
 	return result, nil
@@ -181,4 +193,131 @@ func getDBColumnNames[T InterfaceCRUD](tableName string, model T) []string {
 	}
 
 	return ret
+}
+
+func getPrimaryKeyNames[T InterfaceCRUD](tableName string, model T) []string {
+	var ret []string
+
+	names := Utility.GetStructMemberNames(model, excludeList...)
+	attributes, _ := GetAttributes(tableName)
+	for _, name := range names {
+		attribute := attributes[name]
+		if attribute.isPrimaryKey() {
+			ret = append(ret, name)
+		}
+	}
+
+	return ret
+}
+
+func getUniqueNames[T InterfaceCRUD](tableName string, model T) []string {
+	var ret []string
+
+	names := Utility.GetStructMemberNames(model, excludeList...)
+	attributes, _ := GetAttributes(tableName)
+	for _, name := range names {
+		attribute := attributes[name]
+		if attribute.isUnique() {
+			ret = append(ret, name)
+		}
+	}
+
+	return ret
+}
+
+func getPrimaryKeyDBNames[T InterfaceCRUD](tableName string, model T) []string {
+	var ret []string
+
+	names := Utility.GetStructMemberNames(model, excludeList...)
+	attributes, _ := GetAttributes(tableName)
+	for _, name := range names {
+		attribute := attributes[name]
+		if attribute.isPrimaryKey() {
+			ret = append(ret, name)
+		}
+	}
+
+	return ret
+}
+
+func getUniqueDBNames[T InterfaceCRUD](tableName string, model T) []string {
+	var ret []string
+
+	names := Utility.GetStructMemberNames(model, excludeList...)
+	attributes, _ := GetAttributes(tableName)
+	for _, name := range names {
+		attribute := attributes[name]
+		if attribute.isUnique() {
+			ret = append(ret, name)
+		}
+	}
+
+	return ret
+}
+
+func getPrimaryKeyPointers[T InterfaceCRUD](tableName string, model T) []any {
+	var ret []any
+
+	pointers := Utility.GetStructMemberPointer(model, excludeList...)
+	names := Utility.GetStructMemberNames(model, excludeList...)
+	attributes, _ := GetAttributes(tableName)
+	for i, pointer := range pointers {
+		name := names[i]
+		attribute := attributes[name]
+		if attribute.isPrimaryKey() {
+			ret = append(ret, pointer)
+		}
+	}
+
+	return ret
+}
+
+func getUniquePointers[T InterfaceCRUD](tableName string, model T) []any {
+	var ret []any
+
+	pointers := Utility.GetStructMemberPointer(model, excludeList...)
+	names := Utility.GetStructMemberNames(model, excludeList...)
+	attributes, _ := GetAttributes(tableName)
+	for i, pointer := range pointers {
+		name := names[i]
+		attribute := attributes[name]
+		if attribute.isUnique() {
+			ret = append(ret, pointer)
+		}
+	}
+
+	return ret
+}
+
+func buildSQLReadQueries[T InterfaceCRUD](db *sqlx.DB, model *T) (primaryQuery string, uniqueQueries []string, err error) {
+	tableName := Utility.GetTypeName(*model)
+	fieldNames := Utility.GetStructMemberNames(*model, excludeList...)
+	Utility.Assert(len(fieldNames) > 0)
+
+	primaryKeyNames := getPrimaryKeyDBNames(tableName, *model)
+	if len(primaryKeyNames) == 0 {
+		return "", nil, fmt.Errorf("no primary keys defined for table: %s", tableName)
+	}
+
+	primaryPlaceholders := make([]string, len(primaryKeyNames))
+	for i := range primaryPlaceholders {
+		primaryPlaceholders[i] = "?"
+	}
+	primaryQuery = fmt.Sprintf(
+		"SELECT * FROM %s WHERE %s",
+		tableName,
+		strings.Join(primaryKeyNames, " = ? AND ")+" = ?",
+	)
+
+	uniqueKeyGroups := getUniqueDBNames(tableName, *model)
+	for _, uniqueKey := range uniqueKeyGroups {
+		uniqueQuery := fmt.Sprintf(
+			"SELECT * FROM %s WHERE %s = ?",
+			tableName,
+			uniqueKey,
+		)
+		uniqueQueries = append(uniqueQueries, uniqueQuery)
+	}
+
+	return primaryQuery, uniqueQueries, nil
 }
