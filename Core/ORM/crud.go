@@ -30,10 +30,10 @@ func Create[T InterfaceCRUD](model T) CrudReturn {
 		return ret
 	}
 
-	MemberNames := getModelMemberNames(model)
 	hasAutoIncrement := false
+	memberNames := getModelMemberNames(model)
 	tableName := getModelTableName(model)
-	for _, memberName := range MemberNames {
+	for _, memberName := range memberNames {
 		attribute, exists := getAttribute(tableName, memberName)
 
 		if attribute.isAutoIncrement() {
@@ -43,7 +43,7 @@ func Create[T InterfaceCRUD](model T) CrudReturn {
 		Utility.Assert(exists)
 	}
 
-	result, err := CreateRecord(GetInstance(), model)
+	result, err := CreateRecord(GetInstance(), tableName, model)
 	if err != nil {
 		ret.setError(err)
 		return ret
@@ -66,7 +66,9 @@ func Read[T InterfaceCRUD](model T) CrudReturn {
 		return ret
 	}
 
-	err := ReadRecord(GetInstance(), model)
+	tableName := getModelTableName(model)
+
+	err := ReadRecord(GetInstance(), tableName, model)
 	if err != nil {
 		ret.setError(err)
 		return ret
@@ -90,7 +92,7 @@ func Update[T InterfaceCRUD](model T) CrudReturn {
 		Utility.AssertMsg(attribute.isUpdatable(), "%s.%s is not updatable", tableName, member)
 	}
 
-	_, err := UpdateRecord(GetInstance(), model)
+	_, err := UpdateRecord(GetInstance(), tableName, model)
 	if err != nil {
 		ret.setError(err)
 		return ret
@@ -110,7 +112,8 @@ func Delete[T InterfaceCRUD](model T) CrudReturn {
 		return ret
 	}
 
-	_, err := DeleteRecord(GetInstance(), model)
+	tableName := getModelTableName(model)
+	_, err := DeleteRecord(GetInstance(), tableName, model)
 	if err != nil {
 		ret.setError(err)
 		return ret

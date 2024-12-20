@@ -18,8 +18,7 @@ import (
 // postgres
 // sql_lite
 
-func CreateRecord[T InterfaceCRUD](db *sqlx.DB, model T) (sql.Result, error) {
-	tableName := getModelTableName(model)
+func CreateRecord[T InterfaceCRUD](db *sqlx.DB, tableName string, model T) (sql.Result, error) {
 	fieldNames := getModelMemberNames(model)
 	Utility.Assert(len(fieldNames) > 0)
 
@@ -63,8 +62,7 @@ func CreateRecord[T InterfaceCRUD](db *sqlx.DB, model T) (sql.Result, error) {
 	return result, nil
 }
 
-func ReadRecord[T InterfaceCRUD](db *sqlx.DB, model T) error {
-	tableName := getModelTableName(model)
+func ReadRecord[T InterfaceCRUD](db *sqlx.DB, tableName string, model T) error {
 	fieldNames := getModelMemberNames(model)
 	Utility.Assert(len(fieldNames) > 0)
 
@@ -98,8 +96,7 @@ func ReadRecord[T InterfaceCRUD](db *sqlx.DB, model T) error {
 	return errors.New("failed to fetch record")
 }
 
-func UpdateRecord[T InterfaceCRUD](db *sqlx.DB, model T) (sql.Result, error) {
-	tableName := getModelTableName(model)
+func UpdateRecord[T InterfaceCRUD](db *sqlx.DB, tableName string, model T) (sql.Result, error) {
 	fieldNames := getDBColumnNames(tableName, model)
 	Utility.Assert(len(fieldNames) > 0)
 
@@ -130,8 +127,7 @@ func UpdateRecord[T InterfaceCRUD](db *sqlx.DB, model T) (sql.Result, error) {
 	return result, nil
 }
 
-func DeleteRecord[T InterfaceCRUD](db *sqlx.DB, model T) (sql.Result, error) {
-	tableName := getModelTableName(model)
+func DeleteRecord[T InterfaceCRUD](db *sqlx.DB, tableName string, model T) (sql.Result, error) {
 	fieldNames := getPrimaryKeyDBNames(tableName, model)
 	Utility.Assert(len(fieldNames) > 0)
 
