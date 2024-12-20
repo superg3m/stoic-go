@@ -23,10 +23,10 @@ type InterfaceCRUD interface {
 
 var excludeList = []string{"DB"}
 
-func Create[T InterfaceCRUD](model T) CrudReturn {
+func Create[T InterfaceCRUD](model *T) CrudReturn {
 	stackModel := Utility.DereferencePointer(model)
 	ret := CreateCRUD()
-	if !model.CanCreate() {
+	if !(*model).CanCreate() {
 		ret.setError(errors.New("CanCreate() returned false"))
 		return ret
 	}
@@ -55,14 +55,14 @@ func Create[T InterfaceCRUD](model T) CrudReturn {
 		Utility.UpdateMemberValue(model, "ID", id)
 	}
 
-	model.SetCache()
+	(*model).SetCache()
 
 	return ret
 }
 
-func Read[T InterfaceCRUD](model T) CrudReturn {
+func Read[T InterfaceCRUD](model *T) CrudReturn {
 	ret := CreateCRUD()
-	if !model.CanRead() {
+	if !(*model).CanRead() {
 		ret.setError(errors.New("CanRead() returned false"))
 		return ret
 	}
@@ -76,16 +76,16 @@ func Read[T InterfaceCRUD](model T) CrudReturn {
 	return ret
 }
 
-func Update[T InterfaceCRUD](model T) CrudReturn {
-	stackModel := Utility.DereferencePointer(model)
+func Update[T InterfaceCRUD](model *T) CrudReturn {
+	stackModel := Utility.DereferencePointer(*model)
 	ret := CreateCRUD()
-	if !model.CanUpdate() {
+	if !(*model).CanUpdate() {
 		ret.setError(errors.New("CanUpdate() returned false"))
 		return ret
 	}
 
 	tableName := Utility.GetTypeName(stackModel)
-	membersChanged := model.GetCacheDiff()
+	membersChanged := (*model).GetCacheDiff()
 
 	for _, member := range membersChanged {
 		attribute, _ := getAttribute(tableName, member)
@@ -101,9 +101,9 @@ func Update[T InterfaceCRUD](model T) CrudReturn {
 	return ret
 }
 
-func Delete[T InterfaceCRUD](model T) CrudReturn {
+func Delete[T InterfaceCRUD](model *T) CrudReturn {
 	ret := CreateCRUD()
-	Utility.AssertMsg(model.CanDelete(), "CanDelete() returned false")
+	Utility.AssertMsg((*model).CanDelete(), "CanDelete() returned false")
 
 	read := Read(model)
 	if read.IsBad() {

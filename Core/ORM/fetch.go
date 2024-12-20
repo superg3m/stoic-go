@@ -3,10 +3,18 @@ package ORM
 import (
 	"fmt"
 	"github.com/superg3m/stoic-go/Core/Utility"
+	"reflect"
 )
 
 func Fetch[T InterfaceCRUD](sql string, bindParams ...any) (T, error) {
-	dest := *new(T)
+	var dest T
+
+	tType := reflect.TypeOf(dest)
+	if tType.Kind() == reflect.Ptr {
+		dest = reflect.New(tType.Elem()).Interface().(T)
+	} else {
+		dest = *new(T)
+	}
 
 	row := GetInstance().QueryRowx(sql, bindParams...)
 

@@ -1,6 +1,7 @@
 package Utility
 
 import (
+	"errors"
 	"reflect"
 	"slices"
 )
@@ -157,4 +158,23 @@ func DereferencePointer(p any) any {
 	AssertMsg(v.Kind() == reflect.Ptr, "argument must be a pointer")
 
 	return v.Elem().Interface()
+}
+
+func SetToNil[T any](model *T) error {
+	if model == nil {
+		return errors.New("model cannot be nil")
+	}
+
+	modelValue := reflect.ValueOf(model)
+	if modelValue.Kind() != reflect.Ptr {
+		return errors.New("model must be a pointer")
+	}
+
+	elem := modelValue.Elem()
+	if elem.Kind() == reflect.Ptr || elem.Kind() == reflect.Interface {
+		modelValue.Elem().Set(reflect.Zero(elem.Type()))
+		return nil
+	}
+
+	return errors.New("model type cannot be set to nil")
 }
