@@ -75,7 +75,6 @@ func ReadRecord[T InterfaceCRUD](db *sqlx.DB, model *T) error {
 	{
 		pPointer := getPrimaryKeyPointers(tableName, *model)
 		temp, err := Fetch[T](pKeyQuery, pPointer...)
-		Utility.AssertOnError(err)
 		if err == nil {
 			*model = temp
 			return nil
@@ -89,7 +88,6 @@ func ReadRecord[T InterfaceCRUD](db *sqlx.DB, model *T) error {
 		for i, pointer := range uPointer {
 			query := uniqueQueries[i]
 			temp, err := Fetch[T](query, pointer)
-			Utility.AssertOnError(err)
 			if err == nil {
 				*model = temp
 				return nil
@@ -134,11 +132,11 @@ func UpdateRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
 
 func DeleteRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
 	tableName := getModelTableName(*model)
-	fieldNames := getDBColumnNames(tableName, *model)
+	fieldNames := getPrimaryKeyDBNames(tableName, *model)
 	Utility.Assert(len(fieldNames) > 0)
 
 	var conditions []string
-	values := getModelValues(*model)
+	values := getPrimaryKeyPointers(tableName, *model)
 
 	for _, fieldName := range fieldNames {
 		conditions = append(conditions, fmt.Sprintf("%s = ?", fieldName))

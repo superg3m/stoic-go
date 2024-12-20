@@ -36,7 +36,10 @@ func (u *User) CanDelete() bool {
 }
 
 func (u *User) Create() ORM.CrudReturn {
-	return ORM.Create(&u)
+	temp := u
+	ret := ORM.Create(&temp)
+	*u = *temp
+	return ret
 }
 
 func (u *User) Read() ORM.CrudReturn {
@@ -47,7 +50,10 @@ func (u *User) Read() ORM.CrudReturn {
 }
 
 func (u *User) Update() ORM.CrudReturn {
-	return ORM.Update(&u)
+	temp := u
+	ret := ORM.Update(&temp)
+	*u = *temp
+	return ret
 }
 
 func (u *User) Delete() ORM.CrudReturn {
@@ -61,7 +67,7 @@ func (u *User) SetCache() {
 func (u *User) GetCacheDiff() []string {
 	var mismatchedFields []string
 
-	v1 := reflect.ValueOf(u)
+	v1 := reflect.ValueOf(*u)
 	v2 := reflect.ValueOf(cache)
 	userType := v1.Type()
 

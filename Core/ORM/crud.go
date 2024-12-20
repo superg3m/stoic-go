@@ -24,16 +24,15 @@ type InterfaceCRUD interface {
 var excludeList = []string{"DB"}
 
 func Create[T InterfaceCRUD](model *T) CrudReturn {
-	stackModel := Utility.DereferencePointer(model)
 	ret := CreateCRUD()
 	if !(*model).CanCreate() {
 		ret.setError(errors.New("CanCreate() returned false"))
 		return ret
 	}
 
-	MemberNames := Utility.GetStructMemberNames(stackModel, excludeList...)
+	MemberNames := getModelMemberNames(*model)
 	hasAutoIncrement := false
-	tableName := Utility.GetTypeName(stackModel)
+	tableName := getModelTableName(*model)
 	for _, memberName := range MemberNames {
 		attribute, exists := getAttribute(tableName, memberName)
 
@@ -52,7 +51,7 @@ func Create[T InterfaceCRUD](model *T) CrudReturn {
 
 	if hasAutoIncrement {
 		id, _ := result.LastInsertId()
-		Utility.UpdateMemberValue(model, "ID", id)
+		Utility.UpdateMemberValue(*model, "ID", id)
 	}
 
 	(*model).SetCache()
@@ -77,14 +76,13 @@ func Read[T InterfaceCRUD](model *T) CrudReturn {
 }
 
 func Update[T InterfaceCRUD](model *T) CrudReturn {
-	stackModel := Utility.DereferencePointer(*model)
 	ret := CreateCRUD()
 	if !(*model).CanUpdate() {
 		ret.setError(errors.New("CanUpdate() returned false"))
 		return ret
 	}
 
-	tableName := Utility.GetTypeName(stackModel)
+	tableName := getModelTableName(*model)
 	membersChanged := (*model).GetCacheDiff()
 
 	for _, member := range membersChanged {

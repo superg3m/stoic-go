@@ -2,8 +2,6 @@ package User
 
 import (
 	"errors"
-	"fmt"
-	"github.com/superg3m/stoic-go/Core/Utility"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -52,9 +50,6 @@ func FromID(id int) (*User, error) {
 	if read.IsBad() {
 		return nil, read.GetError()
 	}
-
-	fmt.Println("Email: ", user.Email)
-	Utility.Assert(false)
 
 	user.SetCache()
 
