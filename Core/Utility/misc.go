@@ -62,8 +62,6 @@ func CastAny[T any](v any) T {
 			} else {
 				result = 0
 			}
-		default:
-			AssertMsg(false, "unsupported conversion to int from type: %T", v)
 		}
 	case *string:
 		switch v := v.(type) {
@@ -75,8 +73,6 @@ func CastAny[T any](v any) T {
 			result = strconv.FormatBool(v)
 		case string:
 			result = v
-		default:
-			AssertMsg(false, "unsupported conversion to string from type: %T", v)
 		}
 	case *bool:
 		switch v := v.(type) {
@@ -90,8 +86,6 @@ func CastAny[T any](v any) T {
 			result = v != 0
 		case float64:
 			result = v != 0.0
-		default:
-			AssertMsg(false, "unsupported conversion to bool from type: %T", v)
 		}
 	case *float64:
 		switch v := v.(type) {
@@ -109,14 +103,12 @@ func CastAny[T any](v any) T {
 			} else {
 				result = 0.0
 			}
-		default:
-			AssertMsg(false, "unsupported conversion to float64 from type: %T", v)
 		}
-	default:
-		AssertMsg(false, "unsupported target type: %T", any(new(T)))
 	}
 
-	return result.(T)
+	ret, ok := result.(T)
+	Assert(ok)
+	return ret
 }
 
 func findFileAtDepth(filename string, maxDepth int) (string, error) {

@@ -49,6 +49,23 @@ func UpdateMemberValue(structure HeapAny, memberName string, data HeapAny) {
 	}
 }
 
+func GetMemberValue(structure StackAny, member string) any {
+	AssertMsg(TypeIsStructure(structure), "structure is not of type structure")
+
+	val := reflect.ValueOf(structure)
+	typ := val.Type()
+
+	for i := 0; i < typ.NumField(); i++ {
+		field := typ.Field(i)
+		if field.Name == member {
+			return val.Field(i).Interface()
+		}
+	}
+
+	Assert(false)
+	return nil
+}
+
 func TypeIsStructure(structure any) bool {
 	typeKind := reflect.TypeOf(structure).Kind()
 
