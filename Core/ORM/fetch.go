@@ -2,31 +2,30 @@ package ORM
 
 import (
 	"fmt"
-	"reflect"
-
 	"github.com/superg3m/stoic-go/Core/Utility"
+	"reflect"
 )
 
-func Fetch[T InterfaceCRUD](sql string, bindParams ...any) (*T, error) {
-	var dest T
+func Fetch[T InterfaceCRUD](sql string, bindParams ...any) (T, error) {
+	dest := *new(T)
 
-	v := reflect.ValueOf(&dest).Elem()
+	v := reflect.ValueOf(dest).Elem()
 	Utility.AssertMsg(v.Kind() == reflect.Struct, "Fetch: type %T is not a struct", dest)
 	row := GetInstance().QueryRowx(sql, bindParams...)
 
 	pointers := Utility.GetStructMemberPointer(&dest, excludeList...)
 	err := row.Scan(pointers...)
 	if err != nil {
-		return nil, err
+		return dest, err
 	}
 
 	dest.SetCache()
 
-	return &dest, nil
+	return dest, nil
 }
 
-func FetchAll[T InterfaceCRUD](sql string, bindParams ...any) ([]*T, error) {
-	var results []*T
+func FetchAll[T InterfaceCRUD](sql string, bindParams ...any) ([]T, error) {
+	var results []T
 
 	rows, errQuery := GetInstance().Queryx(sql, bindParams...)
 	if errQuery != nil {
@@ -36,13 +35,13 @@ func FetchAll[T InterfaceCRUD](sql string, bindParams ...any) ([]*T, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var dest T
+		dest := *new(T)
 
 		pointers := Utility.GetStructMemberPointer(&dest, excludeList...)
 		err := rows.Scan(pointers...)
 		Utility.AssertOnErrorMsg(err, fmt.Sprintf("Fetch: failed to scan row into struct: %s", err))
 
-		results = append(results, &dest)
+		results = append(results, dest)
 	}
 
 	if err := rows.Err(); err != nil {

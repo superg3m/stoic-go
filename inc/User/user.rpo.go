@@ -28,7 +28,7 @@ func GetUserList() (string, error) {
 	WHERE UserRole.ID IS NOT NULL
 	`
 
-	admins, err := ORM.FetchAll[User](sql)
+	admins, err := ORM.FetchAll[*User](sql)
 	if err != nil {
 		fmt.Printf("Error getting admins: %s\n", err)
 		return "", fmt.Errorf("getExcludedUserList: %w", err)

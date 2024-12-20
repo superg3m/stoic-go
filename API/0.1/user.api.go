@@ -1,7 +1,6 @@
 package API
 
 import (
-	"fmt"
 	"github.com/superg3m/stoic-go/Core/Router"
 	"github.com/superg3m/stoic-go/Core/Utility"
 	"github.com/superg3m/stoic-go/inc/User"
@@ -19,8 +18,7 @@ func createUser(request *Router.StoicRequest, response Router.StoicResponse) {
 	user.Email = email
 	create := user.Create()
 	if create.IsBad() {
-		msg := fmt.Sprint("Failed to create user | ", create.GetErrorMsg())
-		response.SetError(msg)
+		response.SetError("Failed to create user | %s", create.GetError())
 		return
 	}
 
@@ -47,10 +45,29 @@ func updateUser(request *Router.StoicRequest, response Router.StoicResponse) {
 	user.LastLogin = Utility.NewTime(time.Now())
 	update := user.Update()
 	if update.IsBad() {
-		response.SetError("Failed to update user | %s", update.GetErrorMsg())
+		response.SetError("Failed to update user | %s", update.GetError())
+		return
 	}
 
 	response.SetData("User Updated Successfully!")
+}
+
+func deleteUser(request *Router.StoicRequest, response Router.StoicResponse) {
+	id := request.GetIntParam("id")
+
+	user, err := User.FromID(id)
+	if err != nil {
+		response.SetError(err.Error())
+		return
+	}
+
+	del := user.Delete()
+	if del.IsBad() {
+		response.SetError("Failed to delete user | %s", del.GetError())
+		return
+	}
+
+	response.SetData("User Deleted Successfully!")
 }
 
 func sendUserMetrics(request *Router.StoicRequest, response Router.StoicResponse) {
@@ -64,6 +81,10 @@ func init() {
 
 	Router.RegisterApiEndpoint("/User/Update", updateUser, "POST",
 		Router.MiddlewareValidParams("id", "username", "email", "password", "emailConfirmed"),
+	)
+
+	Router.RegisterApiEndpoint("/User/Delete", deleteUser, "POST",
+		Router.MiddlewareValidParams("id"),
 	)
 
 	Router.RegisterApiEndpoint("/User/Metric", sendUserMetrics, "POST")

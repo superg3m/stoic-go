@@ -151,3 +151,10 @@ func GetStructValues(structure StackAny, excludeList ...string) []any {
 
 	return values
 }
+
+func DereferencePointer(p any) any {
+	v := reflect.ValueOf(p)
+	AssertMsg(v.Kind() == reflect.Ptr, "argument must be a pointer")
+
+	return v.Elem().Interface()
+}

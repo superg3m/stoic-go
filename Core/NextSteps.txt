@@ -55,20 +55,8 @@ Composite Keys
 
 - Make errors a bigger part the setError should take an error and I should be able to format it easily
 Remove all individual panics
-- trasfer Utility.AssertMsg() to not use a format function as second arg anymore
-
-Create and Delete works!
-Delete might only want to delete on the priary key but idk we will see right now it checks all fields
-
-Update now works
+- transfer Utility.AssertMsg() to not use a format function as second arg anymore
 
 
-BRO you can auto generate
-fromID
-fromEmail and all of that by using Read()
-
-The way you do it is by knowing what is primary key including composite keys
-then knowing what is unique. This is fucking massive btw
-
-I need to figure out how to name functions generated composite keys
-FromID_Email_Password() I think just put a underscore
+I need to do more pre computation of the FromX methods so that i can just range over them and I know the name
+it will be more flexible the template suff is a mess you need to do a rewrite

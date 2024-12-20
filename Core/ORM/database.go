@@ -18,12 +18,14 @@ import (
 // postgres
 // sql_lite
 
-func CreateRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
-	tableName := Utility.GetTypeName(*model)
-	fieldNames := Utility.GetStructMemberNames(*model, excludeList...)
+func CreateRecord[T InterfaceCRUD](db *sqlx.DB, model T) (sql.Result, error) {
+	stackModel := Utility.DereferencePointer(model)
+
+	tableName := Utility.GetTypeName(stackModel)
+	fieldNames := Utility.GetStructMemberNames(stackModel, excludeList...)
 	Utility.Assert(len(fieldNames) > 0)
 
-	dbNames := getDBColumnNames(tableName, *model)
+	dbNames := getDBColumnNames(tableName, stackModel)
 	placeholders := make([]string, len(dbNames))
 	for i := range placeholders {
 		placeholders[i] = "?"
@@ -63,9 +65,11 @@ func CreateRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
 	return result, nil
 }
 
-func ReadRecord[T InterfaceCRUD](db *sqlx.DB, model *T) error {
-	tableName := Utility.GetTypeName(*model)
-	fieldNames := Utility.GetStructMemberNames(*model, excludeList...)
+func ReadRecord[T InterfaceCRUD](db *sqlx.DB, model T) error {
+	stackModel := Utility.DereferencePointer(model)
+
+	tableName := Utility.GetTypeName(stackModel)
+	fieldNames := Utility.GetStructMemberNames(stackModel, excludeList...)
 	Utility.Assert(len(fieldNames) > 0)
 
 	pKeyQuery, uniqueQueries, _ := buildSQLReadQueries(db, model)
@@ -73,10 +77,11 @@ func ReadRecord[T InterfaceCRUD](db *sqlx.DB, model *T) error {
 	// ----------------------------------------------------------
 
 	{
-		pPointer := getPrimaryKeyPointers(tableName, *model)
-		_, err := Fetch[T](pKeyQuery, pPointer...)
+		pPointer := getPrimaryKeyPointers(tableName, model)
+		temp, err := Fetch[T](pKeyQuery, pPointer...)
+		Utility.AssertOnError(err)
 		if err == nil {
-			model, _ = Fetch[T](pKeyQuery, pPointer...)
+			model = *temp
 			return nil
 		}
 	}
@@ -84,12 +89,13 @@ func ReadRecord[T InterfaceCRUD](db *sqlx.DB, model *T) error {
 	// ----------------------------------------------------------
 
 	{
-		uPointer := getUniquePointers(tableName, *model)
+		uPointer := getUniquePointers(tableName, stackModel)
 		for i, pointer := range uPointer {
 			query := uniqueQueries[i]
-			_, err := Fetch[T](query, pointer)
+			temp, err := Fetch[T](query, pointer)
+			Utility.AssertOnError(err)
 			if err == nil {
-				model, _ = Fetch[T](query, pointer)
+				model = *temp
 				return nil
 			}
 		}
@@ -98,12 +104,14 @@ func ReadRecord[T InterfaceCRUD](db *sqlx.DB, model *T) error {
 	return errors.New("failed to fetch record")
 }
 
-func UpdateRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
-	tableName := Utility.GetTypeName(*model)
-	fieldNames := getDBColumnNames(tableName, *model)
+func UpdateRecord[T InterfaceCRUD](db *sqlx.DB, model T) (sql.Result, error) {
+	stackModel := Utility.DereferencePointer(model)
+
+	tableName := Utility.GetTypeName(stackModel)
+	fieldNames := getDBColumnNames(tableName, stackModel)
 	Utility.Assert(len(fieldNames) > 0)
 
-	values := Utility.GetStructValues(*model, excludeList...)
+	values := Utility.GetStructValues(stackModel, excludeList...)
 
 	keyField := fieldNames[0] // Get the primary key
 	updateFields := fieldNames[1:]
@@ -130,13 +138,15 @@ func UpdateRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
 	return result, nil
 }
 
-func DeleteRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
-	tableName := Utility.GetTypeName(model)
-	fieldNames := getDBColumnNames(tableName, *model)
+func DeleteRecord[T InterfaceCRUD](db *sqlx.DB, model T) (sql.Result, error) {
+	stackModel := Utility.DereferencePointer(model)
+
+	tableName := Utility.GetTypeName(stackModel)
+	fieldNames := getDBColumnNames(tableName, stackModel)
 	Utility.Assert(len(fieldNames) > 0)
 
 	var conditions []string
-	values := Utility.GetStructValues(*model, excludeList...)
+	values := Utility.GetStructValues(stackModel, excludeList...)
 
 	for _, fieldName := range fieldNames {
 		conditions = append(conditions, fmt.Sprintf("%s = ?", fieldName))
@@ -150,7 +160,16 @@ func DeleteRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
 
 	result, execErr := db.Exec(query, values...)
 	if execErr != nil {
-		return result, fmt.Errorf("failed to execute query: %w", execErr)
+		return result, fmt.Errorf("failed to execute query: %s", execErr)
+	}
+
+	rows, err2 := result.RowsAffected()
+	if rows == 0 {
+		return nil, fmt.Errorf("failed to execute query: Zero rows affected")
+	}
+
+	if err2 != nil {
+		return nil, fmt.Errorf("failed to execute query: %s", err2)
 	}
 
 	return result, nil
@@ -211,7 +230,7 @@ func Close() {
 	db = nil
 }
 
-func getDBColumnNames[T InterfaceCRUD](tableName string, model T) []string {
+func getDBColumnNames[T Utility.StackAny](tableName string, model T) []string {
 	var ret []string
 
 	fieldNames := Utility.GetStructMemberNames(model, excludeList...)
@@ -224,7 +243,7 @@ func getDBColumnNames[T InterfaceCRUD](tableName string, model T) []string {
 	return ret
 }
 
-func getPrimaryKeyNames[T InterfaceCRUD](tableName string, model T) []string {
+func getPrimaryKeyNames[T Utility.StackAny](tableName string, model T) []string {
 	var ret []string
 
 	names := Utility.GetStructMemberNames(model, excludeList...)
@@ -239,7 +258,7 @@ func getPrimaryKeyNames[T InterfaceCRUD](tableName string, model T) []string {
 	return ret
 }
 
-func getUniqueNames[T InterfaceCRUD](tableName string, model T) []string {
+func getUniqueNames[T Utility.StackAny](tableName string, model T) []string {
 	var ret []string
 
 	names := Utility.GetStructMemberNames(model, excludeList...)
@@ -254,7 +273,7 @@ func getUniqueNames[T InterfaceCRUD](tableName string, model T) []string {
 	return ret
 }
 
-func getPrimaryKeyDBNames[T InterfaceCRUD](tableName string, model T) []string {
+func getPrimaryKeyDBNames[T Utility.StackAny](tableName string, model T) []string {
 	var ret []string
 
 	names := Utility.GetStructMemberNames(model, excludeList...)
@@ -269,7 +288,7 @@ func getPrimaryKeyDBNames[T InterfaceCRUD](tableName string, model T) []string {
 	return ret
 }
 
-func getUniqueDBNames[T InterfaceCRUD](tableName string, model T) []string {
+func getUniqueDBNames[T Utility.StackAny](tableName string, model T) []string {
 	var ret []string
 
 	names := Utility.GetStructMemberNames(model, excludeList...)
@@ -284,7 +303,7 @@ func getUniqueDBNames[T InterfaceCRUD](tableName string, model T) []string {
 	return ret
 }
 
-func getPrimaryKeyPointers[T InterfaceCRUD](tableName string, model T) []any {
+func getPrimaryKeyPointers[T Utility.StackAny](tableName string, model T) []any {
 	var ret []any
 
 	pointers := Utility.GetStructMemberPointer(&model, excludeList...)
@@ -301,7 +320,7 @@ func getPrimaryKeyPointers[T InterfaceCRUD](tableName string, model T) []any {
 	return ret
 }
 
-func getUniquePointers[T InterfaceCRUD](tableName string, model T) []any {
+func getUniquePointers[T Utility.StackAny](tableName string, model T) []any {
 	var ret []any
 
 	pointers := Utility.GetStructMemberPointer(&model, excludeList...)
@@ -318,12 +337,14 @@ func getUniquePointers[T InterfaceCRUD](tableName string, model T) []any {
 	return ret
 }
 
-func buildSQLReadQueries[T InterfaceCRUD](db *sqlx.DB, model *T) (primaryQuery string, uniqueQueries []string, err error) {
-	tableName := Utility.GetTypeName(*model)
-	fieldNames := Utility.GetStructMemberNames(*model, excludeList...)
+func buildSQLReadQueries[T Utility.StackAny](db *sqlx.DB, model T) (primaryQuery string, uniqueQueries []string, err error) {
+	stackModel := Utility.DereferencePointer(model)
+
+	tableName := Utility.GetTypeName(stackModel)
+	fieldNames := Utility.GetStructMemberNames(stackModel, excludeList...)
 	Utility.Assert(len(fieldNames) > 0)
 
-	primaryKeyNames := getPrimaryKeyDBNames(tableName, *model)
+	primaryKeyNames := getPrimaryKeyDBNames(tableName, model)
 	if len(primaryKeyNames) == 0 {
 		return "", nil, fmt.Errorf("no primary keys defined for table: %s", tableName)
 	}
@@ -338,7 +359,7 @@ func buildSQLReadQueries[T InterfaceCRUD](db *sqlx.DB, model *T) (primaryQuery s
 		strings.Join(primaryKeyNames, " = ? AND ")+" = ?",
 	)
 
-	uniqueKeyGroups := getUniqueDBNames(tableName, *model)
+	uniqueKeyGroups := getUniqueDBNames(tableName, model)
 	for _, uniqueKey := range uniqueKeyGroups {
 		uniqueQuery := fmt.Sprintf(
 			"SELECT * FROM %s WHERE %s = ?",
@@ -351,9 +372,11 @@ func buildSQLReadQueries[T InterfaceCRUD](db *sqlx.DB, model *T) (primaryQuery s
 	return primaryQuery, uniqueQueries, nil
 }
 
-func getCanonicalValues[T InterfaceCRUD](model *T, fieldNames []string) ([]any, error) {
+func getCanonicalValues[T Utility.StackAny](model T, fieldNames []string) ([]any, error) {
+	stackModel := Utility.DereferencePointer(model)
+
 	var formattedTimeValues []any
-	types := Utility.GetStructMemberTypes(*model, excludeList...)
+	types := Utility.GetStructMemberTypes(stackModel, excludeList...)
 
 	for i, fieldName := range fieldNames {
 		fieldType, exists := types[fieldName]
@@ -365,7 +388,7 @@ func getCanonicalValues[T InterfaceCRUD](model *T, fieldNames []string) ([]any, 
 				formattedTimeValues = append(formattedTimeValues, formattedTime)
 			}
 		} else {
-			originalValue := Utility.GetStructValues(*model, excludeList...)
+			originalValue := Utility.GetStructValues(stackModel, excludeList...)
 			formattedTimeValues = append(formattedTimeValues, originalValue[i])
 		}
 	}
