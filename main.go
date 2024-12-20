@@ -56,9 +56,6 @@ func main() {
 	ORM.Connect(DB_ENGINE, dsn)
 	defer ORM.Close()
 
-	siteSettings := Utility.GetSiteSettings()
-	fmt.Println(siteSettings["settings"].(map[string]any)["dbHost"])
-
 	go gracefulShutdown(server)
 
 	Utility.LogDebug(fmt.Sprintf("Starting server on %s", SERVER_PORT))

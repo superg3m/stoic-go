@@ -1,9 +1,8 @@
 package ORM
 
 type CrudReturn struct {
-	err    error
-	errMsg string
-	isBad  bool
+	err   error
+	isBad bool
 }
 
 func CreateCRUD() CrudReturn {
