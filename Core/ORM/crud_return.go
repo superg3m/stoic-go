@@ -8,9 +8,8 @@ type CrudReturn struct {
 
 func CreateCRUD() CrudReturn {
 	ret := CrudReturn{
-		err:    nil,
-		errMsg: "",
-		isBad:  false,
+		err:   nil,
+		isBad: false,
 	}
 
 	return ret
@@ -20,13 +19,9 @@ func (c *CrudReturn) GetError() error {
 	return c.err
 }
 
-func (c *CrudReturn) GetErrorMsg() string {
-	return c.errMsg
-}
-
 func (c *CrudReturn) setError(err error) {
 	c.makeBad()
-	c.errMsg = err.Error()
+	c.err = err
 }
 
 func (c *CrudReturn) makeBad() {
