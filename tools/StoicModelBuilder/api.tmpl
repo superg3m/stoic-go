@@ -11,19 +11,27 @@ func create{{ .TableName }}(request *Router.StoicRequest, response Router.StoicR
 	entity := {{ .TableName }}.New()
 
     {{- range .Attributes }}
-    {{- if eq .Type "string" }}
-    entity.{{ .Name }} = request.GetStringParam("{{ .Name }}")
-    {{- else if eq .Type "int" }}
-    entity.{{ .Name }} = request.GetIntParam("{{ .Name }}")
-    {{- else if eq .Type "bool" }}
-    entity.{{ .Name }} = request.GetBoolParam("{{ .Name }}")
-    {{- else if eq .Type "float" }}
-    entity.{{ .Name }} = request.GetFloatParam("{{ .Name }}")
-    {{- else }}
-    request.GetJsonParam("{{ .Name }}", &entity.{{ .Name }})
-    {{- end }}
+    {{- $isPrimaryKey := false }}
+    {{- range $.PrimaryKeys }}
+        {{- if eq .Name $.Name }}   <!-- Compare with PrimaryKey Name -->
+            {{- $isPrimaryKey = true }}  <!-- Mark it as a Primary Key -->
+        {{- end }}
     {{- end }}
 
+    {{- if not $isPrimaryKey }}  <!-- Only process non-primary key attributes -->
+    {{- if eq .Type "string" }}
+        entity.{{ .Name }} = request.GetStringParam("{{ .Name }}")
+    {{- else if eq .Type "int" }}
+        entity.{{ .Name }} = request.GetIntParam("{{ .Name }}")
+    {{- else if eq .Type "bool" }}
+        entity.{{ .Name }} = request.GetBoolParam("{{ .Name }}")
+    {{- else if eq .Type "float" }}
+        entity.{{ .Name }} = request.GetFloatParam("{{ .Name }}")
+    {{- else }}
+        request.GetJsonParam("{{ .Name }}", &entity.{{ .Name }})
+    {{- end }}
+    {{- end }}
+    {{- end }}
 
 
     create := entity.Create()
@@ -31,7 +39,6 @@ func create{{ .TableName }}(request *Router.StoicRequest, response Router.StoicR
         response.SetError("Failed to create {{ .TableName }} | %s", create.GetErrorMsg())
         return
     }
-
 
 	response.SetData(fmt.Sprintf("{{ .TableName }} created successfully with ID %d", entity.ID))
 }
