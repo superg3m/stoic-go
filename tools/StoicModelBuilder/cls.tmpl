@@ -40,32 +40,46 @@ func New() *{{ .TableName }} {
 }
 
 func From{{- range $index, $key := .PrimaryKeys }}{{ if $index }}_{{ end }}{{ $key.Name }}{{- end }}(
-    {{- range $index, $key := .PrimaryKeys }}{{ if $index }}, {{ end }}{{ $key.Name }} {{ $key.Type }}{{- end }}) *{{ .TableName }} {
+    {{- range $index, $key := .PrimaryKeys }}{{ if $index }}, {{ end }}{{ $key.Name }} {{ $key.Type }}{{- end }}) (*{{ .TableName }}, error) {
     ret := New()
     {{- range $key := .PrimaryKeys }}
     ret.{{ $key.Name }} = {{ $key.Name }}
     {{- end }}
 
-    ret.Read()
+    read := ret.Read()
+    if read.IsBad() {
+        return nil, read.GetError()
+    }
 
-    return ret
+    {{ $.TableName }}.SetCache(*ret)
+
+    return ret, nil
 }
 
 {{- range .UniqueKeys }}
-func From{{ .Name }}({{ .Name }} {{ .Type }}) *{{ $.TableName }} {
+func From{{ .Name }}({{ .Name }} {{ .Type }}) (*{{ $.TableName }}, error) {
     ret := New()
     ret.{{ .Name }} = {{ .Name }}
 
-    ret.Read()
+    read := ret.Read()
+	if read.IsBad() {
+		return nil, read.GetError()
+	}
 
-    return ret
+	{{ $.TableName }}.SetCache(*ret)
+
+	return ret, nil
 }
 {{- end }}
 
 func init() {
 	ORM.RegisterTableName({{ .TableName }}{})
 
-	{{- range .Attributes }}
-	ORM.RegisterTableColumn("{{ .Name }}", "{{ .Column }}", {{ .Flags }})
-	{{- end }}
+    {{- range .Attributes }}
+    {{- if .Flags }}
+    ORM.RegisterTableColumn("{{ .Name }}", "{{ .Column }}", {{ .Flags }})
+    {{- else }}
+    ORM.RegisterTableColumn("{{ .Name }}", "{{ .Column }}")
+    {{- end }}
+    {{- end }}
 }

@@ -42,7 +42,7 @@ func stringToBool(str string) bool {
 	return false
 }
 
-func extraToFlags(extra string) string {
+func extraToFlags(extra, isNull, isKey string) string {
 	extraAttrs := strings.Fields(extra)
 	var flags []string
 
@@ -50,13 +50,17 @@ func extraToFlags(extra string) string {
 		switch attr {
 		case "auto_increment":
 			flags = append(flags, "ORM.AUTO_INCREMENT")
-		case "unique":
-			flags = append(flags, "ORM.UNIQUE")
-		case "nullable":
-			flags = append(flags, "ORM.NULLABLE")
-		case "key":
-			flags = append(flags, "ORM.KEY")
 		}
+	}
+
+	if isKey == "PRI" {
+		flags = append(flags, "ORM.KEY")
+	} else if isKey == "UNI" {
+		flags = append(flags, "ORM.UNIQUE")
+	}
+
+	if stringToBool(isNull) {
+		flags = append(flags, "ORM.NULLABLE")
 	}
 
 	return strings.Join(flags, " | ")
@@ -86,9 +90,9 @@ func (t *Table) generateTable(tableName string, db *sqlx.DB) error {
 func (r *TableRow) generateAttribute() Attribute {
 	return Attribute{
 		Name:   r.Field,
-		Type:   mapSQLTypeToGoType(r.Type, r.Extra),
+		Type:   mapSQLTypeToGoType(r.Type, r.IsNull),
 		Column: r.Field,
-		Flags:  extraToFlags(r.Extra),
+		Flags:  extraToFlags(r.Extra, r.IsNull, r.IsKey),
 	}
 }
 
@@ -101,9 +105,10 @@ func (t *Table) generateAttributes() []Attribute {
 }
 
 func (r *TableRow) generatePrimaryKey() string {
-	if stringToBool(r.IsKey) {
+	if r.IsKey == "PRI" {
 		return r.Field
 	}
+
 	return ""
 }
 
@@ -114,17 +119,19 @@ func (t *Table) generatePrimaryKeys() []PairData {
 		if pKey != "" {
 			ret = append(ret, PairData{
 				Name: row.Field,
-				Type: row.Type,
+				Type: mapSQLTypeToGoType(row.Type, row.IsNull),
 			})
 		}
 	}
+
 	return ret
 }
 
 func (r *TableRow) generateUnique() string {
-	if extraHas(r.Extra, "unique") || extraHas(r.Extra, "UNIQUE") {
+	if r.IsKey == "UNI" {
 		return r.Field
 	}
+
 	return ""
 }
 
@@ -135,7 +142,7 @@ func (t *Table) generateUniques() []PairData {
 		if unique != "" {
 			ret = append(ret, PairData{
 				Name: row.Field,
-				Type: mapSQLTypeToGoType(row.Type, row.Type),
+				Type: mapSQLTypeToGoType(row.Type, row.IsNull),
 			})
 		}
 	}
@@ -182,16 +189,20 @@ func FetchTableRowALL(db *sqlx.DB, tableName string) ([]TableRow, error) {
 	return results, nil
 }
 
-func mapSQLTypeToGoType(sqlType string, flags string) string {
-	isNotNull := extraHas(flags, "NOT NULL")
+func mapSQLTypeToGoType(sqlType string, isNull string) string {
+	isNullable := stringToBool(isNull)
 
-	switch sqlType {
+	if strings.Contains(sqlType, "varchar") {
+		return "string"
+	}
+
+	switch strings.ToLower(sqlType) {
 	case "integer", "int":
 		return "int"
 	case "varchar", "nvarchar":
 		return "string"
 	case "timestamp", "datetime":
-		if isNotNull {
+		if !isNullable {
 			return "time.Time"
 		}
 		return "*time.Time"

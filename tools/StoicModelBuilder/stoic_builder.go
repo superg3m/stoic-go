@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"github.com/superg3m/stoic-go/Core/ORM"
 	"github.com/superg3m/stoic-go/Core/Utility"
 	"html/template"
 	"os"
+	"strings"
 )
 
 // ./cmd/bin/builder dsn password username dbname Table to build
@@ -18,6 +20,7 @@ type TemplateDataType struct {
 	Attributes  []Attribute
 	PrimaryKeys []PairData
 	UniqueKeys  []PairData
+	SafeHTML    template.HTML
 }
 
 func main() {
@@ -34,21 +37,31 @@ func main() {
 	ORM.Connect(DB_ENGINE, dsn)
 	defer ORM.Close()
 
-	tableName := "User"
+	tableName := ""
+	fmt.Print("Enter TableName: ")
+	_, err := fmt.Scanln(&tableName)
+	fmt.Println("")
+	Utility.AssertOnError(err)
+
 	db := ORM.GetInstance()
 
 	table := Table{
 		TableName: tableName,
 	}
 
-	err := table.generateTable(tableName, db)
+	err = table.generateTable(tableName, db)
 	Utility.AssertOnError(err)
+
+	attributes := table.generateAttributes()
+	primaryKeys := table.generatePrimaryKeys()
+	uniqueKeys := table.generateUniques()
 
 	templateData := TemplateDataType{
 		TableName:   tableName,
-		Attributes:  table.generateAttributes(),
-		PrimaryKeys: table.generatePrimaryKeys(),
-		UniqueKeys:  table.generateUniques(),
+		Attributes:  attributes,
+		PrimaryKeys: primaryKeys,
+		UniqueKeys:  uniqueKeys,
+		SafeHTML:    template.HTML(`<`),
 	}
 
 	tmplFile := "cls.tmpl"
@@ -57,7 +70,7 @@ func main() {
 		panic(err)
 	}
 
-	filePtr, err := os.Create("./user.cls.go")
+	filePtr, err := os.Create(fmt.Sprintf("./%s.cls.go", strings.ToLower(tableName)))
 	Utility.AssertOnError(err)
 
 	err = tmpl.Execute(filePtr, templateData)
@@ -73,7 +86,7 @@ func main() {
 		panic(err)
 	}
 
-	filePtr, err = os.Create("./user.api.go")
+	filePtr, err = os.Create(fmt.Sprintf("./%s.api.go", strings.ToLower(tableName)))
 	Utility.AssertOnError(err)
 
 	err = tmpl.Execute(filePtr, templateData)
@@ -89,7 +102,7 @@ func main() {
 		panic(err)
 	}
 
-	filePtr, err = os.Create("./user.crud.go")
+	filePtr, err = os.Create(fmt.Sprintf("./%s.crud.go", strings.ToLower(tableName)))
 	Utility.AssertOnError(err)
 
 	err = tmpl.Execute(filePtr, templateData)
