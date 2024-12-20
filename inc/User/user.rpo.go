@@ -14,7 +14,7 @@ func AllFromEmail(email string) ([]*User, error) {
 	}
 
 	sql := "SELECT * FROM User WHERE email = ?"
-	users, _ := ORM.FetchAll[User](sql, email)
+	users, _ := ORM.FetchAll[*User](sql, email)
 
 	return users, nil
 }

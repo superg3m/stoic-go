@@ -3,17 +3,14 @@ package ORM
 import (
 	"fmt"
 	"github.com/superg3m/stoic-go/Core/Utility"
-	"reflect"
 )
 
 func Fetch[T InterfaceCRUD](sql string, bindParams ...any) (T, error) {
 	dest := *new(T)
 
-	v := reflect.ValueOf(dest).Elem()
-	Utility.AssertMsg(v.Kind() == reflect.Struct, "Fetch: type %T is not a struct", dest)
 	row := GetInstance().QueryRowx(sql, bindParams...)
 
-	pointers := Utility.GetStructMemberPointer(&dest, excludeList...)
+	pointers := Utility.GetStructMemberPointer(dest, excludeList...)
 	err := row.Scan(pointers...)
 	if err != nil {
 		return dest, err

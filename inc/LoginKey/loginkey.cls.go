@@ -55,13 +55,13 @@ func FromUserID_Provider(UserID int, Provider int) (*LoginKey, error) {
 		return nil, read.GetError()
 	}
 
-	LoginKey.SetCache(*ret)
+	ret.SetCache()
 
 	return ret, nil
 }
 
 func init() {
-	ORM.RegisterTableName(LoginKey{})
+	ORM.RegisterTableName(&LoginKey{})
 	ORM.RegisterTableColumn("UserID", "UserID", ORM.KEY)
 	ORM.RegisterTableColumn("Provider", "Provider", ORM.KEY)
 	ORM.RegisterTableColumn("Key", "Key")

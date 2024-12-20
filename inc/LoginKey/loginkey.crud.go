@@ -5,40 +5,40 @@ import (
 	"reflect"
 )
 
-func (model LoginKey) CanCreate() bool {
+func (model *LoginKey) CanCreate() bool {
 	return true
 }
 
-func (model LoginKey) CanRead() bool {
+func (model *LoginKey) CanRead() bool {
 	return true
 }
 
-func (model LoginKey) CanUpdate() bool {
+func (model *LoginKey) CanUpdate() bool {
 	return true
 }
 
-func (model LoginKey) CanDelete() bool {
+func (model *LoginKey) CanDelete() bool {
 	return true
 }
 
-func (model LoginKey) Create() ORM.CrudReturn {
-	return ORM.Create(&model)
+func (model *LoginKey) Create() ORM.CrudReturn {
+	return ORM.Create(model)
 }
 
-func (model LoginKey) Read() ORM.CrudReturn {
-	return ORM.Read(&model)
+func (model *LoginKey) Read() ORM.CrudReturn {
+	return ORM.Read(model)
 }
 
-func (model LoginKey) Update() ORM.CrudReturn {
-	return ORM.Update(&model)
+func (model *LoginKey) Update() ORM.CrudReturn {
+	return ORM.Update(model)
 }
 
-func (model LoginKey) Delete() ORM.CrudReturn {
-	return ORM.Delete(&model)
+func (model *LoginKey) Delete() ORM.CrudReturn {
+	return ORM.Delete(model)
 }
 
-func (u LoginKey) SetCache() {
-	cache = u
+func (u *LoginKey) SetCache() {
+	cache = *u
 }
 
 func (u LoginKey) GetCacheDiff() []string {
@@ -60,5 +60,5 @@ func (u LoginKey) GetCacheDiff() []string {
 	return mismatchedFields
 }
 
-var _ ORM.InterfaceCRUD = LoginKey{}
+var _ ORM.InterfaceCRUD = &LoginKey{}
 var cache LoginKey

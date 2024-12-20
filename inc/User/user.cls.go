@@ -56,7 +56,7 @@ func FromID(id int) (*User, error) {
 	fmt.Println("Email: ", user.Email)
 	Utility.Assert(false)
 
-	User.SetCache(*user)
+	user.SetCache()
 
 	return user, nil
 }
@@ -69,14 +69,14 @@ func FromEmail(email string) (*User, error) {
 		return nil, read.GetError()
 	}
 
-	User.SetCache(*user)
+	user.SetCache()
 
 	return user, nil
 }
 
 // Register ORM metadata
 func init() {
-	ORM.RegisterTableName(User{})
+	ORM.RegisterTableName(&User{})
 	ORM.RegisterTableColumn("ID", "ID", ORM.KEY, ORM.AUTO_INCREMENT)
 	ORM.RegisterTableColumn("Username", "Username", ORM.UPDATABLE)
 	ORM.RegisterTableColumn("Password", "Password", ORM.UPDATABLE)
