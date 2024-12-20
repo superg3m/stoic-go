@@ -18,18 +18,18 @@ import (
 // postgres
 // sql_lite
 
-func CreateRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
-	tableName := getModelTableName(*model)
-	fieldNames := getModelMemberNames(*model)
+func CreateRecord[T InterfaceCRUD](db *sqlx.DB, model T) (sql.Result, error) {
+	tableName := getModelTableName(model)
+	fieldNames := getModelMemberNames(model)
 	Utility.Assert(len(fieldNames) > 0)
 
-	dbNames := getDBColumnNames(tableName, *model)
+	dbNames := getDBColumnNames(tableName, model)
 	placeholders := make([]string, len(dbNames))
 	for i := range placeholders {
 		placeholders[i] = "?"
 	}
 
-	values, err := getCanonicalValues(*model, fieldNames)
+	values, err := getCanonicalValues(model, fieldNames)
 	if err != nil {
 		return nil, err
 	}
@@ -63,20 +63,20 @@ func CreateRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
 	return result, nil
 }
 
-func ReadRecord[T InterfaceCRUD](db *sqlx.DB, model *T) error {
-	tableName := getModelTableName(*model)
-	fieldNames := getModelMemberNames(*model)
+func ReadRecord[T InterfaceCRUD](db *sqlx.DB, model T) error {
+	tableName := getModelTableName(model)
+	fieldNames := getModelMemberNames(model)
 	Utility.Assert(len(fieldNames) > 0)
 
-	pKeyQuery, uniqueQueries, _ := buildSQLReadQueries(db, *model)
+	pKeyQuery, uniqueQueries, _ := buildSQLReadQueries(db, model)
 
 	// ----------------------------------------------------------
 
 	{
-		pPointer := getPrimaryKeyPointers(tableName, *model)
+		pPointer := getPrimaryKeyPointers(tableName, model)
 		temp, err := Fetch[T](pKeyQuery, pPointer...)
 		if err == nil {
-			*model = temp
+			model = temp
 			return nil
 		}
 	}
@@ -84,12 +84,12 @@ func ReadRecord[T InterfaceCRUD](db *sqlx.DB, model *T) error {
 	// ----------------------------------------------------------
 
 	{
-		uPointer := getUniquePointers(tableName, *model)
+		uPointer := getUniquePointers(tableName, model)
 		for i, pointer := range uPointer {
 			query := uniqueQueries[i]
 			temp, err := Fetch[T](query, pointer)
 			if err == nil {
-				*model = temp
+				model = temp
 				return nil
 			}
 		}
@@ -98,12 +98,12 @@ func ReadRecord[T InterfaceCRUD](db *sqlx.DB, model *T) error {
 	return errors.New("failed to fetch record")
 }
 
-func UpdateRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
-	tableName := getModelTableName(*model)
-	fieldNames := getDBColumnNames(tableName, *model)
+func UpdateRecord[T InterfaceCRUD](db *sqlx.DB, model T) (sql.Result, error) {
+	tableName := getModelTableName(model)
+	fieldNames := getDBColumnNames(tableName, model)
 	Utility.Assert(len(fieldNames) > 0)
 
-	values := getModelValues(*model)
+	values := getModelValues(model)
 
 	keyField := fieldNames[0] // Get the primary key
 	updateFields := fieldNames[1:]
@@ -130,13 +130,13 @@ func UpdateRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
 	return result, nil
 }
 
-func DeleteRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
-	tableName := getModelTableName(*model)
-	fieldNames := getPrimaryKeyDBNames(tableName, *model)
+func DeleteRecord[T InterfaceCRUD](db *sqlx.DB, model T) (sql.Result, error) {
+	tableName := getModelTableName(model)
+	fieldNames := getPrimaryKeyDBNames(tableName, model)
 	Utility.Assert(len(fieldNames) > 0)
 
 	var conditions []string
-	values := getPrimaryKeyPointers(tableName, *model)
+	values := getPrimaryKeyPointers(tableName, model)
 
 	for _, fieldName := range fieldNames {
 		conditions = append(conditions, fmt.Sprintf("%s = ?", fieldName))
@@ -162,7 +162,7 @@ func DeleteRecord[T InterfaceCRUD](db *sqlx.DB, model *T) (sql.Result, error) {
 		return nil, fmt.Errorf("failed to execute query: %s", err2)
 	}
 
-	err := Utility.SetToNil[T](model)
+	err := Utility.SetToNil[T](&model)
 	if err != nil {
 		return nil, err
 	}

@@ -22,19 +22,19 @@ func (model *LoginKey) CanDelete() bool {
 }
 
 func (model *LoginKey) Create() ORM.CrudReturn {
-	return ORM.Create(&model)
+	return ORM.Create(model)
 }
 
 func (model *LoginKey) Read() ORM.CrudReturn {
-	return ORM.Read(&model)
+	return ORM.Read(model)
 }
 
 func (model *LoginKey) Update() ORM.CrudReturn {
-	return ORM.Update(&model)
+	return ORM.Update(model)
 }
 
 func (model *LoginKey) Delete() ORM.CrudReturn {
-	return ORM.Delete(&model)
+	return ORM.Delete(model)
 }
 
 func (u *LoginKey) SetCache() {

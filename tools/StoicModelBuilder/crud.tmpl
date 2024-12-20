@@ -1,43 +1,43 @@
 package {{ .TableName }}
 import "github.com/superg3m/stoic-go/Core/ORM"
 
-func (model {{ .TableName }}) CanCreate() bool {
+func (model *{{ .TableName }}) CanCreate() bool {
 	return true
 }
 
-func (model {{ .TableName }}) CanRead() bool {
+func (model *{{ .TableName }}) CanRead() bool {
 	return true
 }
 
-func (model {{ .TableName }}) CanUpdate() bool {
+func (model *{{ .TableName }}) CanUpdate() bool {
 	return true
 }
 
-func (model {{ .TableName }}) CanDelete() bool {
+func (model *{{ .TableName }}) CanDelete() bool {
 	return true
 }
 
-func (model {{ .TableName }}) Create() ORM.CrudReturn {
-	return ORM.Create(&model)
+func (model *{{ .TableName }}) Create() ORM.CrudReturn {
+	return ORM.Create(model)
 }
 
-func (model {{ .TableName }}) Read() ORM.CrudReturn {
-	return ORM.Read(&model)
+func (model *{{ .TableName }}) Read() ORM.CrudReturn {
+	return ORM.Read(model)
 }
 
-func (model {{ .TableName }}) Update() ORM.CrudReturn {
-	return ORM.Update(&model)
+func (model *{{ .TableName }}) Update() ORM.CrudReturn {
+	return ORM.Update(model)
 }
 
-func (model {{ .TableName }}) Delete() ORM.CrudReturn {
-	return ORM.Delete(&model)
+func (model *{{ .TableName }}) Delete() ORM.CrudReturn {
+	return ORM.Delete(model)
 }
 
-func (u {{ .TableName }}) SetCache() {
-	cache = u
+func (u *{{ .TableName }}) SetCache() {
+	cache = *u
 }
 
-func (u {{ .TableName }}) GetCacheDiff() []string {
+func (u *{{ .TableName }}) GetCacheDiff() []string {
 	var mismatchedFields []string
 
 	v1 := reflect.ValueOf(u)
@@ -56,5 +56,5 @@ func (u {{ .TableName }}) GetCacheDiff() []string {
 	return mismatchedFields
 }
 
-var _ ORM.InterfaceCRUD = {{ .TableName }}{}
+var _ ORM.InterfaceCRUD = &{{ .TableName }}{}
 var cache {{ .TableName }}
