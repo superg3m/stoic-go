@@ -60,3 +60,4 @@ Remove all individual panics
 
 I need to do more pre computation of the FromX methods so that i can just range over them and I know the name
 it will be more flexible the template suff is a mess you need to do a rewrite
+
