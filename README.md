@@ -65,5 +65,7 @@ I need to easily sperate runtime developer checks
 clear ; go run ./tools/StoicMigration/stoic_migration.go up|down
 clear ; ./tools/wgo-main/wgo run main.go -w "*.go"  
 
+clear ; cloc --exclude-dir=".\\tools\\wgo-main" --include-ext=go .
+
 # TODO
 Add the rest of the models from stoic-php
