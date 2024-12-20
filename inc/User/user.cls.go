@@ -43,48 +43,30 @@ func New() *User {
 	return user
 }
 
-func FromID(id int) *User {
-	/*
-		if id <= 0 {
-			return nil
-		}
-		// sql := "SELECT * FROM User WHERE id = ?"
-		// ORM.Fetch[User](sql, id)
-	*/
-
+func FromID(id int) (*User, error) {
 	user := New()
 	user.ID = id
 	read := user.Read()
-
 	if read.IsBad() {
-		return nil
+		return nil, read.GetError()
 	}
 
 	User.SetCache(*user)
 
-	return user
+	return user, nil
 }
 
-func FromEmail(email string) *User {
-	/*
-		if !Utility.ValidEmail(email) {
-			return nil
-		}
-		// sql := "SELECT * FROM User WHERE email = ?"
-		// ORM.Fetch[User](sql, email)
-	*/
-
+func FromEmail(email string) (*User, error) {
 	user := New()
 	user.Email = email
 	read := user.Read()
-
 	if read.IsBad() {
-		return nil
+		return nil, read.GetError()
 	}
 
 	User.SetCache(*user)
 
-	return user
+	return user, nil
 }
 
 // Register ORM metadata

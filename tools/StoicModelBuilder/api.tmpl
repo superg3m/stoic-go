@@ -6,19 +6,7 @@ import (
 	"github.com/superg3m/stoic-go/inc/{{ .TableName }}"
 )
 
-func Get{{ .TableName }}(request *Router.StoicRequest, response Router.StoicResponse) {
-	id := request.GetIntParam("id")
-
-	record, err := {{ .TableName }}.FromId(id)
-	if err != nil {
-		response.SetError(fmt.Sprintf("Error fetching {{ .TableName }}: %s", err))
-		return
-	}
-
-	response.SetData(record)
-}
-
-func Create{{ .TableName }}(request *Router.StoicRequest, response Router.StoicResponse) {
+func create{{ .TableName }}(request *Router.StoicRequest, response Router.StoicResponse) {
 	// Instantiate a new model object
 	entity := {{ .TableName }}.New()
 
@@ -36,18 +24,38 @@ func Create{{ .TableName }}(request *Router.StoicRequest, response Router.StoicR
     {{- end }}
     {{- end }}
 
-	entity.Create()
+
+
+    create := entity.Create()
+    if create.IsBad() {
+        response.SetError("Failed to create {{ .TableName }} | %s", create.GetErrorMsg())
+        return
+    }
+
+
 	response.SetData(fmt.Sprintf("{{ .TableName }} created successfully with ID %d", entity.ID))
 }
 
-func Update{{ .TableName }}(request *Router.StoicRequest, response Router.StoicResponse) {
+func get{{ .TableName }}(request *Router.StoicRequest, response Router.StoicResponse) {
 	id := request.GetIntParam("id")
 
-	entity, err := {{ .TableName }}.FromId(id)
+	entity, err := {{ .TableName }}.FromID(id)
 	if err != nil {
-		response.SetError(fmt.Sprintf("Error fetching {{ .TableName }}: %s", err))
+		response.SetError(fmt.Sprintf("Error getting {{ .TableName }}: %s", err))
 		return
 	}
+
+	response.SetData(entity)
+}
+
+func update{{ .TableName }}(request *Router.StoicRequest, response Router.StoicResponse) {
+	id := request.GetIntParam("id")
+
+	entity, err := {{ .TableName }}.FromID(id)
+    if err != nil {
+        response.SetError("Failed to find {{ .TableName }} by ID | %s", err)
+        return
+    }
 
     {{- range .Attributes }}
     {{- if eq .Type "string" }}
@@ -63,29 +71,45 @@ func Update{{ .TableName }}(request *Router.StoicRequest, response Router.StoicR
     {{- end }}
     {{- end }}
 
-	entity.Update()
+	update := entity.Update()
+	if update.IsBad() {
+	    response.SetError("Failed to update {{ .TableName }} | %s", update.GetErrorMsg())
+	    return
+	}
 
 	response.SetData(fmt.Sprintf("{{ .TableName }} with ID %d updated successfully", id))
 }
 
-func Delete{{ .TableName }}(request *Router.StoicRequest, response Router.StoicResponse) {
+func delete{{ .TableName }}(request *Router.StoicRequest, response Router.StoicResponse) {
 	id := request.GetIntParam("id")
 
-	err := {{ .TableName }}.DeleteByID(id) // Dynamic DeleteByID
+	entity, err := {{ .TableName }}.FromID(id)
+	if err != nil {
+        response.SetError("Failed to find {{ .TableName }} by ID | %s", err)
+        return
+	}
+
+	delete := entity.Delete()
+
+	if delete.IsBad() {
+	    response.SetError("Failed to delete {{ .TableName }} %s", delete.GetErrorMsg())
+	    return
+	}
+
 	response.SetData(fmt.Sprintf("{{ .TableName }} with ID %d deleted successfully", id))
 }
 
 func init() {
-	Router.RegisterApiEndpoint("{{ .TableName }}/Get", Get{{ .TableName }}, "GET",
-		Router.MiddlewareValidParams("id"),
-	)
-	Router.RegisterApiEndpoint("{{ .TableName }}/Create", Create{{ .TableName }}, "POST",
+	Router.RegisterApiEndpoint("{{ .TableName }}/Create", create{{ .TableName }}, "POST",
 		Router.MiddlewareValidParams({{ range .Attributes }}"{{ .Name }}", {{ end }}),
 	)
-	Router.RegisterApiEndpoint("{{ .TableName }}/Update", Update{{ .TableName }}, "PATCH",
+    Router.RegisterApiEndpoint("{{ .TableName }}/Get", get{{ .TableName }}, "GET",
+        Router.MiddlewareValidParams("id"),
+    )
+	Router.RegisterApiEndpoint("{{ .TableName }}/Update", update{{ .TableName }}, "PATCH",
 		Router.MiddlewareValidParams("id", {{ range .Attributes }}"{{ .Name }}", {{ end }}),
 	)
-	Router.RegisterApiEndpoint("{{ .TableName }}/Delete", Delete{{ .TableName }}, "DELETE",
+	Router.RegisterApiEndpoint("{{ .TableName }}/Delete", delete{{ .TableName }}, "DELETE",
 		Router.MiddlewareValidParams("id"),
 	)
 }

@@ -1,26 +1,32 @@
 package ORM
 
 type CrudReturn struct {
-	errMSG string
+	err    error
+	errMsg string
 	isBad  bool
 }
 
 func CreateCRUD() CrudReturn {
 	ret := CrudReturn{
+		err:    nil,
+		errMsg: "",
 		isBad:  false,
-		errMSG: "",
 	}
 
 	return ret
 }
 
-func (c *CrudReturn) GetErrorMsg() string {
-	return c.errMSG
+func (c *CrudReturn) GetError() error {
+	return c.err
 }
 
-func (c *CrudReturn) setErrorMsg(errMSG string) {
+func (c *CrudReturn) GetErrorMsg() string {
+	return c.errMsg
+}
+
+func (c *CrudReturn) setError(err error) {
 	c.makeBad()
-	c.errMSG = errMSG
+	c.errMsg = err.Error()
 }
 
 func (c *CrudReturn) makeBad() {

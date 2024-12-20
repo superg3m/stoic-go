@@ -1,6 +1,7 @@
 package ORM
 
 import (
+	"errors"
 	"github.com/superg3m/stoic-go/Core/Utility"
 )
 
@@ -24,7 +25,7 @@ var excludeList = []string{"DB"}
 func Create[T InterfaceCRUD](model *T) CrudReturn {
 	ret := CreateCRUD()
 	if !(*model).CanCreate() {
-		ret.setErrorMsg("CanCreate() returned false")
+		ret.setError(errors.New("CanCreate() returned false"))
 		return ret
 	}
 
@@ -43,11 +44,11 @@ func Create[T InterfaceCRUD](model *T) CrudReturn {
 
 	result, err := CreateRecord(GetInstance(), model)
 	if err != nil {
-		ret.setErrorMsg(err.Error())
+		ret.setError(err)
 		return ret
 	}
 
-	if hasAutoIncrement && err == nil {
+	if hasAutoIncrement {
 		id, _ := result.LastInsertId()
 		Utility.UpdateMemberValue(model, "ID", id)
 	}
@@ -60,13 +61,13 @@ func Create[T InterfaceCRUD](model *T) CrudReturn {
 func Read[T InterfaceCRUD](model *T) CrudReturn {
 	ret := CreateCRUD()
 	if !(*model).CanRead() {
-		ret.setErrorMsg("CanRead() returned false")
+		ret.setError(errors.New("CanRead() returned false"))
 		return ret
 	}
 
 	err := ReadRecord(GetInstance(), model)
 	if err != nil {
-		ret.setErrorMsg(err.Error())
+		ret.setError(err)
 		return ret
 	}
 
@@ -76,7 +77,7 @@ func Read[T InterfaceCRUD](model *T) CrudReturn {
 func Update[T InterfaceCRUD](model *T) CrudReturn {
 	ret := CreateCRUD()
 	if !(*model).CanUpdate() {
-		ret.setErrorMsg("CanUpdate() returned false")
+		ret.setError(errors.New("CanUpdate() returned false"))
 		return ret
 	}
 
@@ -90,7 +91,7 @@ func Update[T InterfaceCRUD](model *T) CrudReturn {
 
 	_, err := UpdateRecord(GetInstance(), model)
 	if err != nil {
-		ret.setErrorMsg(err.Error())
+		ret.setError(err)
 		return ret
 	}
 
@@ -103,7 +104,7 @@ func Delete[T InterfaceCRUD](model *T) CrudReturn {
 
 	_, err := DeleteRecord(GetInstance(), model)
 	if err != nil {
-		ret.setErrorMsg(err.Error())
+		ret.setError(err)
 		return ret
 	}
 

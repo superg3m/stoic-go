@@ -34,9 +34,9 @@ func updateUser(request *Router.StoicRequest, response Router.StoicResponse) {
 	password := request.GetStringParam("password")
 	emailConfirmed := request.GetBoolParam("emailConfirmed")
 
-	user := User.FromID(id)
-	if user == nil {
-		response.SetError("User does not exists")
+	user, err := User.FromID(id)
+	if err != nil {
+		response.SetError(err.Error())
 		return
 	}
 

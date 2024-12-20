@@ -7,6 +7,7 @@ const ( // ORM_Flags
 	UPDATABLE                           // 1 << 1 = 2 (bit 1)
 	AUTO_INCREMENT                      // 1 << 2 = 4 (bit 2)
 	UNIQUE                              // 1 << 3 = 8 (bit 3)
+	NULLABLE                            // 1 << 4 = 16 (bit 4)
 )
 
 type Attribute struct {

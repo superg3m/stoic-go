@@ -17,19 +17,19 @@ func (model {{ .TableName }}) CanDelete() bool {
 	return true
 }
 
-func (model {{ .TableName }}) Create() bool {
+func (model {{ .TableName }}) Create() ORM.CrudReturn {
 	return ORM.Create(&model)
 }
 
-func (model {{ .TableName }}) Read() bool {
+func (model {{ .TableName }}) Read() ORM.CrudReturn {
 	return ORM.Read(&model)
 }
 
-func (model {{ .TableName }}) Update() bool {
+func (model {{ .TableName }}) Update() ORM.CrudReturn {
 	return ORM.Update(&model)
 }
 
-func (model {{ .TableName }}) Delete() bool {
+func (model {{ .TableName }}) Delete() ORM.CrudReturn {
 	return ORM.Delete(&model)
 }
 
