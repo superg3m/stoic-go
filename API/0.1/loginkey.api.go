@@ -66,10 +66,10 @@ func deleteLoginKey(request *Router.StoicRequest, response Router.StoicResponse)
 		return
 	}
 
-	delete := entity.Delete()
+	del := entity.Delete()
 
-	if delete.IsBad() {
-		response.SetError("Failed to delete LoginKey %s", delete.GetError())
+	if del.IsBad() {
+		response.SetError("Failed to delete LoginKey %s", del.GetError())
 		return
 	}
 
