@@ -28,10 +28,11 @@ func getProvider(value int) LoginKeyProvider {
 }
 
 type LoginKey struct {
-	DB       *sqlx.DB
-	UserID   int
-	Provider LoginKeyProvider
-	Key      string
+	DB *sqlx.DB
+
+	UserID   int              `db:"UserID,   KEY"`
+	Provider LoginKeyProvider `db:"Provider, KEY"`
+	Key      string           `db:"Key,      UPDATABLE"`
 }
 
 func New() *LoginKey {
@@ -39,30 +40,31 @@ func New() *LoginKey {
 
 	//ret.DB = ORM.GetInstance()
 	ret.UserID = 0
-	ret.Provider = 0
+	ret.Provider = PASSWORD
 	ret.Key = ""
 
 	return ret
 }
 
-func FromUserID_Provider(UserID int, Provider int) (*LoginKey, error) {
+func (loginKey *LoginKey) HashKey() {
+	loginKey.Key = Utility.Sha256HashString(loginKey.Key)
+}
+
+func FromUserID_Provider(UserID int, Provider LoginKeyProvider) *LoginKey {
 	ret := New()
 	ret.UserID = UserID
-	ret.Provider = getProvider(Provider)
+	ret.Provider = getProvider(int(Provider))
 
 	read := ret.Read()
 	if read.IsBad() {
-		return nil, read.GetError()
+		return nil
 	}
 
 	ret.SetCache()
 
-	return ret, nil
+	return ret
 }
 
 func init() {
-	ORM.RegisterTableName(&LoginKey{})
-	ORM.RegisterTableColumn("UserID", "UserID", ORM.KEY)
-	ORM.RegisterTableColumn("Provider", "Provider", ORM.KEY)
-	ORM.RegisterTableColumn("Key", "Key")
+	ORM.RegisterModel(&LoginKey{})
 }

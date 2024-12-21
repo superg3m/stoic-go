@@ -7,7 +7,6 @@ import (
 type MemberAttributeMap map[string]Attribute // Key: StructMemberName
 
 var tempTableName string
-var tempTypes map[string]string
 var tempAutoIncrementFound bool
 var globalTable map[string]MemberAttributeMap // Key: TableName
 
@@ -16,27 +15,16 @@ func init() {
 	tempAutoIncrementFound = false
 }
 
-func RegisterTableName(table InterfaceCRUD) {
-	stackModel := Utility.DereferencePointer(table)
-	tempTableName = Utility.GetTypeName(stackModel)
-	tempTypes = Utility.GetStructMemberTypes(stackModel, excludeList...)
+func registerTableName(tableName string) {
+	tempTableName = tableName
+	globalTable[tempTableName] = make(MemberAttributeMap)
 }
 
-func RegisterTableColumn(memberName string, columnName string, flags ...ORM_FLAG) {
-	if globalTable[tempTableName] == nil {
-		globalTable[tempTableName] = make(MemberAttributeMap)
-	}
-
-	var finalFlag ORM_FLAG
-	for _, flag := range flags {
-		finalFlag |= flag
-	}
-
+func registerTableColumn(memberName, columnName, typeName string, flags []string) {
 	attribute := Attribute{
-		MemberName: memberName,
 		ColumnName: columnName,
-		TypeName:   tempTypes[memberName],
-		Flags:      finalFlag,
+		TypeName:   typeName,
+		Flags:      flags,
 	}
 
 	if !tempAutoIncrementFound && (attribute.isAutoIncrement() && !attribute.isPrimaryKey()) {
@@ -48,6 +36,18 @@ func RegisterTableColumn(memberName string, columnName string, flags ...ORM_FLAG
 	}
 
 	globalTable[tempTableName][memberName] = attribute
+}
+
+func RegisterModel(model InterfaceCRUD) {
+	payload := getModelPayload(model)
+	registerTableName(payload.TableName)
+	for i, memberName := range payload.MemberNames {
+		columnName := payload.ColumnNames[i]
+		flags := payload.Flags[columnName]
+		typeName := payload.Types[memberName]
+
+		registerTableColumn(memberName, columnName, typeName, flags)
+	}
 }
 
 func GetAttributes(tableName string) map[string]Attribute {

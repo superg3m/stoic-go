@@ -24,9 +24,12 @@ func createUser(request *Router.StoicRequest, response Router.StoicResponse) {
 	loginKey.UserID = user.ID
 	loginKey.Key = password
 	loginKey.Provider = LoginKey.PASSWORD
+	loginKey.HashKey()
 	create = loginKey.Create()
 	if create.IsBad() {
-		response.SetError("Failed to create user | %s", create.GetError())
+		user.Delete()
+		response.SetError("Failed to create loginKey | %s", create.GetError())
+		return
 	}
 
 	response.SetData("User Created Successfully!")
@@ -53,10 +56,11 @@ func updateUser(request *Router.StoicRequest, response Router.StoicResponse) {
 		return
 	}
 
-	loginKey := LoginKey.New()
+	loginKey := LoginKey.FromUserID_Provider(user.ID, LoginKey.PASSWORD)
 	loginKey.UserID = user.ID
 	loginKey.Key = password
 	loginKey.Provider = LoginKey.PASSWORD
+	loginKey.HashKey()
 	update = loginKey.Update()
 	if update.IsBad() {
 		response.SetError("Failed to update login key | %s", update.GetError())

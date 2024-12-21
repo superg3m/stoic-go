@@ -138,7 +138,11 @@ func GetStructMemberTypes(structure StackAny, excludeList ...string) map[string]
 			continue
 		}
 
-		ret[field.Name] = field.Type.Name()
+		if field.Type.Kind() == reflect.Ptr {
+			ret[field.Name] = "*" + field.Type.Elem().Name()
+		} else {
+			ret[field.Name] = field.Type.Name()
+		}
 	}
 
 	return ret

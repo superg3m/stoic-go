@@ -44,7 +44,7 @@ func (model *LoginKey) SetCache() {
 func (model *LoginKey) GetCacheDiff() []string {
 	var mismatchedFields []string
 
-	v1 := reflect.ValueOf(model)
+	v1 := reflect.ValueOf(*model)
 	v2 := reflect.ValueOf(cache)
 	userType := v1.Type()
 

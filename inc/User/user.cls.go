@@ -2,6 +2,7 @@ package User
 
 import (
 	"errors"
+	"github.com/superg3m/stoic-go/Core/ORM"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -16,7 +17,7 @@ type User struct {
 	DB *sqlx.DB
 
 	ID             int        `db:"ID,             KEY, AUTO_INCREMENT"`
-	Email          string     `db:"Email,          UNIQUE,UPDATABLE"`
+	Email          string     `db:"Email,          UNIQUE, UPDATABLE"`
 	EmailConfirmed bool       `db:"EmailConfirmed, UPDATABLE"`
 	Joined         time.Time  `db:"Joined"`
 	LastLogin      *time.Time `db:"LastLogin,      UPDATABLE"`
@@ -58,4 +59,8 @@ func FromEmail(email string) (*User, error) {
 	}
 
 	return user, nil
+}
+
+func init() {
+	ORM.RegisterModel(&User{})
 }

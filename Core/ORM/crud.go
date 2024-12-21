@@ -22,8 +22,6 @@ type InterfaceCRUD interface {
 	GetCacheDiff() []string
 }
 
-var excludeList = []string{"DB"}
-
 func Create[T InterfaceCRUD](model T) CrudReturn {
 	ret := CreateCRUD()
 	if !model.CanCreate() {
@@ -42,7 +40,15 @@ func Create[T InterfaceCRUD](model T) CrudReturn {
 
 	if hasAutoIncrement {
 		id, _ := result.LastInsertId()
-		Utility.UpdateMemberValue(model, "ID", id)
+		autoIncName := ""
+
+		for memberName, attribute := range GetAttributes(payload.TableName) {
+			if attribute.isAutoIncrement() {
+				autoIncName = memberName
+				Utility.UpdateMemberValue(model, autoIncName, id)
+				break
+			}
+		}
 	}
 
 	model.SetCache()
