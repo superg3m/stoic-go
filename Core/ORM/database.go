@@ -4,13 +4,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"reflect"
-	"strings"
-	"time"
-
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/superg3m/stoic-go/Core/Utility"
+	"strings"
 )
 
 // mysql
@@ -26,11 +23,6 @@ func CreateRecord[T InterfaceCRUD](db *sqlx.DB, payload ModelPayload, model T) (
 		placeholders[i] = "?"
 	}
 
-	values, err := getCanonicalValues(model, payload.MemberNames)
-	if err != nil {
-		return nil, err
-	}
-
 	var newDbNames []string
 	var newPlaceholders []string
 	var newValues []any
@@ -42,7 +34,7 @@ func CreateRecord[T InterfaceCRUD](db *sqlx.DB, payload ModelPayload, model T) (
 		}
 		newDbNames = append(newDbNames, payload.ColumnNames[i])
 		newPlaceholders = append(newPlaceholders, placeholders[i])
-		newValues = append(newValues, values[i])
+		newValues = append(newValues, payload.Values[i])
 	}
 
 	query := fmt.Sprintf(
@@ -245,28 +237,4 @@ func buildSQLReadQueries(payload ModelPayload) (primaryQuery string, uniqueQueri
 	}
 
 	return primaryQuery, uniqueQueries, nil
-}
-
-func getCanonicalValues[T InterfaceCRUD](model T, memberNames []string) ([]any, error) {
-	stackModel := Utility.DereferencePointer(model)
-
-	var formattedTimeValues []any
-	types := Utility.GetStructMemberTypes(stackModel, excludeList...)
-
-	for i, memberName := range memberNames {
-		fieldType, exists := types[memberName]
-		Utility.Assert(exists)
-		if fieldType == "time.Time" || fieldType == "*time.Time" {
-			value := reflect.ValueOf(model).Elem().FieldByName(memberName)
-			if value.IsValid() && value.Kind() == reflect.Struct && value.Type() == reflect.TypeOf(time.Time{}) {
-				formattedTime := value.Interface().(time.Time).Format(time.DateTime)
-				formattedTimeValues = append(formattedTimeValues, formattedTime)
-			}
-		} else {
-			originalValue := Utility.GetStructValues(stackModel, excludeList...)
-			formattedTimeValues = append(formattedTimeValues, originalValue[i])
-		}
-	}
-
-	return formattedTimeValues, nil
 }

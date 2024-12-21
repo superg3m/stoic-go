@@ -2,6 +2,8 @@ package ORM
 
 import (
 	"github.com/superg3m/stoic-go/Core/Utility"
+	"reflect"
+	"time"
 )
 
 type ModelPayload struct {
@@ -25,7 +27,6 @@ func getModelPayload[T InterfaceCRUD](model T) ModelPayload {
 	tableName := Utility.GetTypeName(stackModel)
 	memberNames := Utility.GetStructMemberNames(stackModel, excludeList...)
 	columnNames := getColumnNames(tableName, memberNames)
-	values := Utility.GetStructValues(stackModel, excludeList...)
 	pointers := Utility.GetStructMemberPointer(model, excludeList...)
 
 	var (
@@ -52,6 +53,24 @@ func getModelPayload[T InterfaceCRUD](model T) ModelPayload {
 		}
 	}
 
+	var formattedTimeValues []any
+	types := Utility.GetStructMemberTypes(stackModel, excludeList...)
+
+	for i, memberName := range memberNames {
+		fieldType, exists := types[memberName]
+		Utility.Assert(exists)
+		if fieldType == "time.Time" || fieldType == "*time.Time" {
+			value := reflect.ValueOf(model).Elem().FieldByName(memberName)
+			if value.IsValid() && value.Kind() == reflect.Struct && value.Type() == reflect.TypeOf(time.Time{}) {
+				formattedTime := value.Interface().(time.Time).Format(time.DateTime)
+				formattedTimeValues = append(formattedTimeValues, formattedTime)
+			}
+		} else {
+			originalValue := Utility.GetStructValues(stackModel, excludeList...)
+			formattedTimeValues = append(formattedTimeValues, originalValue[i])
+		}
+	}
+
 	return ModelPayload{
 		TableName: tableName,
 
@@ -60,7 +79,7 @@ func getModelPayload[T InterfaceCRUD](model T) ModelPayload {
 		UniqueMemberNames:     uniqueMemberNames,
 		ColumnNames:           columnNames,
 
-		Values: values,
+		Values: formattedTimeValues,
 
 		Pointers:           pointers,
 		PrimaryKeyPointers: primaryKeyPointers,
