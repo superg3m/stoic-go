@@ -52,10 +52,10 @@ func RegisterTableColumn(memberName string, columnName string, flags ...ORM_FLAG
 	globalTable[tempTableName][memberName] = attribute
 }
 
-func GetAttributes(tableName string) (map[string]Attribute, bool) {
+func GetAttributes(tableName string) map[string]Attribute {
 	attributes, exists := globalTable[tableName]
 	Utility.Assert(exists)
-	return attributes, exists
+	return attributes
 }
 
 func getAttribute(tableName string, memberName string) (Attribute, bool) {

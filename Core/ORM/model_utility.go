@@ -1,23 +1,79 @@
 package ORM
 
-import "github.com/superg3m/stoic-go/Core/Utility"
+import (
+	"github.com/superg3m/stoic-go/Core/Utility"
+)
 
-func getModelMemberNames[T InterfaceCRUD](model T) []string {
-	stackModel := Utility.DereferencePointer(model)
-	return Utility.GetStructMemberNames(stackModel, excludeList...)
+type ModelPayload struct {
+	TableName string
+
+	PrimaryKeyMemberNames []string
+	UniqueMemberNames     []string
+	MemberNames           []string
+	ColumnNames           []string
+
+	Values []any
+
+	Pointers           []any
+	PrimaryKeyPointers []any
+	UniquePointers     []any
 }
 
-func getModelTableName[T InterfaceCRUD](model T) string {
+func getModelPayload[T InterfaceCRUD](model T) ModelPayload {
 	stackModel := Utility.DereferencePointer(model)
-	return Utility.GetTypeName(stackModel)
+
+	tableName := Utility.GetTypeName(stackModel)
+	memberNames := Utility.GetStructMemberNames(stackModel, excludeList...)
+	columnNames := getColumnNames(tableName, memberNames)
+	values := Utility.GetStructValues(stackModel, excludeList...)
+	pointers := Utility.GetStructMemberPointer(model, excludeList...)
+
+	var (
+		primaryKeyMemberNames []string
+		uniqueMemberNames     []string
+
+		primaryKeyPointers []any
+		uniquePointers     []any
+	)
+
+	attributes := GetAttributes(tableName)
+
+	for i, memberName := range memberNames {
+		attribute := attributes[memberName]
+		pointer := pointers[i]
+		if attribute.isPrimaryKey() {
+			primaryKeyMemberNames = append(primaryKeyMemberNames, memberName)
+			primaryKeyPointers = append(primaryKeyPointers, pointer)
+		}
+
+		if attribute.isUnique() {
+			uniqueMemberNames = append(uniqueMemberNames, memberName)
+			uniquePointers = append(uniquePointers, pointer)
+		}
+	}
+
+	return ModelPayload{
+		TableName: tableName,
+
+		MemberNames:           memberNames,
+		PrimaryKeyMemberNames: primaryKeyMemberNames,
+		UniqueMemberNames:     uniqueMemberNames,
+		ColumnNames:           columnNames,
+
+		Values: values,
+
+		Pointers:           pointers,
+		PrimaryKeyPointers: primaryKeyPointers,
+		UniquePointers:     uniquePointers,
+	}
 }
 
-func getModelValues[T InterfaceCRUD](model T) []any {
-	stackModel := Utility.DereferencePointer(model)
-	return Utility.GetStructValues(stackModel, excludeList...)
-}
+func getColumnNames(tableName string, memberNames []string) []string {
+	var ret []string
+	attributes := GetAttributes(tableName)
+	for _, memberName := range memberNames {
+		ret = append(ret, attributes[memberName].ColumnName)
+	}
 
-func getModelTypes[T InterfaceCRUD](model T) map[string]string {
-	stackModel := Utility.DereferencePointer(model)
-	return Utility.GetStructMemberTypes(stackModel, excludeList...)
+	return ret
 }

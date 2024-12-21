@@ -31,10 +31,10 @@ func Create[T InterfaceCRUD](model T) CrudReturn {
 	}
 
 	hasAutoIncrement := false
-	memberNames := getModelMemberNames(model)
-	tableName := getModelTableName(model)
-	for _, memberName := range memberNames {
-		attribute, exists := getAttribute(tableName, memberName)
+
+	payload := getModelPayload(model)
+	for _, memberName := range payload.MemberNames {
+		attribute, exists := getAttribute(payload.TableName, memberName)
 
 		if attribute.isAutoIncrement() {
 			hasAutoIncrement = true
@@ -43,7 +43,7 @@ func Create[T InterfaceCRUD](model T) CrudReturn {
 		Utility.Assert(exists)
 	}
 
-	result, err := CreateRecord(GetInstance(), tableName, model)
+	result, err := CreateRecord(GetInstance(), payload, model)
 	if err != nil {
 		ret.setError(err)
 		return ret
@@ -66,9 +66,9 @@ func Read[T InterfaceCRUD](model T) CrudReturn {
 		return ret
 	}
 
-	tableName := getModelTableName(model)
+	payload := getModelPayload(model)
 
-	err := ReadRecord(GetInstance(), tableName, model)
+	err := ReadRecord(GetInstance(), payload, model)
 	if err != nil {
 		ret.setError(err)
 		return ret
@@ -84,15 +84,15 @@ func Update[T InterfaceCRUD](model T) CrudReturn {
 		return ret
 	}
 
-	tableName := getModelTableName(model)
+	payload := getModelPayload(model)
 	membersChanged := (model).GetCacheDiff()
 
 	for _, member := range membersChanged {
-		attribute, _ := getAttribute(tableName, member)
-		Utility.AssertMsg(attribute.isUpdatable(), "%s.%s is not updatable", tableName, member)
+		attribute, _ := getAttribute(payload.TableName, member)
+		Utility.AssertMsg(attribute.isUpdatable(), "%s.%s is not updatable", payload.TableName, member)
 	}
 
-	_, err := UpdateRecord(GetInstance(), tableName, model)
+	_, err := UpdateRecord(GetInstance(), payload, model)
 	if err != nil {
 		ret.setError(err)
 		return ret
@@ -112,8 +112,8 @@ func Delete[T InterfaceCRUD](model T) CrudReturn {
 		return ret
 	}
 
-	tableName := getModelTableName(model)
-	_, err := DeleteRecord(GetInstance(), tableName, model)
+	payload := getModelPayload(model)
+	_, err := DeleteRecord(GetInstance(), payload, model)
 	if err != nil {
 		ret.setError(err)
 		return ret
