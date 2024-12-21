@@ -30,18 +30,8 @@ func Create[T InterfaceCRUD](model T) CrudReturn {
 		return ret
 	}
 
-	hasAutoIncrement := false
-
 	payload := getModelPayload(model)
-	for _, memberName := range payload.MemberNames {
-		attribute, exists := getAttribute(payload.TableName, memberName)
-
-		if attribute.isAutoIncrement() {
-			hasAutoIncrement = true
-		}
-
-		Utility.Assert(exists)
-	}
+	hasAutoIncrement := createValidate(payload)
 
 	result, err := CreateRecord(GetInstance(), payload, model)
 	if err != nil {
@@ -85,12 +75,7 @@ func Update[T InterfaceCRUD](model T) CrudReturn {
 	}
 
 	payload := getModelPayload(model)
-	membersChanged := (model).GetCacheDiff()
-
-	for _, member := range membersChanged {
-		attribute, _ := getAttribute(payload.TableName, member)
-		Utility.AssertMsg(attribute.isUpdatable(), "%s.%s is not updatable", payload.TableName, member)
-	}
+	updateValidate(payload, model)
 
 	_, err := UpdateRecord(GetInstance(), payload, model)
 	if err != nil {
@@ -120,4 +105,29 @@ func Delete[T InterfaceCRUD](model T) CrudReturn {
 	}
 
 	return ret
+}
+
+// returns if auto increment
+func createValidate(payload ModelPayload) bool {
+	hasAutoIncrement := false
+	for _, memberName := range payload.MemberNames {
+		attribute, exists := getAttribute(payload.TableName, memberName)
+
+		if attribute.isAutoIncrement() {
+			hasAutoIncrement = true
+		}
+
+		Utility.Assert(exists)
+	}
+
+	return hasAutoIncrement
+}
+
+func updateValidate[T InterfaceCRUD](payload ModelPayload, model T) {
+	membersChanged := (model).GetCacheDiff()
+
+	for _, member := range membersChanged {
+		attribute, _ := getAttribute(payload.TableName, member)
+		Utility.AssertMsg(attribute.isUpdatable(), "%s.%s is not updatable", payload.TableName, member)
+	}
 }
