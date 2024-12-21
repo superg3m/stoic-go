@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/superg3m/stoic-go/Core/ORM"
 )
 
 var (
@@ -16,12 +15,12 @@ var (
 type User struct {
 	DB *sqlx.DB
 
-	ID             int
-	Email          string
-	EmailConfirmed bool
-	Joined         time.Time
-	LastLogin      *time.Time
-	LastActive     *time.Time
+	ID             int        `db:"ID,             KEY, AUTO_INCREMENT"`
+	Email          string     `db:"Email,          UNIQUE,UPDATABLE"`
+	EmailConfirmed bool       `db:"EmailConfirmed, UPDATABLE"`
+	Joined         time.Time  `db:"Joined"`
+	LastLogin      *time.Time `db:"LastLogin,      UPDATABLE"`
+	LastActive     *time.Time `db:"LastActive,     UPDATABLE"`
 }
 
 func New() *User {
@@ -47,8 +46,6 @@ func FromID(id int) (*User, error) {
 		return nil, read.GetError()
 	}
 
-	user.SetCache()
-
 	return user, nil
 }
 
@@ -60,18 +57,5 @@ func FromEmail(email string) (*User, error) {
 		return nil, read.GetError()
 	}
 
-	user.SetCache()
-
 	return user, nil
-}
-
-// Register ORM metadata
-func init() {
-	ORM.RegisterTableName(&User{})
-	ORM.RegisterTableColumn("ID", "ID", ORM.KEY, ORM.AUTO_INCREMENT)
-	ORM.RegisterTableColumn("Email", "Email", ORM.UPDATABLE, ORM.UNIQUE)
-	ORM.RegisterTableColumn("EmailConfirmed", "EmailConfirmed", ORM.UPDATABLE)
-	ORM.RegisterTableColumn("Joined", "Joined")
-	ORM.RegisterTableColumn("LastLogin", "LastLogin", ORM.UPDATABLE)
-	ORM.RegisterTableColumn("LastActive", "LastActive", ORM.UPDATABLE)
 }
