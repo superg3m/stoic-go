@@ -1,34 +1,27 @@
 package ORM
 
-type ORM_FLAG int
+import "slices"
 
-const ( // ORM_Flags
-	KEY            ORM_FLAG = 1 << iota // 1 << 0 = 1 (bit 0)
-	UPDATABLE                           // 1 << 1 = 2 (bit 1)
-	AUTO_INCREMENT                      // 1 << 2 = 4 (bit 2)
-	UNIQUE                              // 1 << 3 = 8 (bit 3)
-	NULLABLE                            // 1 << 4 = 16 (bit 4)
-)
+var acceptableFlagStrings = []string{"KEY", "UPDATABLE", "AUTO_INCREMENT", "UNIQUE"}
 
 type Attribute struct {
-	MemberName string
 	ColumnName string // The name of the column in the database
 	TypeName   string
-	Flags      ORM_FLAG // Bit flag to store Nullable, Updatable, etc.
+	Flags      []string // Bit flag to store Nullable, Updatable, etc.
 }
 
 func (attribute *Attribute) isPrimaryKey() bool {
-	return attribute.Flags&KEY != 0
+	return slices.Contains(attribute.Flags, "KEY")
 }
 
 func (attribute *Attribute) isUpdatable() bool {
-	return attribute.Flags&UPDATABLE != 0
+	return slices.Contains(attribute.Flags, "UPDATABLE")
 }
 
 func (attribute *Attribute) isAutoIncrement() bool {
-	return attribute.Flags&AUTO_INCREMENT != 0
+	return slices.Contains(attribute.Flags, "AUTO_INCREMENT")
 }
 
 func (attribute *Attribute) isUnique() bool {
-	return attribute.Flags&UNIQUE != 0
+	return slices.Contains(attribute.Flags, "UNIQUE")
 }

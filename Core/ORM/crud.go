@@ -65,6 +65,8 @@ func Read[T InterfaceCRUD](model T) CrudReturn {
 		return ret
 	}
 
+	model.SetCache()
+
 	return ret
 }
 
@@ -83,6 +85,8 @@ func Update[T InterfaceCRUD](model T) CrudReturn {
 		ret.setError(err)
 		return ret
 	}
+
+	model.SetCache()
 
 	return ret
 }
@@ -104,6 +108,8 @@ func Delete[T InterfaceCRUD](model T) CrudReturn {
 		ret.setError(err)
 		return ret
 	}
+
+	model.SetCache()
 
 	return ret
 }
