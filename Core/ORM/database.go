@@ -62,7 +62,7 @@ func ReadRecord[T InterfaceCRUD](db *sqlx.DB, payload ModelPayload, model T) err
 	{
 		temp, err := Fetch[T](pKeyQuery, payload.PrimaryKeyPointers...)
 		if err == nil {
-			model = temp
+			Utility.Copy(temp, model)
 			return nil
 		}
 	}
@@ -74,7 +74,7 @@ func ReadRecord[T InterfaceCRUD](db *sqlx.DB, payload ModelPayload, model T) err
 			query := uniqueQueries[i]
 			temp, err := Fetch[T](query, pointer)
 			if err == nil {
-				model = temp
+				Utility.Copy(temp, model)
 				return nil
 			}
 		}
@@ -115,7 +115,7 @@ func UpdateRecord(db *sqlx.DB, payload ModelPayload) (sql.Result, error) {
 	return result, nil
 }
 
-func DeleteRecord[T InterfaceCRUD](db *sqlx.DB, payload ModelPayload, model T) (sql.Result, error) {
+func DeleteRecord(db *sqlx.DB, payload ModelPayload) (sql.Result, error) {
 	Utility.Assert(len(payload.ColumnNames) > 0)
 
 	var conditions []string
@@ -143,11 +143,6 @@ func DeleteRecord[T InterfaceCRUD](db *sqlx.DB, payload ModelPayload, model T) (
 
 	if err2 != nil {
 		return nil, fmt.Errorf("failed to execute query: %s", err2)
-	}
-
-	err := Utility.SetToNil[T](&model)
-	if err != nil {
-		return nil, err
 	}
 
 	return result, nil

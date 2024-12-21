@@ -1,7 +1,7 @@
 package Utility
 
 import (
-	"errors"
+	"fmt"
 	"reflect"
 	"slices"
 )
@@ -177,21 +177,25 @@ func DereferencePointer(p any) any {
 	return v.Elem().Interface()
 }
 
-func SetToNil[T any](model *T) error {
-	if model == nil {
-		return errors.New("model cannot be nil")
+func SetNil[T any](target T) (T, error) {
+	v := reflect.ValueOf(target)
+
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Interface, reflect.Slice, reflect.Map, reflect.Func, reflect.Chan:
+		return reflect.Zero(v.Type()).Interface().(T), nil
+	default:
+		return target, fmt.Errorf("type %s cannot be set to nil", v.Kind())
+	}
+}
+
+func Copy[T any](source T, dest T) {
+	v := reflect.ValueOf(source)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
 	}
 
-	modelValue := reflect.ValueOf(model)
-	if modelValue.Kind() != reflect.Ptr {
-		return errors.New("model must be a pointer")
-	}
+	destVal := reflect.ValueOf(dest).Elem()
+	AssertMsg(v.Type().AssignableTo(destVal.Type()), "types are not compatible: %v to %v", v.Type(), destVal.Type())
 
-	elem := modelValue.Elem()
-	if elem.Kind() == reflect.Ptr || elem.Kind() == reflect.Interface {
-		modelValue.Elem().Set(reflect.Zero(elem.Type()))
-		return nil
-	}
-
-	return errors.New("model type cannot be set to nil")
+	destVal.Set(v)
 }

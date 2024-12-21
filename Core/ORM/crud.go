@@ -98,7 +98,7 @@ func Delete[T InterfaceCRUD](model T) CrudReturn {
 	}
 
 	payload := getModelPayload(model)
-	_, err := DeleteRecord(GetInstance(), payload, model)
+	_, err := DeleteRecord(GetInstance(), payload)
 	if err != nil {
 		ret.setError(err)
 		return ret
