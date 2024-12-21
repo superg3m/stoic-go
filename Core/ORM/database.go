@@ -15,7 +15,7 @@ import (
 // postgres
 // sql_lite
 
-func CreateRecord[T InterfaceCRUD](db *sqlx.DB, payload ModelPayload, model T) (sql.Result, error) {
+func CreateRecord(db *sqlx.DB, payload ModelPayload) (sql.Result, error) {
 	Utility.Assert(len(payload.MemberNames) > 0)
 
 	placeholders := make([]string, len(payload.ColumnNames))
@@ -83,7 +83,7 @@ func ReadRecord[T InterfaceCRUD](db *sqlx.DB, payload ModelPayload, model T) err
 	return errors.New("failed to fetch record")
 }
 
-func UpdateRecord[T InterfaceCRUD](db *sqlx.DB, payload ModelPayload, model T) (sql.Result, error) {
+func UpdateRecord(db *sqlx.DB, payload ModelPayload) (sql.Result, error) {
 	Utility.Assert(len(payload.ColumnNames) > 0)
 
 	keyColumns := getColumnNames(payload.TableName, payload.PrimaryKeyMemberNames)

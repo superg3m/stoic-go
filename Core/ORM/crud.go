@@ -33,7 +33,7 @@ func Create[T InterfaceCRUD](model T) CrudReturn {
 	payload := getModelPayload(model)
 	hasAutoIncrement := createValidate(payload)
 
-	result, err := CreateRecord(GetInstance(), payload, model)
+	result, err := CreateRecord(GetInstance(), payload)
 	if err != nil {
 		ret.setError(err)
 		return ret
@@ -77,7 +77,7 @@ func Update[T InterfaceCRUD](model T) CrudReturn {
 	payload := getModelPayload(model)
 	updateValidate(payload, model)
 
-	_, err := UpdateRecord(GetInstance(), payload, model)
+	_, err := UpdateRecord(GetInstance(), payload)
 	if err != nil {
 		ret.setError(err)
 		return ret
