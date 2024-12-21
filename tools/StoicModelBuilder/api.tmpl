@@ -95,15 +95,15 @@ func delete{{ .TableName }}(request *Router.StoicRequest, response Router.StoicR
 
 func init() {
 	Router.RegisterApiEndpoint("{{ .TableName }}/Create", create{{ .TableName }}, "POST",
-		Router.MiddlewareValidParams("id", {{ range $i, $pk := .Attributes }}{{ if $i }}, {{ end }}"{{ $pk.Name }}"{{ end }}),
+		Router.MiddlewareValidParams({{ range $i, $pk := .Attributes }}{{ if $i }}, {{ end }}"{{ $pk.Name }}"{{ end }}),
 	)
     Router.RegisterApiEndpoint("{{ .TableName }}/Get", get{{ .TableName }}, "GET",
-        Router.MiddlewareValidParams("id"),
+        Router.MiddlewareValidParams({{ range $i, $pk := .PrimaryKeys }}{{ if $i }}, {{ end }}"{{ $pk.Name }}"{{ end }}),
     )
 	Router.RegisterApiEndpoint("{{ .TableName }}/Update", update{{ .TableName }}, "PATCH",
-		Router.MiddlewareValidParams("id", {{ range $i, $pk := .PrimaryKeys }}{{ if $i }}, {{ end }}"{{ $pk.Name }}"{{ end }}),
+		Router.MiddlewareValidParams({{ range $i, $pk := .Attributes }}{{ if $i }}, {{ end }}"{{ $pk.Name }}"{{ end }}),
 	)
 	Router.RegisterApiEndpoint("{{ .TableName }}/Delete", delete{{ .TableName }}, "DELETE",
-		Router.MiddlewareValidParams("id"),
+		Router.MiddlewareValidParams({{ range $i, $pk := .PrimaryKeys }}{{ if $i }}, {{ end }}"{{ $pk.Name }}"{{ end }}),
 	)
 }
