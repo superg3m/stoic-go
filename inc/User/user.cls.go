@@ -17,8 +17,6 @@ type User struct {
 	DB *sqlx.DB
 
 	ID             int
-	Username       string
-	Password       string
 	Email          string
 	EmailConfirmed bool
 	Joined         time.Time
@@ -32,8 +30,6 @@ func New() *User {
 	//user.DB = db
 
 	user.ID = 0
-	user.Username = ""
-	user.Password = ""
 	user.Email = ""
 	user.EmailConfirmed = false
 	user.Joined = time.Now()
@@ -73,8 +69,6 @@ func FromEmail(email string) (*User, error) {
 func init() {
 	ORM.RegisterTableName(&User{})
 	ORM.RegisterTableColumn("ID", "ID", ORM.KEY, ORM.AUTO_INCREMENT)
-	ORM.RegisterTableColumn("Username", "Username", ORM.UPDATABLE)
-	ORM.RegisterTableColumn("Password", "Password", ORM.UPDATABLE)
 	ORM.RegisterTableColumn("Email", "Email", ORM.UPDATABLE, ORM.UNIQUE)
 	ORM.RegisterTableColumn("EmailConfirmed", "EmailConfirmed", ORM.UPDATABLE)
 	ORM.RegisterTableColumn("Joined", "Joined")

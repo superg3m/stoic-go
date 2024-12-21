@@ -37,7 +37,7 @@ func GetUserList() (string, error) {
 	var ret []string
 
 	for _, user := range admins {
-		ret = append(ret, user.Username)
+		ret = append(ret, user.Email)
 	}
 
 	return strings.Join(ret, ","), nil

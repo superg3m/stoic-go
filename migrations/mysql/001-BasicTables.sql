@@ -19,8 +19,6 @@
 -- StoicMigration Up
 CREATE TABLE IF NOT EXISTS `User` (
     `ID` INT AUTO_INCREMENT NOT NULL,
-    `Username` NVARCHAR(256) NOT NULL,
-    `Password` NVARCHAR(256) NOT NULL,
     `Email` NVARCHAR(256) NOT NULL UNIQUE,
     `EmailConfirmed` TINYINT NOT NULL,
     `Joined` DATETIME NOT NULL,
