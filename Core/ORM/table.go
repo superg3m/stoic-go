@@ -1,8 +1,6 @@
 package ORM
 
 import (
-	"fmt"
-
 	"github.com/superg3m/stoic-go/Core/Utility"
 )
 
@@ -56,14 +54,4 @@ func GetAttributes(tableName string) map[string]Attribute {
 	attributes, exists := globalTable[tableName]
 	Utility.Assert(exists)
 	return attributes
-}
-
-func getAttribute(tableName string, memberName string) (Attribute, bool) {
-	attribute, exists := globalTable[tableName][memberName]
-	Utility.AssertMsg(exists, fmt.Sprintf("Table: %s, Member: %s | Doesn't exist", tableName, memberName))
-	return attribute, exists
-}
-
-func getPrimaryKeys() []Attribute {
-	return nil
 }

@@ -22,8 +22,8 @@ type User struct {
 	Email          string
 	EmailConfirmed bool
 	Joined         time.Time
-	LastActive     *time.Time
 	LastLogin      *time.Time
+	LastActive     *time.Time
 }
 
 func New() *User {

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/superg3m/stoic-go/Core/Utility"
+	"slices"
 )
 
 type InterfaceCRUD interface {
@@ -110,14 +111,11 @@ func Delete[T InterfaceCRUD](model T) CrudReturn {
 // returns if auto increment
 func createValidate(payload ModelPayload) bool {
 	hasAutoIncrement := false
-	for _, memberName := range payload.MemberNames {
-		attribute, exists := getAttribute(payload.TableName, memberName)
 
+	for _, attribute := range GetAttributes(payload.TableName) {
 		if attribute.isAutoIncrement() {
 			hasAutoIncrement = true
 		}
-
-		Utility.Assert(exists)
 	}
 
 	return hasAutoIncrement
@@ -126,8 +124,10 @@ func createValidate(payload ModelPayload) bool {
 func updateValidate[T InterfaceCRUD](payload ModelPayload, model T) {
 	membersChanged := (model).GetCacheDiff()
 
-	for _, member := range membersChanged {
-		attribute, _ := getAttribute(payload.TableName, member)
-		Utility.AssertMsg(attribute.isUpdatable(), "%s.%s is not updatable", payload.TableName, member)
+	for memberName, attribute := range GetAttributes(payload.TableName) {
+		if !slices.Contains(membersChanged, memberName) {
+			continue
+		}
+		Utility.AssertMsg(attribute.isUpdatable(), "%s.%s is not updatable", payload.TableName, memberName)
 	}
 }

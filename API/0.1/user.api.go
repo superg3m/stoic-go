@@ -37,7 +37,7 @@ func updateUser(request *Router.StoicRequest, response Router.StoicResponse) {
 		response.SetError(err.Error())
 		return
 	}
-
+	
 	user.Username = username
 	user.Email = email
 	user.Password = password
