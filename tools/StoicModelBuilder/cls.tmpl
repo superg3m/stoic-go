@@ -11,7 +11,7 @@ type {{ .TableName }} struct {
 	DB *sqlx.DB
 
 	{{- range .Attributes }}
-	{{ .Name }} {{ .Type }}
+	{{ .Name }} {{ .Type }} `db: "{{ .Column }}"`
 	{{- end }}
 }
 
@@ -73,13 +73,5 @@ func From{{ .Name }}({{ .Name }} {{ .Type }}) (*{{ $.TableName }}, error) {
 {{- end }}
 
 func init() {
-	ORM.RegisterTableName({{ .TableName }}{})
-
-    {{- range .Attributes }}
-    {{- if .Flags }}
-    ORM.RegisterTableColumn("{{ .Name }}", "{{ .Column }}", {{ .Flags }})
-    {{- else }}
-    ORM.RegisterTableColumn("{{ .Name }}", "{{ .Column }}")
-    {{- end }}
-    {{- end }}
+	ORM.RegisterModel(&{{ .TableName }}{})
 }
