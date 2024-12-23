@@ -43,12 +43,12 @@ Stoic-Go is a modular project designed for handling backend services, database m
   
 - Install `wgo`:  
   ```  
-  cd ./tools/wgo-main  
-  go install  
+  cd ./cmd/src/wgo-main  
+  go build ; mv ./wgo ../../bin/
   ```  
 - Run with hot recompilation:  
   ```  
-  ./tools/wgo-main/wgo run main.go -w "*.go"  
+  ./cmd/bin/wgo run main.go -w "*.go"  
   ```  
   
 ### TODO  
