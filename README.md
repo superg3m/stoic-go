@@ -1,71 +1,89 @@
-# High level overview of Stoic-Go
-
-- cmd
-    - bin
-        - StoicMigration
-        - StoicModelBuilder
-        - wgo (Hot Recompiles Go code) (really good software nice job): ./cmd/bin/wgo.exe run main.go -w "*.go" 
- 
-## Exec.ps1 | init | stop | reset | test | migration up | migration down
-
-### init
-- Docker
-    - SMTP (Emails)
-    - Frontend: Vite/Vue3.js
-    - Database (mysql, sqlserver, postgres, sql_lite)
-    - Go Backend: Stoic-Go
-
-- Migration Control
-    - Goose: https://github.com/pressly/goose (Sql lite only -_-)
-    - Custom parsing like goose
-    - -- StoicMigration Up
-    - -- StoicMigration Down
-    - Store migration in db to know which ones have been successfully run
-
-
-
-### test
-
-
-# Goals
-
-## Core
-
-### Package Utils
-- [ ] utils.go
-    - AssertOnError(err error, format string, args ...any)
-    - LoggerInit()
-
-    - LogInfo()
-    - LogWarn()
-    - LogDebug()
-    - LogError()
-    - LogFatal()
-
-    - LogOnError(err error, format string, args ...any)
-    - castAny[T any](v any) T
-    - 
-
-
-cd ./tools/wgo-main
-go install
-
-i'm sorry for my sins I'm about to use a whole lot of global state purely for the name spacing if this becomes
-a problem we can also consolidate it into something called StoicState and then initialize everything in teh main.go
-The only issue is that the Nice Namespacing that we get will be gone!
-
-clear ; ./tools/wgo-main/wgo run main.go -w "*.go"
-
-Auto increment works!
-
-
-I need to easily separate runtime developer checks 
-- Register Column stuff
-
-clear ; go run ./tools/StoicMigration/stoic_migration.go up|down
-clear ; ./tools/wgo-main/wgo run main.go -w "*.go"  
-
-clear ; cloc --exclude-dir=".\\tools\\wgo-main" --include-ext=go .
-
-# TODO
-Add the rest of the models from stoic-php
+# Stoic-Go: Overview and Guide  
+  
+## Overview  
+  
+Stoic-Go is a modular project designed for handling backend services, database migrations, and runtime utility tasks. It includes tools for routing, logging, migrations, and dynamic recompilation.  
+  
+### Key Components  
+- **Command-line Tools (`cmd/bin`)**:  
+  - **StoicMigration**: Manages database migrations.  
+  - **StoicModelBuilder**: Builds models dynamically.  
+  - **wgo**: Hot recompilation tool for Go code.  
+    - Example: `./cmd/bin/wgo.exe run main.go -w "*.go"`  
+  
+## Features and Usage  
+  
+### `Exec.ps1` Commands  
+1. **init**: Sets up the development environment.  
+   - **Dockerized Services**:  
+     - SMTP for emails.  
+     - Vite/Vue3.js frontend.  
+     - Databases: MySQL, SQLServer, Postgres, SQLite.  
+     - Stoic-Go backend.  
+   - **Migration Control**:
+     - Custom parsing for migrations:  
+       - `-- StoicMigration Up`  
+       - `-- StoicMigration Down`
+  
+2. **test**: Runs unit and integration tests.  
+  
+## Goals  
+  
+### Core Functionality  
+  
+#### Package `utils.go`  
+- [ ] Functions:  
+  - `AssertOnError(err error, format string, args ...any)`  
+  - `LoggerInit()`  
+  - Logging: `LogInfo()`, `LogWarn()`, `LogDebug()`, `LogError()`, `LogFatal()`  
+  - `LogOnError(err error, format string, args ...any)`  
+  - Generic casting: `castAny[T any](v any) T`  
+  
+### Runtime Tools  
+  
+- Install `wgo`:  
+  ```  
+  cd ./tools/wgo-main  
+  go install  
+  ```  
+- Run with hot recompilation:  
+  ```  
+  ./tools/wgo-main/wgo run main.go -w "*.go"  
+  ```  
+  
+### TODO  
+- Add models from Stoic-PHP.  
+- Consolidate into a single package:  
+  - `StoicCore.Router`  
+  - `StoicCore.ORM`  
+  - `StoicCore.Utility`  
+  
+## Services  
+  
+- **Router Package** (Uses Gorilla Mux):  
+  - `router.go`:  
+    - `NewRouter()`  
+    - `RegisterPrefix(newPrefix string)`  
+    - `RegisterApiEndpoint(path, handler, method, middlewares ...StoicMiddleware)`  
+  - `middleware.go`:  
+    - Public middleware:  
+      - `RegisterCommonMiddleware(middlewares ...StoicMiddleware)`  
+      - `MiddlewareCORS()`  
+      - `MiddlewareValidParams(requiredParams ...string)`  
+      - `MiddlewareLogger()`  
+    - Private functions:  
+      - `isMiddlewareRegistered()`  
+      - `chainMiddleware()`  
+  - `request.go`:  
+    - `type StoicRequest`  
+    - `SetError(msg string)`  
+    - `SetData(data any)`  
+  - `response.go`:  
+    - `type StoicResponse`  
+    - Functions for parameter handling (`Has`, `GetStringParam`, `GetIntParam`, etc.).  
+  
+## Future Work  
+- ORM, Stripe
+- Pre-computation for `FromX` methods to simplify templates.  
+- Replace panics with robust error handling. 
+- Track successful migrations in the database Migration table.  

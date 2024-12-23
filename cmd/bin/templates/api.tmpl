@@ -1,0 +1,109 @@
+package API
+
+import (
+    "fmt"
+	"github.com/superg3m/stoic-go/Core/Router"
+	"github.com/superg3m/stoic-go/inc/{{ .TableName }}"
+)
+
+func create{{ .TableName }}(request *Router.StoicRequest, response Router.StoicResponse) {
+	// Instantiate a new model object
+	entity := {{ .TableName }}.New()
+
+    {{- range .PrimaryKeys }}
+    {{- if eq .Type "string" }}
+    entity.{{ .Name }} = request.GetStringParam("{{ .Name }}")
+    {{- else if eq .Type "int" }}
+    entity.{{ .Name }} = request.GetIntParam("{{ .Name }}")
+    {{- else if eq .Type "bool" }}
+    entity.{{ .Name }} = request.GetBoolParam("{{ .Name }}")
+    {{- else if eq .Type "float" }}
+    entity.{{ .Name }} = request.GetFloatParam("{{ .Name }}")
+    {{- end }}
+    {{- end }}
+
+
+    create := entity.Create()
+    if create.IsBad() {
+        response.SetError("Failed to create {{ .TableName }} | %s", create.GetError())
+        return
+    }
+
+	response.SetData(fmt.Sprintf("{{ .TableName }} created successfully with ID %d", entity.ID))
+}
+
+func get{{ .TableName }}(request *Router.StoicRequest, response Router.StoicResponse) {
+	id := request.GetIntParam("id")
+
+	entity, err := {{ .TableName }}.FromID(id)
+	if err != nil {
+		response.SetError(fmt.Sprintf("Error getting {{ .TableName }}: %s", err))
+		return
+	}
+
+	response.SetData(entity)
+}
+
+func update{{ .TableName }}(request *Router.StoicRequest, response Router.StoicResponse) {
+	id := request.GetIntParam("id")
+
+	entity, err := {{ .TableName }}.FromID(id)
+    if err != nil {
+        response.SetError("Failed to find {{ .TableName }} by ID | %s", err)
+        return
+    }
+
+    {{- range .Attributes }}
+    {{- if eq .Type "string" }}
+    entity.{{ .Name }} = request.GetStringParam("{{ .Name }}")
+    {{- else if eq .Type "int" }}
+    entity.{{ .Name }} = request.GetIntParam("{{ .Name }}")
+    {{- else if eq .Type "bool" }}
+    entity.{{ .Name }} = request.GetBoolParam("{{ .Name }}")
+    {{- else if eq .Type "float" }}
+    entity.{{ .Name }} = request.GetFloatParam("{{ .Name }}")
+    {{- end }}
+    {{- end }}
+
+	update := entity.Update()
+	if update.IsBad() {
+	    response.SetError("Failed to update {{ .TableName }} | %s", update.GetError())
+	    return
+	}
+
+	response.SetData(fmt.Sprintf("{{ .TableName }} with ID %d updated successfully", id))
+}
+
+func delete{{ .TableName }}(request *Router.StoicRequest, response Router.StoicResponse) {
+	id := request.GetIntParam("id")
+
+	entity, err := {{ .TableName }}.FromID(id)
+	if err != nil {
+        response.SetError("Failed to find {{ .TableName }} by ID | %s", err)
+        return
+	}
+
+	delete := entity.Delete()
+
+	if delete.IsBad() {
+	    response.SetError("Failed to delete {{ .TableName }} %s", delete.GetError())
+	    return
+	}
+
+	response.SetData(fmt.Sprintf("{{ .TableName }} with ID %d deleted successfully", id))
+}
+
+func init() {
+	Router.RegisterApiEndpoint("{{ .TableName }}/Create", create{{ .TableName }}, "POST",
+		Router.MiddlewareValidParams({{ range $i, $pk := .Attributes }}{{ if $i }}, {{ end }}"{{ $pk.Name }}"{{ end }}),
+	)
+    Router.RegisterApiEndpoint("{{ .TableName }}/Get", get{{ .TableName }}, "GET",
+        Router.MiddlewareValidParams({{ range $i, $pk := .PrimaryKeys }}{{ if $i }}, {{ end }}"{{ $pk.Name }}"{{ end }}),
+    )
+	Router.RegisterApiEndpoint("{{ .TableName }}/Update", update{{ .TableName }}, "PATCH",
+		Router.MiddlewareValidParams({{ range $i, $pk := .Attributes }}{{ if $i }}, {{ end }}"{{ $pk.Name }}"{{ end }}),
+	)
+	Router.RegisterApiEndpoint("{{ .TableName }}/Delete", delete{{ .TableName }}, "DELETE",
+		Router.MiddlewareValidParams({{ range $i, $pk := .PrimaryKeys }}{{ if $i }}, {{ end }}"{{ $pk.Name }}"{{ end }}),
+	)
+}
