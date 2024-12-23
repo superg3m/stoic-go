@@ -7,7 +7,6 @@ import (
 )
 
 func create{{ .TableName }}(request *Router.StoicRequest, response Router.StoicResponse) {
-	// Instantiate a new model object
 	entity := {{ .TableName }}.New()
 
     {{- range .PrimaryKeys }}
@@ -29,15 +28,25 @@ func create{{ .TableName }}(request *Router.StoicRequest, response Router.StoicR
         return
     }
 
-	response.SetData(fmt.Sprintf("{{ .TableName }} created successfully with ID %d", entity.ID))
+	response.SetData(fmt.Sprintf("{{ .TableName }} created successfully"))
 }
 
 func get{{ .TableName }}(request *Router.StoicRequest, response Router.StoicResponse) {
-	id := request.GetIntParam("id")
+    {{- range .PrimaryKeys }}
+    {{- if eq .Type "string" }}
+    {{ .Name }} := request.GetStringParam("{{ .Name }}")
+    {{- else if eq .Type "int" }}
+    {{ .Name }} := request.GetIntParam("{{ .Name }}")
+    {{- else if eq .Type "bool" }}
+    {{ .Name }} := request.GetBoolParam("{{ .Name }}")
+    {{- else if eq .Type "float" }}
+    {{ .Name }} := request.GetFloatParam("{{ .Name }}")
+    {{- end }}
+    {{- end }}
 
-	entity, err := {{ .TableName }}.FromID(id)
+	entity, err := {{ .TableName }}.From{{ .FromPrimaryKey }}({{ .PrimaryKeyParams }})
 	if err != nil {
-		response.SetError(fmt.Sprintf("Error getting {{ .TableName }}: %s", err))
+		response.SetError("Failed to get {{ .TableName }} | %s", err)
 		return
 	}
 
@@ -45,13 +54,23 @@ func get{{ .TableName }}(request *Router.StoicRequest, response Router.StoicResp
 }
 
 func update{{ .TableName }}(request *Router.StoicRequest, response Router.StoicResponse) {
-	id := request.GetIntParam("id")
+    {{- range .PrimaryKeys }}
+    {{- if eq .Type "string" }}
+    {{ .Name }} := request.GetStringParam("{{ .Name }}")
+    {{- else if eq .Type "int" }}
+    {{ .Name }} := request.GetIntParam("{{ .Name }}")
+    {{- else if eq .Type "bool" }}
+    {{ .Name }} := request.GetBoolParam("{{ .Name }}")
+    {{- else if eq .Type "float" }}
+    {{ .Name }} := request.GetFloatParam("{{ .Name }}")
+    {{- end }}
+    {{- end }}
 
-	entity, err := {{ .TableName }}.FromID(id)
-    if err != nil {
-        response.SetError("Failed to find {{ .TableName }} by ID | %s", err)
-        return
-    }
+	entity, err := {{ .TableName }}.From{{ .FromPrimaryKey }}({{ .PrimaryKeyParams }})
+	if err != nil {
+		response.SetError("Failed to get {{ .TableName }} | %s", err)
+		return
+	}
 
     {{- range .Attributes }}
     {{- if eq .Type "string" }}
@@ -71,26 +90,36 @@ func update{{ .TableName }}(request *Router.StoicRequest, response Router.StoicR
 	    return
 	}
 
-	response.SetData(fmt.Sprintf("{{ .TableName }} with ID %d updated successfully", id))
+	response.SetData(fmt.Sprintf("{{ .TableName }} updated successfully"))
 }
 
 func delete{{ .TableName }}(request *Router.StoicRequest, response Router.StoicResponse) {
-	id := request.GetIntParam("id")
+    {{- range .PrimaryKeys }}
+    {{- if eq .Type "string" }}
+    {{ .Name }} := request.GetStringParam("{{ .Name }}")
+    {{- else if eq .Type "int" }}
+    {{ .Name }} := request.GetIntParam("{{ .Name }}")
+    {{- else if eq .Type "bool" }}
+    {{ .Name }} := request.GetBoolParam("{{ .Name }}")
+    {{- else if eq .Type "float" }}
+    {{ .Name }} := request.GetFloatParam("{{ .Name }}")
+    {{- end }}
+    {{- end }}
 
-	entity, err := {{ .TableName }}.FromID(id)
+	entity, err := {{ .TableName }}.From{{ .FromPrimaryKey }}({{ .PrimaryKeyParams }})
 	if err != nil {
-        response.SetError("Failed to find {{ .TableName }} by ID | %s", err)
-        return
+		response.SetError("Failed to get {{ .TableName }} | %s", err)
+		return
 	}
 
-	delete := entity.Delete()
+	del := entity.Delete()
 
-	if delete.IsBad() {
-	    response.SetError("Failed to delete {{ .TableName }} %s", delete.GetError())
+	if del.IsBad() {
+	    response.SetError("Failed to delete {{ .TableName }} %s", del.GetError())
 	    return
 	}
 
-	response.SetData(fmt.Sprintf("{{ .TableName }} with ID %d deleted successfully", id))
+	response.SetData(fmt.Sprintf("{{ .TableName }} deleted successfully"))
 }
 
 func init() {

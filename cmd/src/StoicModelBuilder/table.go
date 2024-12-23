@@ -212,3 +212,27 @@ func mapSQLTypeToGoType(sqlType string, isNull string) string {
 		return "any"
 	}
 }
+
+func generateFromPrimaryKey(primaryKeys []PairData) string {
+	var parts []string
+	for i, pk := range primaryKeys {
+		if i > 0 {
+			parts = append(parts, "_")
+		}
+		parts = append(parts, pk.Name)
+	}
+	return strings.Join(parts, "")
+}
+
+func generatePrimaryKeyArgs(primaryKeys []PairData) string {
+	var ret string
+	for i, pk := range primaryKeys {
+		if i > 0 {
+			ret += ", "
+		}
+
+		ret += pk.Name
+	}
+
+	return ret
+}

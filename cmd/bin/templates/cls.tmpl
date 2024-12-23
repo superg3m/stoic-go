@@ -39,19 +39,15 @@ func New() *{{ .TableName }} {
 	return ret
 }
 
-func From{{- range $index, $key := .PrimaryKeys }}{{ if $index }}_{{ end }}{{ $key.Name }}{{- end }}(
-    {{- range $index, $key := .PrimaryKeys }}{{ if $index }}, {{ end }}{{ $key.Name }} {{ $key.Type }}{{- end }}) (*{{ .TableName }}, error) {
+func From{{ .FromPrimaryKey }}({{ range $i, $pk := .PrimaryKeys }}{{ if $i }}, {{ end }}{{ $pk.Name }} {{ $pk.Type }}{{ end }}) (*{{ .TableName }}, error) {
     ret := New()
-    {{- range $key := .PrimaryKeys }}
-    ret.{{ $key.Name }} = {{ $key.Name }}
+    {{- range .PrimaryKeys }}
+    ret.{{ .Name }} = {{ .Name }}
     {{- end }}
-
     read := ret.Read()
     if read.IsBad() {
         return nil, read.GetError()
     }
-
-    {{ $.TableName }}.SetCache(*ret)
 
     return ret, nil
 }
@@ -60,20 +56,18 @@ func From{{- range $index, $key := .PrimaryKeys }}{{ if $index }}_{{ end }}{{ $k
 func From{{ .Name }}({{ .Name }} {{ .Type }}) (*{{ $.TableName }}, error) {
     ret := New()
     ret.{{ .Name }} = {{ .Name }}
-
     read := ret.Read()
-	if read.IsBad() {
-		return nil, read.GetError()
-	}
-
-	{{ $.TableName }}.SetCache(*ret)
-
-	return ret, nil
+    if read.IsBad() {
+        return nil, read.GetError()
+    }
+    
+    return ret, nil
 }
 {{- end }}
 
+
 func init() {
-	ORM.RegisterTableName({{ .TableName }}{})
+	ORM.RegisterTableName(&{{ .TableName }}{})
 
     {{- range .Attributes }}
     {{- if .Flags }}

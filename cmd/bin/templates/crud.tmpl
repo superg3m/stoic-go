@@ -1,5 +1,9 @@
 package {{ .TableName }}
-import "github.com/superg3m/stoic-go/Core/ORM"
+
+import (
+	"github.com/superg3m/stoic-go/Core/ORM"
+	"reflect"
+)
 
 func (model *{{ .TableName }}) CanCreate() bool {
 	return true

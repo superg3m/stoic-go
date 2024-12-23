@@ -16,11 +16,14 @@ import (
 // If files already exist, then just log: "File already exists for <TableName> table."
 
 type TemplateDataType struct {
-	TableName   string
-	Attributes  []Attribute
-	PrimaryKeys []PairData
-	UniqueKeys  []PairData
-	SafeHTML    template.HTML
+	TableName        string
+	Attributes       []Attribute
+	PrimaryKeys      []PairData
+	UniqueKeys       []PairData
+	SafeHTML         template.HTML
+	FromPrimaryKey   string
+	FromUniques      []string
+	PrimaryKeyParams string
 }
 
 func main() {
@@ -62,51 +65,49 @@ func main() {
 		PrimaryKeys: primaryKeys,
 		UniqueKeys:  uniqueKeys,
 		SafeHTML:    template.HTML(`<`),
+		// Precompute FromPrimaryKey
+		FromPrimaryKey:   generateFromPrimaryKey(primaryKeys),
+		PrimaryKeyParams: generatePrimaryKeyArgs(primaryKeys),
 	}
 
 	tmplFile := "./templates/cls.tmpl"
-	tmpl, err := template.New(tmplFile).ParseFiles(tmplFile)
-	if err != nil {
-		panic(err)
+	tmpl, err := template.ParseFiles(tmplFile)
+	Utility.AssertOnError(err)
+
+	dirName := fmt.Sprintf("../../inc/%s", tableName)
+
+	if _, err := os.Stat(dirName); os.IsNotExist(err) {
+		err = os.Mkdir(dirName, 0755)
+		Utility.AssertOnError(err)
 	}
 
-	filePtr, err := os.Create(fmt.Sprintf("../../inc/%s/%s.cls.go", tableName, strings.ToLower(tableName)))
+	filePtr, err := os.Create(fmt.Sprintf("%s/%s.cls.go", dirName, strings.ToLower(tableName)))
 	Utility.AssertOnError(err)
 
 	err = tmpl.Execute(filePtr, templateData)
-	if err != nil {
-		panic(err)
-	}
+	Utility.AssertOnError(err)
 
 	// --------------------------------------------------------
 
 	tmplFile = "./templates/api.tmpl"
-	tmpl, err = template.New(tmplFile).ParseFiles(tmplFile)
-	if err != nil {
-		panic(err)
-	}
+	tmpl, err = template.ParseFiles(tmplFile)
+	Utility.AssertOnError(err)
 
 	filePtr, err = os.Create(fmt.Sprintf("../../API/0.1/%s.api.go", strings.ToLower(tableName)))
 	Utility.AssertOnError(err)
 
 	err = tmpl.Execute(filePtr, templateData)
-	if err != nil {
-		panic(err)
-	}
+	Utility.AssertOnError(err)
 
 	// --------------------------------------------------------
 
 	tmplFile = "./templates/crud.tmpl"
-	tmpl, err = template.New(tmplFile).ParseFiles(tmplFile)
-	if err != nil {
-		panic(err)
-	}
+	tmpl, err = template.ParseFiles(tmplFile)
+	Utility.AssertOnError(err)
 
-	filePtr, err = os.Create(fmt.Sprintf("../../inc/%s/%s.crud.go", tableName, strings.ToLower(tableName)))
+	filePtr, err = os.Create(fmt.Sprintf("%s/%s.crud.go", dirName, strings.ToLower(tableName)))
 	Utility.AssertOnError(err)
 
 	err = tmpl.Execute(filePtr, templateData)
-	if err != nil {
-		panic(err)
-	}
+	Utility.AssertOnError(err)
 }
