@@ -70,11 +70,11 @@ func main() {
 		PrimaryKeyParams: generatePrimaryKeyArgs(primaryKeys),
 	}
 
-	tmplFile := "./templates/cls.tmpl"
+	tmplFile := "./cmd/bin/templates/cls.tmpl"
 	tmpl, err := template.ParseFiles(tmplFile)
 	Utility.AssertOnError(err)
 
-	dirName := fmt.Sprintf("../../inc/%s", tableName)
+	dirName := fmt.Sprintf("./inc/%s", tableName)
 
 	if _, err := os.Stat(dirName); os.IsNotExist(err) {
 		err = os.Mkdir(dirName, 0755)
@@ -89,11 +89,11 @@ func main() {
 
 	// --------------------------------------------------------
 
-	tmplFile = "./templates/api.tmpl"
+	tmplFile = "./cmd/bin/templates/api.tmpl"
 	tmpl, err = template.ParseFiles(tmplFile)
 	Utility.AssertOnError(err)
 
-	filePtr, err = os.Create(fmt.Sprintf("../../API/0.1/%s.api.go", strings.ToLower(tableName)))
+	filePtr, err = os.Create(fmt.Sprintf("./API/0.1/%s.api.go", strings.ToLower(tableName)))
 	Utility.AssertOnError(err)
 
 	err = tmpl.Execute(filePtr, templateData)
@@ -101,7 +101,7 @@ func main() {
 
 	// --------------------------------------------------------
 
-	tmplFile = "./templates/crud.tmpl"
+	tmplFile = "./cmd/bin/templates/crud.tmpl"
 	tmpl, err = template.ParseFiles(tmplFile)
 	Utility.AssertOnError(err)
 

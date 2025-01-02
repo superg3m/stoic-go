@@ -9,7 +9,7 @@ Stoic-Go is a modular project designed for handling backend services, database m
   - **StoicMigration**: Manages database migrations.  
   - **StoicModelBuilder**: Builds models dynamically.  
   - **wgo**: Hot recompilation tool for Go code.  
-    - Example: `./cmd/bin/wgo.exe run main.go -w "*.go"`  
+    - Example: `./cmd/bin/wgo run main.go -w "*.go"`  
   
 ## Features and Usage  
   
