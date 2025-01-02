@@ -1,10 +1,10 @@
 package API
 
 import (
+	"github.com/superg3m/stoic-go/Core/Utility"
 	"time"
 
 	"github.com/superg3m/stoic-go/Core/Router"
-	"github.com/superg3m/stoic-go/Core/Utility"
 	"github.com/superg3m/stoic-go/inc/LoginKey"
 	"github.com/superg3m/stoic-go/inc/User"
 )
@@ -25,6 +25,7 @@ func createUser(request *Router.StoicRequest, response Router.StoicResponse) {
 	loginKey.UserID = user.ID
 	loginKey.Key = password
 	loginKey.Provider = LoginKey.PASSWORD
+	loginKey.HashKey()
 	create = loginKey.Create()
 	if create.IsBad() {
 		response.SetError("Failed to create login key | %s", create.GetError())
