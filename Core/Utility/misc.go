@@ -1,6 +1,8 @@
 package Utility
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -146,4 +148,11 @@ func GetSiteSettings() map[string]any {
 	AssertOnError(err)
 
 	return settings
+}
+
+func Sha256HashString(str string) string {
+	h := sha256.New()
+	h.Write([]byte(str))
+
+	return hex.EncodeToString(h.Sum(nil))
 }

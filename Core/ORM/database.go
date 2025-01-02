@@ -4,10 +4,11 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/superg3m/stoic-go/Core/Utility"
-	"strings"
 )
 
 // mysql
@@ -16,8 +17,6 @@ import (
 // sql_lite
 
 func CreateRecord(db *sqlx.DB, payload ModelPayload) (sql.Result, error) {
-	Utility.Assert(len(payload.MemberNames) > 0)
-
 	placeholders := make([]string, len(payload.ColumnNames))
 	for i := range placeholders {
 		placeholders[i] = "?"
@@ -32,13 +31,13 @@ func CreateRecord(db *sqlx.DB, payload ModelPayload) (sql.Result, error) {
 		if attribute.isAutoIncrement() {
 			continue
 		}
-		newDbNames = append(newDbNames, payload.ColumnNames[i])
+		newDbNames = append(newDbNames, "`"+payload.ColumnNames[i]+"`")
 		newPlaceholders = append(newPlaceholders, placeholders[i])
 		newValues = append(newValues, payload.Values[i])
 	}
 
 	query := fmt.Sprintf(
-		"INSERT INTO %s (%s) VALUES (%s)",
+		"INSERT INTO `%s` (%s) VALUES (%s)",
 		payload.TableName,
 		strings.Join(newDbNames, ", "),
 		strings.Join(newPlaceholders, ", "),
@@ -53,8 +52,6 @@ func CreateRecord(db *sqlx.DB, payload ModelPayload) (sql.Result, error) {
 }
 
 func ReadRecord[T InterfaceCRUD](db *sqlx.DB, payload ModelPayload, model T) error {
-	Utility.Assert(len(payload.MemberNames) > 0)
-
 	pKeyQuery, uniqueQueries, _ := buildSQLReadQueries(payload)
 
 	// ----------------------------------------------------------
@@ -84,24 +81,22 @@ func ReadRecord[T InterfaceCRUD](db *sqlx.DB, payload ModelPayload, model T) err
 }
 
 func UpdateRecord(db *sqlx.DB, payload ModelPayload) (sql.Result, error) {
-	Utility.Assert(len(payload.ColumnNames) > 0)
-
 	keyColumns := getColumnNames(payload.TableName, payload.PrimaryKeyMemberNames)
 	updateFields := payload.ColumnNames
 	updateValues := payload.Values
 
 	var updates []string
 	for _, fieldName := range updateFields {
-		updates = append(updates, fmt.Sprintf("%s = ?", fieldName))
+		updates = append(updates, fmt.Sprintf("`%s` = ?", fieldName))
 	}
 
 	var where []string
 	for _, columnNames := range keyColumns {
-		where = append(where, fmt.Sprintf("%s = ?", columnNames))
+		where = append(where, fmt.Sprintf("`%s` = ?", columnNames))
 	}
 
 	query := fmt.Sprintf(
-		"UPDATE %s SET %s WHERE %s",
+		"UPDATE `%s` SET %s WHERE %s",
 		payload.TableName,
 		strings.Join(updates, ", "),
 		strings.Join(where, " AND "),
@@ -116,17 +111,15 @@ func UpdateRecord(db *sqlx.DB, payload ModelPayload) (sql.Result, error) {
 }
 
 func DeleteRecord(db *sqlx.DB, payload ModelPayload) (sql.Result, error) {
-	Utility.Assert(len(payload.ColumnNames) > 0)
-
 	var conditions []string
 	primaryKeyColumns := getColumnNames(payload.TableName, payload.PrimaryKeyMemberNames)
 
 	for _, fieldName := range primaryKeyColumns {
-		conditions = append(conditions, fmt.Sprintf("%s = ?", fieldName))
+		conditions = append(conditions, fmt.Sprintf("`%s` = ?", fieldName))
 	}
 
 	query := fmt.Sprintf(
-		"DELETE FROM %s WHERE %s",
+		"DELETE FROM `%s` WHERE %s",
 		payload.TableName,
 		strings.Join(conditions, " AND "),
 	)

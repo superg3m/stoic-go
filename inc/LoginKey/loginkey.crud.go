@@ -1,8 +1,9 @@
 package LoginKey
 
 import (
-	"github.com/superg3m/stoic-go/Core/ORM"
 	"reflect"
+
+	"github.com/superg3m/stoic-go/Core/ORM"
 )
 
 func (model *LoginKey) CanCreate() bool {
@@ -44,7 +45,7 @@ func (model *LoginKey) SetCache() {
 func (model *LoginKey) GetCacheDiff() []string {
 	var mismatchedFields []string
 
-	v1 := reflect.ValueOf(model)
+	v1 := reflect.ValueOf(*model)
 	v2 := reflect.ValueOf(cache)
 	userType := v1.Type()
 

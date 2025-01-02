@@ -45,17 +45,19 @@ func New() *LoginKey {
 	return ret
 }
 
-func FromUserID_Provider(UserID int, Provider int) (*LoginKey, error) {
+func (loginKey *LoginKey) HashKey() {
+	loginKey.Key = Utility.Sha256HashString(loginKey.Key)
+}
+
+func FromUserID_Provider(UserID int, Provider LoginKeyProvider) (*LoginKey, error) {
 	ret := New()
 	ret.UserID = UserID
-	ret.Provider = getProvider(Provider)
+	ret.Provider = getProvider(int(Provider))
 
 	read := ret.Read()
 	if read.IsBad() {
 		return nil, read.GetError()
 	}
-
-	ret.SetCache()
 
 	return ret, nil
 }
@@ -64,5 +66,5 @@ func init() {
 	ORM.RegisterTableName(&LoginKey{})
 	ORM.RegisterTableColumn("UserID", "UserID", ORM.KEY)
 	ORM.RegisterTableColumn("Provider", "Provider", ORM.KEY)
-	ORM.RegisterTableColumn("Key", "Key")
+	ORM.RegisterTableColumn("Key", "Key", ORM.UPDATABLE)
 }
