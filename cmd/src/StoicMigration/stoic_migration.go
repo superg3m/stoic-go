@@ -39,7 +39,7 @@ func hasMigrationString(data []byte, migrationStr string) bool {
 }
 
 func getSqlCommandsFromFile(mode MigrationMode, filePath string) ([]string, error) {
-	migrationStr := []string{"-- StoicMigration Up\n", "-- StoicMigration Down\n"}
+	migrationStr := []string{"-- StoicMigration Up\r\n", "-- StoicMigration Down\r\n"}
 	delimitor := ';'
 
 	otherMode := int(mode)
@@ -154,7 +154,8 @@ func main() {
 	files, _ := findFilesWithExtension(fmt.Sprintf("./migrations/%s", DB_ENGINE), ".sql")
 
 	for _, file := range files {
-		sqlUpCommands, _ := getSqlCommandsFromFile(mode, file)
+		sqlUpCommands, err := getSqlCommandsFromFile(mode, file)
+		Utility.AssertOnError(err)
 
 		if mode == MIGRATION_MODE_UP {
 			Utility.LogSuccess("Migration Up: %s", file)

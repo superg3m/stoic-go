@@ -144,16 +144,16 @@ CREATE TABLE IF NOT EXISTS `UserRelationEvent` (
 );
 
 -- StoicMigration Down
-DROP TABLE `UserRelationEvent`;
-DROP TABLE `UserRelation`;
-DROP TABLE `UserContact`;
-DROP TABLE `UserVisibilities`;
-DROP TABLE `UserSettings`;
-DROP TABLE `UserProfile`;
-DROP TABLE `UserToken`;
-DROP TABLE `UserAuthHistory`;
-DROP TABLE `UserSession`;
-DROP TABLE `UserRole`;
-DROP TABLE `Role`;
-DROP TABLE `LoginKey`;
-DROP TABLE `User`;
+DROP TABLE IF EXISTS `UserRelationEvent`;
+DROP TABLE IF EXISTS `UserRelation`;
+DROP TABLE IF EXISTS `UserContact`;
+DROP TABLE IF EXISTS `UserVisibilities`;
+DROP TABLE IF EXISTS `UserSettings`;
+DROP TABLE IF EXISTS `UserProfile`;
+DROP TABLE IF EXISTS `UserToken`;
+DROP TABLE IF EXISTS `UserAuthHistory`;
+DROP TABLE IF EXISTS `UserSession`;
+DROP TABLE IF EXISTS `UserRole`;
+DROP TABLE IF EXISTS `Role`;
+DROP TABLE IF EXISTS `LoginKey`;
+DROP TABLE IF EXISTS `User`;
