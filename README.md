@@ -86,4 +86,10 @@ Stoic-Go is a modular project designed for handling backend services, database m
 - ORM, Stripe
 - Pre-computation for `FromX` methods to simplify templates.  
 - Replace panics with robust error handling. 
-- Track successful migrations in the database Migration table.  
+- Track successful migrations in the database Migration table.
+
+## Notes for myself:
+- I'm going to use go-generate to do some metaprogramming so that I can get hte powerful workflow without init()
+- Would want to add a local version 
+- dsn := ORM.GetDSN(DB_ENGINE, HOST, PORT, USER, PASSWORD, DBNAME)
+- ORM.ConnectLocal("../SQLite.db)
