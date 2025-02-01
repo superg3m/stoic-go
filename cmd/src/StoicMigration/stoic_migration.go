@@ -39,7 +39,7 @@ func hasMigrationString(data []byte, migrationStr string) bool {
 }
 
 func getSqlCommandsFromFile(mode MigrationMode, filePath string) ([]string, error) {
-	migrationStr := []string{"-- StoicMigration Up\r\n", "-- StoicMigration Down\r\n"}
+	migrationStr := []string{"-- StoicMigration Up\n", "-- StoicMigration Down\n"}
 	delimitor := ';'
 
 	otherMode := int(mode)
@@ -49,12 +49,13 @@ func getSqlCommandsFromFile(mode MigrationMode, filePath string) ([]string, erro
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file %s: %w", filePath, err)
 	}
+	string_data := strings.ReplaceAll(string(data), "\r\n", "\n")
 
-	if !strings.Contains(string(data), migrationStr[mode]) {
+	if !strings.Contains(string_data, migrationStr[mode]) {
 		return nil, fmt.Errorf("migration file doesn't contain %s", migrationStr[mode])
 	}
 
-	lines := strings.SplitAfter(string(data), "\n")
+	lines := strings.SplitAfter(string_data, "\n")
 
 	var ret []string
 	var charAccumulator strings.Builder
