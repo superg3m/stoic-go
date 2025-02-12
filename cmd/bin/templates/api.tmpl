@@ -6,7 +6,7 @@ import (
 	"github.com/superg3m/stoic-go/inc/{{ .TableName }}"
 )
 
-func create{{ .TableName }}(request *Router.StoicRequest, response Router.StoicResponse) {
+func create{{ .TableName }}(request *Router.StoicRequest, response *Router.StoicResponse) {
 	entity := {{ .TableName }}.New()
 
     {{- range .PrimaryKeys }}
@@ -31,7 +31,7 @@ func create{{ .TableName }}(request *Router.StoicRequest, response Router.StoicR
 	response.SetData(fmt.Sprintf("{{ .TableName }} created successfully"))
 }
 
-func get{{ .TableName }}(request *Router.StoicRequest, response Router.StoicResponse) {
+func get{{ .TableName }}(request *Router.StoicRequest, response *Router.StoicResponse) {
     {{- range .PrimaryKeys }}
     {{- if eq .Type "string" }}
     {{ .Name }} := request.GetStringParam("{{ .Name }}")
@@ -53,7 +53,7 @@ func get{{ .TableName }}(request *Router.StoicRequest, response Router.StoicResp
 	response.SetData(entity)
 }
 
-func update{{ .TableName }}(request *Router.StoicRequest, response Router.StoicResponse) {
+func update{{ .TableName }}(request *Router.StoicRequest, response *Router.StoicResponse) {
     {{- range .PrimaryKeys }}
     {{- if eq .Type "string" }}
     {{ .Name }} := request.GetStringParam("{{ .Name }}")
@@ -93,7 +93,7 @@ func update{{ .TableName }}(request *Router.StoicRequest, response Router.StoicR
 	response.SetData(fmt.Sprintf("{{ .TableName }} updated successfully"))
 }
 
-func delete{{ .TableName }}(request *Router.StoicRequest, response Router.StoicResponse) {
+func delete{{ .TableName }}(request *Router.StoicRequest, response *Router.StoicResponse) {
     {{- range .PrimaryKeys }}
     {{- if eq .Type "string" }}
     {{ .Name }} := request.GetStringParam("{{ .Name }}")
