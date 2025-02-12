@@ -37,14 +37,14 @@ func (model *UserRole) Delete() ORM.CrudReturn {
 	return ORM.Delete(model)
 }
 
-func (u *UserRole) SetCache() {
-	cache = *u
+func (model *UserRole) SetCache() {
+	cache = *model
 }
 
-func (u *UserRole) GetCacheDiff() []string {
+func (model *UserRole) GetCacheDiff() []string {
 	var mismatchedFields []string
 
-	v1 := reflect.ValueOf(u)
+	v1 := reflect.ValueOf(*model)
 	v2 := reflect.ValueOf(cache)
 	userType := v1.Type()
 

@@ -101,3 +101,4 @@ Stoic-Go is a modular project designed for handling backend services, database m
 - ORM.ConnectLocal("../SQLite.db)
 - I need to figure out how setData should work with returning something like a User for example
 - CanUpdate(), CanCreate() should be CRUD return
+- Remove the valid params middleware doesn't really make sense opt for what zsf-php tryGetParams

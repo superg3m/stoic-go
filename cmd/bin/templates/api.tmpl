@@ -86,7 +86,7 @@ func update{{ .TableName }}(request *Router.StoicRequest, response *Router.Stoic
 
 	update := entity.Update()
 	if update.IsBad() {
-    	response.AddErrors(create.GetErrors(), "Failed to update {{ .TableName }}")
+    	response.AddErrors(update.GetErrors(), "Failed to update {{ .TableName }}")
 	    return
 	}
 
@@ -107,7 +107,7 @@ func delete{{ .TableName }}(request *Router.StoicRequest, response *Router.Stoic
     {{- end }}
 
 	entity, errors := {{ .TableName }}.From{{ .FromPrimaryKey }}({{ .PrimaryKeyParams }})
-	if err != nil {
+	if errors != nil {
 	    response.AddErrors(errors, "Failed to get {{ .TableName }}")
 		return
 	}
@@ -115,7 +115,7 @@ func delete{{ .TableName }}(request *Router.StoicRequest, response *Router.Stoic
 	del := entity.Delete()
 
 	if del.IsBad() {
-	    response.AddErrors(del.GetError(), Failed to delete {{ .TableName }}")
+	    response.AddErrors(del.GetErrors(), "Failed to delete {{ .TableName }}")
 	    return
 	}
 
