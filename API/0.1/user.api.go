@@ -37,7 +37,8 @@ func createUser(request *Router.StoicRequest, response *Router.StoicResponse) {
 		return
 	}
 
-	response.SetData(user)
+	// response.SetData(user) // This should work but right now it doesn't
+	response.SetData("User Created Successfully!")
 }
 
 func updateUser(request *Router.StoicRequest, response *Router.StoicResponse) {
