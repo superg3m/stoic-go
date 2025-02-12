@@ -100,3 +100,4 @@ Stoic-Go is a modular project designed for handling backend services, database m
 - dsn := ORM.GetDSN(DB_ENGINE, HOST, PORT, USER, PASSWORD, DBNAME)
 - ORM.ConnectLocal("../SQLite.db)
 - I need to figure out how setData should work with returning something like a User for example
+- CanUpdate(), CanCreate() should be CRUD return

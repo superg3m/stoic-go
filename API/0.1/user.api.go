@@ -1,6 +1,7 @@
 package API
 
 import (
+	"fmt"
 	"github.com/superg3m/stoic-go/Core/Utility"
 	"time"
 
@@ -9,7 +10,7 @@ import (
 	"github.com/superg3m/stoic-go/inc/User"
 )
 
-func createUser(request *Router.StoicRequest, response Router.StoicResponse) {
+func createUser(request *Router.StoicRequest, response *Router.StoicResponse) {
 	email := request.GetStringParam("email")
 	password := request.GetStringParam("password")
 
@@ -17,6 +18,7 @@ func createUser(request *Router.StoicRequest, response Router.StoicResponse) {
 	user.Email = email
 	create := user.Create()
 	if create.IsBad() {
+		fmt.Println("Create Endpoint")
 		response.AddErrors(create.GetErrors(), "Failed to create user")
 
 		return
@@ -38,7 +40,7 @@ func createUser(request *Router.StoicRequest, response Router.StoicResponse) {
 	response.SetData(user)
 }
 
-func updateUser(request *Router.StoicRequest, response Router.StoicResponse) {
+func updateUser(request *Router.StoicRequest, response *Router.StoicResponse) {
 	id := request.GetIntParam("id")
 	email := request.GetStringParam("email")
 	password := request.GetStringParam("password")
@@ -77,7 +79,7 @@ func updateUser(request *Router.StoicRequest, response Router.StoicResponse) {
 	response.SetData("User Updated Successfully!")
 }
 
-func deleteUser(request *Router.StoicRequest, response Router.StoicResponse) {
+func deleteUser(request *Router.StoicRequest, response *Router.StoicResponse) {
 	id := request.GetIntParam("id")
 
 	user, errors := User.FromID(id)

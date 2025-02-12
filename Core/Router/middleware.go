@@ -16,7 +16,7 @@ type StoicMiddleware func(next StoicHandlerFunc) StoicHandlerFunc
 
 func MiddlewareValidParams(requiredParams ...string) StoicMiddleware {
 	return func(next StoicHandlerFunc) StoicHandlerFunc {
-		return func(req *StoicRequest, res StoicResponse) {
+		return func(req *StoicRequest, res *StoicResponse) {
 			var retParams []string
 			for _, param := range requiredParams {
 				if !req.Has(param) {
@@ -25,7 +25,7 @@ func MiddlewareValidParams(requiredParams ...string) StoicMiddleware {
 			}
 
 			if len(retParams) != 0 {
-				res.SetError(fmt.Sprintf("Missing required parameters: %v", retParams))
+				res.AddError(fmt.Sprintf("Missing required parameters: %v", retParams))
 				return
 			}
 
@@ -36,7 +36,7 @@ func MiddlewareValidParams(requiredParams ...string) StoicMiddleware {
 
 func MiddlewareCORS() StoicMiddleware {
 	return func(next StoicHandlerFunc) StoicHandlerFunc {
-		return func(req *StoicRequest, res StoicResponse) {
+		return func(req *StoicRequest, res *StoicResponse) {
 			headers := res.Header()
 			headers.Add("Access-Control-Allow-Origin", "*")
 			headers.Add("Vary", "Origin")
@@ -57,7 +57,7 @@ func MiddlewareCORS() StoicMiddleware {
 
 func MiddlewareLogger() StoicMiddleware {
 	return func(next StoicHandlerFunc) StoicHandlerFunc {
-		return func(req *StoicRequest, res StoicResponse) {
+		return func(req *StoicRequest, res *StoicResponse) {
 			fmt.Printf("Received request: Method=%s, Path=%s\n", req.Request.Method, req.Request.URL.Path)
 			next(req, res)
 		}

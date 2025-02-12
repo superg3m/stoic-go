@@ -6,7 +6,7 @@ import (
 	"github.com/superg3m/stoic-go/inc/UserVisibilities"
 )
 
-func createUserVisibilities(request *Router.StoicRequest, response Router.StoicResponse) {
+func createUserVisibilities(request *Router.StoicRequest, response *Router.StoicResponse) {
 	entity := UserVisibilities.New()
 	entity.UserID = request.GetIntParam("UserID")
 
@@ -19,7 +19,7 @@ func createUserVisibilities(request *Router.StoicRequest, response Router.StoicR
 	response.SetData(fmt.Sprintf("UserVisibilities created successfully"))
 }
 
-func getUserVisibilities(request *Router.StoicRequest, response Router.StoicResponse) {
+func getUserVisibilities(request *Router.StoicRequest, response *Router.StoicResponse) {
 	UserID := request.GetIntParam("UserID")
 
 	entity, errors := UserVisibilities.FromUserID(UserID)
@@ -31,7 +31,7 @@ func getUserVisibilities(request *Router.StoicRequest, response Router.StoicResp
 	response.SetData(entity)
 }
 
-func updateUserVisibilities(request *Router.StoicRequest, response Router.StoicResponse) {
+func updateUserVisibilities(request *Router.StoicRequest, response *Router.StoicResponse) {
 	UserID := request.GetIntParam("UserID")
 
 	entity, errors := UserVisibilities.FromUserID(UserID)
@@ -57,7 +57,7 @@ func updateUserVisibilities(request *Router.StoicRequest, response Router.StoicR
 	response.SetData(fmt.Sprintf("UserVisibilities updated successfully"))
 }
 
-func deleteUserVisibilities(request *Router.StoicRequest, response Router.StoicResponse) {
+func deleteUserVisibilities(request *Router.StoicRequest, response *Router.StoicResponse) {
 	UserID := request.GetIntParam("UserID")
 
 	entity, errors := UserVisibilities.FromUserID(UserID)

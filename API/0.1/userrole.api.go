@@ -6,7 +6,7 @@ import (
 	"github.com/superg3m/stoic-go/inc/UserRole"
 )
 
-func createUserRole(request *Router.StoicRequest, response Router.StoicResponse) {
+func createUserRole(request *Router.StoicRequest, response *Router.StoicResponse) {
 	entity := UserRole.New()
 	entity.UserID = request.GetIntParam("UserID")
 	entity.RoleID = request.GetIntParam("RoleID")
@@ -20,7 +20,7 @@ func createUserRole(request *Router.StoicRequest, response Router.StoicResponse)
 	response.SetData(fmt.Sprintf("UserRole created successfully"))
 }
 
-func getUserRole(request *Router.StoicRequest, response Router.StoicResponse) {
+func getUserRole(request *Router.StoicRequest, response *Router.StoicResponse) {
 	UserID := request.GetIntParam("UserID")
 	RoleID := request.GetIntParam("RoleID")
 
@@ -33,7 +33,7 @@ func getUserRole(request *Router.StoicRequest, response Router.StoicResponse) {
 	response.SetData(entity)
 }
 
-func updateUserRole(request *Router.StoicRequest, response Router.StoicResponse) {
+func updateUserRole(request *Router.StoicRequest, response *Router.StoicResponse) {
 	UserID := request.GetIntParam("UserID")
 	RoleID := request.GetIntParam("RoleID")
 
@@ -54,7 +54,7 @@ func updateUserRole(request *Router.StoicRequest, response Router.StoicResponse)
 	response.SetData(fmt.Sprintf("UserRole updated successfully"))
 }
 
-func deleteUserRole(request *Router.StoicRequest, response Router.StoicResponse) {
+func deleteUserRole(request *Router.StoicRequest, response *Router.StoicResponse) {
 	UserID := request.GetIntParam("UserID")
 	RoleID := request.GetIntParam("RoleID")
 

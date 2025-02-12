@@ -9,7 +9,7 @@ import (
 	"github.com/superg3m/stoic-go/Core/Utility"
 )
 
-type StoicHandlerFunc func(r *StoicRequest, w StoicResponse)
+type StoicHandlerFunc func(r *StoicRequest, w *StoicResponse)
 
 var prefix string
 var Router *mux.Router
@@ -29,10 +29,13 @@ func RegisterPrefix(newPrefix string) {
 func adaptHandler(handler StoicHandlerFunc, middlewareList []StoicMiddleware) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		stoicRequest := &StoicRequest{Request: r}
-		stoicResponse := StoicResponse{ResponseWriter: w}
+		stoicResponse := &StoicResponse{ResponseWriter: w}
 
 		finalHandler := chainMiddleware(handler, middlewareList)
 		finalHandler(stoicRequest, stoicResponse)
+		fmt.Println("After Create Endpoint")
+
+		fmt.Println(stoicResponse.GetErrors())
 
 		if stoicResponse.ResponseWriter != nil {
 			stoicResponse.WriteHeader(http.StatusInternalServerError)

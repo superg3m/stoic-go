@@ -1,8 +1,6 @@
 package ORM
 
 import (
-	"errors"
-	"fmt"
 	"slices"
 
 	"github.com/superg3m/stoic-go/Core/Utility"
@@ -28,7 +26,7 @@ var excludeList = []string{"DB"}
 func Create[T InterfaceCRUD](model T) CrudReturn {
 	ret := CreateCRUD()
 	if !model.CanCreate() {
-		ret.setError(errors.New("CanCreate() returned false"))
+		ret.AddError("CanCreate() returned false")
 		return ret
 	}
 
@@ -37,7 +35,7 @@ func Create[T InterfaceCRUD](model T) CrudReturn {
 
 	result, err := CreateRecord(GetInstance(), payload)
 	if err != nil {
-		ret.setError(err)
+		ret.AddError(err.Error())
 		return ret
 	}
 
@@ -54,7 +52,7 @@ func Create[T InterfaceCRUD](model T) CrudReturn {
 func Read[T InterfaceCRUD](model T) CrudReturn {
 	ret := CreateCRUD()
 	if !model.CanRead() {
-		ret.setError(errors.New("CanRead() returned false"))
+		ret.AddError("CanRead() returned false")
 		return ret
 	}
 
@@ -62,7 +60,7 @@ func Read[T InterfaceCRUD](model T) CrudReturn {
 
 	err := ReadRecord(GetInstance(), payload, model)
 	if err != nil {
-		ret.setError(err)
+		ret.AddError(err.Error())
 		return ret
 	}
 
@@ -74,7 +72,7 @@ func Read[T InterfaceCRUD](model T) CrudReturn {
 func Update[T InterfaceCRUD](model T) CrudReturn {
 	ret := CreateCRUD()
 	if !model.CanUpdate() {
-		ret.setError(errors.New("CanUpdate() returned false"))
+		ret.AddError("CanUpdate() returned false")
 		return ret
 	}
 
@@ -83,7 +81,7 @@ func Update[T InterfaceCRUD](model T) CrudReturn {
 
 	_, err := UpdateRecord(GetInstance(), payload)
 	if err != nil {
-		ret.setError(err)
+		ret.AddError(err.Error())
 		return ret
 	}
 
@@ -98,15 +96,14 @@ func Delete[T InterfaceCRUD](model T) CrudReturn {
 
 	read := Read(model)
 	if read.IsBad() {
-		msg := fmt.Sprintf("Failed to delete | %s", ret.GetError())
-		ret.setError(errors.New(msg))
+		ret.AddErrors(ret.GetErrors(), "Failed to delete")
 		return ret
 	}
 
 	payload := getModelPayload(model)
 	_, err := DeleteRecord(GetInstance(), payload)
 	if err != nil {
-		ret.setError(err)
+		ret.AddError(err.Error())
 		return ret
 	}
 
