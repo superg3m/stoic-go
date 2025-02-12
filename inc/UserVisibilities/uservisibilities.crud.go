@@ -5,20 +5,20 @@ import (
 	"reflect"
 )
 
-func (model *UserVisibilities) CanCreate() bool {
-	return true
+func (model *UserVisibilities) CanCreate() []string {
+	return nil
 }
 
-func (model *UserVisibilities) CanRead() bool {
-	return true
+func (model *UserVisibilities) CanRead() []string {
+	return nil
 }
 
-func (model *UserVisibilities) CanUpdate() bool {
-	return true
+func (model *UserVisibilities) CanUpdate() []string {
+	return nil
 }
 
-func (model *UserVisibilities) CanDelete() bool {
-	return true
+func (model *UserVisibilities) CanDelete() []string {
+	return nil
 }
 
 func (model *UserVisibilities) Create() ORM.CrudReturn {

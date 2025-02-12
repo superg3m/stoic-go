@@ -7,10 +7,10 @@ import (
 )
 
 type InterfaceCRUD interface {
-	CanCreate() bool
-	CanRead() bool
-	CanUpdate() bool
-	CanDelete() bool
+	CanCreate() []string
+	CanRead() []string
+	CanUpdate() []string
+	CanDelete() []string
 
 	Create() CrudReturn
 	Read() CrudReturn
@@ -25,8 +25,10 @@ var excludeList = []string{"DB"}
 
 func Create[T InterfaceCRUD](model T) CrudReturn {
 	ret := CreateCRUD()
-	if !model.CanCreate() {
-		ret.AddError("CanCreate() returned false")
+
+	errors := model.CanCreate()
+	if errors != nil {
+		ret.AddErrors(errors)
 		return ret
 	}
 
@@ -51,8 +53,10 @@ func Create[T InterfaceCRUD](model T) CrudReturn {
 
 func Read[T InterfaceCRUD](model T) CrudReturn {
 	ret := CreateCRUD()
-	if !model.CanRead() {
-		ret.AddError("CanRead() returned false")
+
+	errors := model.CanRead()
+	if errors != nil {
+		ret.AddErrors(errors)
 		return ret
 	}
 
@@ -71,8 +75,10 @@ func Read[T InterfaceCRUD](model T) CrudReturn {
 
 func Update[T InterfaceCRUD](model T) CrudReturn {
 	ret := CreateCRUD()
-	if !model.CanUpdate() {
-		ret.AddError("CanUpdate() returned false")
+
+	errors := model.CanUpdate()
+	if errors != nil {
+		ret.AddErrors(errors)
 		return ret
 	}
 
@@ -92,7 +98,12 @@ func Update[T InterfaceCRUD](model T) CrudReturn {
 
 func Delete[T InterfaceCRUD](model T) CrudReturn {
 	ret := CreateCRUD()
-	Utility.AssertMsg(model.CanDelete(), "CanDelete() returned false")
+
+	errors := model.CanDelete()
+	if errors != nil {
+		ret.AddErrors(errors)
+		return ret
+	}
 
 	read := Read(model)
 	if read.IsBad() {

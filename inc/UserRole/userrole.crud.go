@@ -5,20 +5,26 @@ import (
 	"reflect"
 )
 
-func (model *UserRole) CanCreate() bool {
-	return true
+func (model *UserRole) CanCreate() []string {
+	model, errors := FromUserID_RoleID(model.UserID, model.RoleID)
+	if errors != nil {
+		errors = append(errors, "Duplicate User Role")
+		return errors
+	}
+
+	return nil
 }
 
-func (model *UserRole) CanRead() bool {
-	return true
+func (model *UserRole) CanRead() []string {
+	return nil
 }
 
-func (model *UserRole) CanUpdate() bool {
-	return true
+func (model *UserRole) CanUpdate() []string {
+	return nil
 }
 
-func (model *UserRole) CanDelete() bool {
-	return true
+func (model *UserRole) CanDelete() []string {
+	return nil
 }
 
 func (model *UserRole) Create() ORM.CrudReturn {

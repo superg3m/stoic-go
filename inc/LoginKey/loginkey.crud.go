@@ -6,20 +6,20 @@ import (
 	"github.com/superg3m/stoic-go/Core/ORM"
 )
 
-func (model *LoginKey) CanCreate() bool {
-	return true
+func (model *LoginKey) CanCreate() []string {
+	return nil
 }
 
-func (model *LoginKey) CanRead() bool {
-	return true
+func (model *LoginKey) CanRead() []string {
+	return nil
 }
 
-func (model *LoginKey) CanUpdate() bool {
-	return true
+func (model *LoginKey) CanUpdate() []string {
+	return nil
 }
 
-func (model *LoginKey) CanDelete() bool {
-	return true
+func (model *LoginKey) CanDelete() []string {
+	return nil
 }
 
 func (model *LoginKey) Create() ORM.CrudReturn {

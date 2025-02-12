@@ -7,32 +7,34 @@ import (
 	"github.com/superg3m/stoic-go/Core/ORM"
 )
 
-func (u *User) CanCreate() bool {
+func (u *User) CanCreate() []string {
+	_, errors := FromEmail(u.Email)
+
+	if errors != nil {
+		errors = append(errors, "User Duplicate Email")
+	}
+
 	if !Utility.ValidEmail(u.Email) {
-		return false
+		errors = append(errors, "User Invalid Email")
 	}
 
-	return true
+	return errors
 }
 
-func (u *User) CanRead() bool {
-	if u.ID >= 1 {
-		return true
+func (u *User) CanRead() []string {
+	if u.ID > 0 {
+		return nil
 	}
 
-	if Utility.ValidEmail(u.Email) {
-		return true
-	}
-
-	return false
+	return nil
 }
 
-func (u *User) CanUpdate() bool {
-	return true
+func (u *User) CanUpdate() []string {
+	return nil
 }
 
-func (u *User) CanDelete() bool {
-	return true
+func (u *User) CanDelete() []string {
+	return nil
 }
 
 func (u *User) Create() ORM.CrudReturn {
