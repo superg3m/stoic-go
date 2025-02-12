@@ -1,7 +1,6 @@
 package API
 
 import (
-	"fmt"
 	"github.com/superg3m/stoic-go/Core/Utility"
 	"time"
 
@@ -18,7 +17,6 @@ func createUser(request *Router.StoicRequest, response *Router.StoicResponse) {
 	user.Email = email
 	create := user.Create()
 	if create.IsBad() {
-		fmt.Println("Create Endpoint")
 		response.AddErrors(create.GetErrors(), "Failed to create user")
 
 		return

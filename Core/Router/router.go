@@ -34,7 +34,7 @@ func adaptHandler(handler StoicHandlerFunc, middlewareList []StoicMiddleware) ht
 		finalHandler := chainMiddleware(handler, middlewareList)
 		finalHandler(stoicRequest, stoicResponse)
 
-		if stoicResponse.ResponseWriter != nil {
+		if stoicResponse.GetErrors() != nil {
 			stoicResponse.WriteHeader(http.StatusInternalServerError)
 		} else {
 			stoicResponse.WriteHeader(http.StatusOK)
