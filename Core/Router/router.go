@@ -36,8 +36,6 @@ func adaptHandler(handler StoicHandlerFunc, middlewareList []StoicMiddleware) ht
 
 		if stoicResponse.GetErrors() != nil {
 			stoicResponse.WriteHeader(http.StatusInternalServerError)
-		} else {
-			stoicResponse.WriteHeader(http.StatusOK)
 		}
 
 		stoicResponse.Header().Set("Content-Type", "application/json")
