@@ -6,10 +6,17 @@ Stoic-Go is a modular project designed for handling backend services, database m
   
 ### Key Components  
 - **Command-line Tools (`cmd/bin`)**:  
-  - **StoicMigration**: Manages database migrations.  
-  - **StoicModelBuilder**: Builds models dynamically.  
+  - **StoicMigration**: Manages database migrations.
+    - Build: `cd ./cmd/src/StoicMigration ; go build -o StoicMigration.exe ; move ./StoicMigration.exe ../../bin/StoicMigration.exe ; cd ../../..`
+    - Usage: `./cmd/bin/StoicMigration.exe`
+
+  - **StoicModelBuilder**: Builds models dynamically.
+    - Build: `cd ./cmd/src/StoicModelBuilder ; go build -o StoicModelBuilder.exe ; move ./StoicModelBuilder.exe ../../bin/StoicModelBuilder.exe ; cd ../../..`
+    - Usage: `./cmd/bin/StoicModelBuilder.exe`
+
   - **wgo**: Hot recompilation tool for Go code.  
-    - Example: `./cmd/bin/wgo run main.go -w "*.go"`  
+    - Build: `cd ./cmd/src/wgo-main ; go build -o wgo.exe ; move ./wgo.exe ../../bin/wgo.exe ; cd ../../..`
+    - Usage: `./cmd/bin/wgo.exe run main.go -w "*.go"`
   
 ## Features and Usage  
   
