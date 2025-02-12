@@ -46,7 +46,7 @@ func From{{ .FromPrimaryKey }}({{ range $i, $pk := .PrimaryKeys }}{{ if $i }}, {
     {{- end }}
     read := ret.Read()
     if read.IsBad() {
-        return nil, read.GetError()
+        return nil, read.GetErrors()
     }
 
     return ret, nil
@@ -58,7 +58,7 @@ func From{{ .Name }}({{ .Name }} {{ .Type }}) (*{{ $.TableName }}, []string) {
     ret.{{ .Name }} = {{ .Name }}
     read := ret.Read()
     if read.IsBad() {
-        return nil, read.GetError()
+        return nil, read.GetErrors()
     }
     
     return ret, nil

@@ -12,7 +12,7 @@ func createUserVisibilities(request *Router.StoicRequest, response Router.StoicR
 
 	create := entity.Create()
 	if create.IsBad() {
-		response.SetError("Failed to create UserVisibilities | %s", create.GetError())
+		response.AddErrors(create.GetErrors(), "Failed to create UserVisibilities")
 		return
 	}
 
@@ -22,9 +22,9 @@ func createUserVisibilities(request *Router.StoicRequest, response Router.StoicR
 func getUserVisibilities(request *Router.StoicRequest, response Router.StoicResponse) {
 	UserID := request.GetIntParam("UserID")
 
-	entity, err := UserVisibilities.FromUserID(UserID)
-	if err != nil {
-		response.SetError("Failed to get UserVisibilities | %s", err)
+	entity, errors := UserVisibilities.FromUserID(UserID)
+	if errors != nil {
+		response.AddErrors(errors, "Failed to get UserVisibilities")
 		return
 	}
 
@@ -34,9 +34,9 @@ func getUserVisibilities(request *Router.StoicRequest, response Router.StoicResp
 func updateUserVisibilities(request *Router.StoicRequest, response Router.StoicResponse) {
 	UserID := request.GetIntParam("UserID")
 
-	entity, err := UserVisibilities.FromUserID(UserID)
-	if err != nil {
-		response.SetError("Failed to get UserVisibilities | %s", err)
+	entity, errors := UserVisibilities.FromUserID(UserID)
+	if errors != nil {
+		response.AddErrors(errors, "Failed to get UserVisibilities from UserID")
 		return
 	}
 	entity.UserID = request.GetIntParam("UserID")
@@ -50,7 +50,7 @@ func updateUserVisibilities(request *Router.StoicRequest, response Router.StoicR
 
 	update := entity.Update()
 	if update.IsBad() {
-		response.SetError("Failed to update UserVisibilities | %s", update.GetError())
+		response.AddErrors(update.GetErrors(), "Failed to update UserVisibilities")
 		return
 	}
 

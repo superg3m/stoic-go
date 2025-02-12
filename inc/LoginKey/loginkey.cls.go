@@ -49,14 +49,14 @@ func (loginKey *LoginKey) HashKey() {
 	loginKey.Key = Utility.Sha256HashString(loginKey.Key)
 }
 
-func FromUserID_Provider(UserID int, Provider LoginKeyProvider) (*LoginKey, error) {
+func FromUserID_Provider(UserID int, Provider LoginKeyProvider) (*LoginKey, []string) {
 	ret := New()
 	ret.UserID = UserID
 	ret.Provider = getProvider(int(Provider))
 
 	read := ret.Read()
 	if read.IsBad() {
-		return nil, read.GetError()
+		return nil, read.GetErrors()
 	}
 
 	return ret, nil

@@ -1,7 +1,6 @@
 package API
 
 import (
-	"fmt"
 	"github.com/superg3m/stoic-go/Core/Utility"
 	"time"
 
@@ -45,9 +44,9 @@ func updateUser(request *Router.StoicRequest, response Router.StoicResponse) {
 	password := request.GetStringParam("password")
 	emailConfirmed := request.GetBoolParam("emailConfirmed")
 
-	user, err := User.FromID(id)
-	if err != nil {
-		response.AddError(err.Error())
+	user, errors := User.FromID(id)
+	if errors != nil {
+		response.AddErrors(errors, "Failed to get user from ID")
 		return
 	}
 
@@ -56,13 +55,13 @@ func updateUser(request *Router.StoicRequest, response Router.StoicResponse) {
 	user.LastLogin = Utility.NewTime(time.Now())
 	update := user.Update()
 	if update.IsBad() {
-		response.SetError("Failed to update user | %s", update.GetError())
+		response.AddErrors(update.GetErrors(), "Failed to update user")
 		return
 	}
 
-	loginKey, err := LoginKey.FromUserID_Provider(user.ID, LoginKey.PASSWORD)
-	if err != nil {
-		response.SetError(err.Error())
+	loginKey, errors := LoginKey.FromUserID_Provider(user.ID, LoginKey.PASSWORD)
+	if errors != nil {
+		response.AddErrors(errors, "Failed to get LoginKey from UserID and Provider")
 		return
 	}
 	loginKey.UserID = user.ID
@@ -71,7 +70,7 @@ func updateUser(request *Router.StoicRequest, response Router.StoicResponse) {
 	loginKey.HashKey()
 	update = loginKey.Update()
 	if update.IsBad() {
-		response.SetError("Failed to update login key | %s", update.GetError())
+		response.AddErrors(update.GetErrors(), "Failed to update login key")
 		return
 	}
 
@@ -81,15 +80,15 @@ func updateUser(request *Router.StoicRequest, response Router.StoicResponse) {
 func deleteUser(request *Router.StoicRequest, response Router.StoicResponse) {
 	id := request.GetIntParam("id")
 
-	user, err := User.FromID(id)
-	if err != nil {
-		response.SetError(err.Error())
+	user, errors := User.FromID(id)
+	if errors != nil {
+		response.AddErrors(errors, "Failed to get user from ID")
 		return
 	}
 
 	del := user.Delete()
 	if del.IsBad() {
-		response.SetError("Failed to delete user | %s", del.GetError())
+		response.AddErrors(del.GetErrors(), "Failed to delete user")
 		return
 	}
 
