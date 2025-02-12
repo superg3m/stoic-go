@@ -33,12 +33,12 @@ func New() *UserVisibilities {
 	return ret
 }
 
-func FromUserID(UserID int) (*UserVisibilities, error) {
+func FromUserID(UserID int) (*UserVisibilities, []string) {
 	ret := New()
 	ret.UserID = UserID
 	read := ret.Read()
 	if read.IsBad() {
-		return nil, read.GetError()
+		return nil, read.GetErrors()
 	}
 
 	return ret, nil

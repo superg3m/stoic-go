@@ -39,7 +39,7 @@ func New() *{{ .TableName }} {
 	return ret
 }
 
-func From{{ .FromPrimaryKey }}({{ range $i, $pk := .PrimaryKeys }}{{ if $i }}, {{ end }}{{ $pk.Name }} {{ $pk.Type }}{{ end }}) (*{{ .TableName }}, error) {
+func From{{ .FromPrimaryKey }}({{ range $i, $pk := .PrimaryKeys }}{{ if $i }}, {{ end }}{{ $pk.Name }} {{ $pk.Type }}{{ end }}) (*{{ .TableName }}, []string]) {
     ret := New()
     {{- range .PrimaryKeys }}
     ret.{{ .Name }} = {{ .Name }}
@@ -53,7 +53,7 @@ func From{{ .FromPrimaryKey }}({{ range $i, $pk := .PrimaryKeys }}{{ if $i }}, {
 }
 
 {{- range .UniqueKeys }}
-func From{{ .Name }}({{ .Name }} {{ .Type }}) (*{{ $.TableName }}, error) {
+func From{{ .Name }}({{ .Name }} {{ .Type }}) (*{{ $.TableName }}, []string) {
     ret := New()
     ret.{{ .Name }} = {{ .Name }}
     read := ret.Read()

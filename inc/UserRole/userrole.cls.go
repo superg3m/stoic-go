@@ -21,13 +21,13 @@ func New() *UserRole {
 	return ret
 }
 
-func FromUserID_RoleID(UserID int, RoleID int) (*UserRole, error) {
+func FromUserID_RoleID(UserID int, RoleID int) (*UserRole, []string) {
 	ret := New()
 	ret.UserID = UserID
 	ret.RoleID = RoleID
 	read := ret.Read()
 	if read.IsBad() {
-		return nil, read.GetError()
+		return nil, read.GetErrors()
 	}
 
 	return ret, nil

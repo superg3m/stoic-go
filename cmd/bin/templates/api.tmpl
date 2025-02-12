@@ -24,7 +24,7 @@ func create{{ .TableName }}(request *Router.StoicRequest, response Router.StoicR
 
     create := entity.Create()
     if create.IsBad() {
-        response.SetError("Failed to create {{ .TableName }} | %s", create.GetError())
+        response.AddErrors(create.GetErrors(), "Failed to create {{ .TableName }}")
         return
     }
 
@@ -44,9 +44,9 @@ func get{{ .TableName }}(request *Router.StoicRequest, response Router.StoicResp
     {{- end }}
     {{- end }}
 
-	entity, err := {{ .TableName }}.From{{ .FromPrimaryKey }}({{ .PrimaryKeyParams }})
-	if err != nil {
-		response.SetError("Failed to get {{ .TableName }} | %s", err)
+	entity, errors := {{ .TableName }}.From{{ .FromPrimaryKey }}({{ .PrimaryKeyParams }})
+	if errors != nil {
+		response.AddErrors(errors, "Failed to get {{ .TableName }}")
 		return
 	}
 
@@ -66,9 +66,9 @@ func update{{ .TableName }}(request *Router.StoicRequest, response Router.StoicR
     {{- end }}
     {{- end }}
 
-	entity, err := {{ .TableName }}.From{{ .FromPrimaryKey }}({{ .PrimaryKeyParams }})
-	if err != nil {
-		response.SetError("Failed to get {{ .TableName }} | %s", err)
+	entity, errors := {{ .TableName }}.From{{ .FromPrimaryKey }}({{ .PrimaryKeyParams }})
+	if errors != nil {
+		response.AddErrors(errors, "Failed to get {{ .TableName }}")
 		return
 	}
 
@@ -86,7 +86,7 @@ func update{{ .TableName }}(request *Router.StoicRequest, response Router.StoicR
 
 	update := entity.Update()
 	if update.IsBad() {
-	    response.SetError("Failed to update {{ .TableName }} | %s", update.GetError())
+    	response.AddErrors(create.GetErrors(), "Failed to update {{ .TableName }}")
 	    return
 	}
 
@@ -106,16 +106,16 @@ func delete{{ .TableName }}(request *Router.StoicRequest, response Router.StoicR
     {{- end }}
     {{- end }}
 
-	entity, err := {{ .TableName }}.From{{ .FromPrimaryKey }}({{ .PrimaryKeyParams }})
+	entity, errors := {{ .TableName }}.From{{ .FromPrimaryKey }}({{ .PrimaryKeyParams }})
 	if err != nil {
-		response.SetError("Failed to get {{ .TableName }} | %s", err)
+	    response.AddErrors(errors, "Failed to get {{ .TableName }}")
 		return
 	}
 
 	del := entity.Delete()
 
 	if del.IsBad() {
-	    response.SetError("Failed to delete {{ .TableName }} %s", del.GetError())
+	    response.AddErrors(del.GetError(), Failed to delete {{ .TableName }}")
 	    return
 	}
 

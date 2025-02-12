@@ -1,32 +1,16 @@
 package ORM
 
+import "github.com/superg3m/stoic-go/Core/Utility"
+
 type CrudReturn struct {
-	err   error
-	isBad bool
+	Utility.ErrorHandler
 }
 
 func CreateCRUD() CrudReturn {
-	ret := CrudReturn{
-		err:   nil,
-		isBad: false,
-	}
-
+	ret := CrudReturn{}
 	return ret
 }
 
-func (c *CrudReturn) GetError() error {
-	return c.err
-}
-
-func (c *CrudReturn) setError(err error) {
-	c.makeBad()
-	c.err = err
-}
-
-func (c *CrudReturn) makeBad() {
-	c.isBad = true
-}
-
 func (c *CrudReturn) IsBad() bool {
-	return c.isBad == true
+	return c.GetErrors() != nil
 }

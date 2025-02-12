@@ -1,6 +1,7 @@
 package Router
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -32,6 +33,21 @@ func adaptHandler(handler StoicHandlerFunc, middlewareList []StoicMiddleware) ht
 
 		finalHandler := chainMiddleware(handler, middlewareList)
 		finalHandler(stoicRequest, stoicResponse)
+
+		if stoicResponse.ResponseWriter != nil {
+			stoicResponse.WriteHeader(http.StatusInternalServerError)
+		} else {
+			stoicResponse.WriteHeader(http.StatusOK)
+		}
+		stoicResponse.Header().Set("Content-Type", "application/json")
+		errorsJSON, err := json.Marshal(map[string][]string{"Errors": stoicResponse.GetErrors()})
+		if err != nil {
+			http.Error(stoicResponse, "Failed to marshal errors", http.StatusInternalServerError)
+			return
+		}
+		_, err = fmt.Fprintf(stoicResponse, "%s", errorsJSON)
+
+		Utility.AssertOnError(err)
 	}
 }
 

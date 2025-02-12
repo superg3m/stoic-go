@@ -1,6 +1,7 @@
 package API
 
 import (
+	"fmt"
 	"github.com/superg3m/stoic-go/Core/Utility"
 	"time"
 
@@ -17,7 +18,8 @@ func createUser(request *Router.StoicRequest, response Router.StoicResponse) {
 	user.Email = email
 	create := user.Create()
 	if create.IsBad() {
-		response.SetError("Failed to create user | %s", create.GetError())
+		response.AddErrors(create.GetErrors(), "Failed to create user")
+
 		return
 	}
 
@@ -28,12 +30,13 @@ func createUser(request *Router.StoicRequest, response Router.StoicResponse) {
 	loginKey.HashKey()
 	create = loginKey.Create()
 	if create.IsBad() {
-		response.SetError("Failed to create login key | %s", create.GetError())
+		response.AddErrors(create.GetErrors(), "Failed to create login key")
 		user.Delete()
+
 		return
 	}
 
-	response.SetData("User Created Successfully!")
+	response.SetData(user)
 }
 
 func updateUser(request *Router.StoicRequest, response Router.StoicResponse) {
@@ -44,7 +47,7 @@ func updateUser(request *Router.StoicRequest, response Router.StoicResponse) {
 
 	user, err := User.FromID(id)
 	if err != nil {
-		response.SetError(err.Error())
+		response.AddError(err.Error())
 		return
 	}
 

@@ -39,12 +39,12 @@ func New() *User {
 	return user
 }
 
-func FromID(id int) (*User, error) {
+func FromID(id int) (*User, []string) {
 	user := New()
 	user.ID = id
 	read := user.Read()
 	if read.IsBad() {
-		return nil, read.GetError()
+		return nil, read.GetErrors()
 	}
 
 	user.SetCache()
@@ -52,12 +52,12 @@ func FromID(id int) (*User, error) {
 	return user, nil
 }
 
-func FromEmail(email string) (*User, error) {
+func FromEmail(email string) (*User, []string) {
 	user := New()
 	user.Email = email
 	read := user.Read()
 	if read.IsBad() {
-		return nil, read.GetError()
+		return nil, read.GetErrors()
 	}
 
 	user.SetCache()

@@ -10,41 +10,23 @@ import (
 
 type StoicResponse struct {
 	http.ResponseWriter
-}
-
-func (response *StoicResponse) SetError(fmtMessage string, args ...interface{}) {
-	response.WriteHeader(http.StatusInternalServerError)
-	msg := fmt.Sprintf(fmtMessage, args...)
-	_, err := fmt.Fprintf(response, "%s", msg)
-	if err != nil {
-		Utility.Assert(false)
-	}
+	Utility.ErrorHandler
 }
 
 func (response *StoicResponse) SetData(data any) {
-	contentType := "text/plain"
-
 	switch reflect.TypeOf(data).Kind() {
 	case reflect.Struct, reflect.Map, reflect.Slice, reflect.Array:
-		contentType = "application/json"
-		response.Header().Set("Content-Type", contentType)
+		response.Header().Set("Content-Type", "application/json")
 
 		jsonData, err := json.Marshal(data)
-		if err != nil {
-			Utility.AssertOnErrorMsg(err, "failed to marshal data to JSON")
-		}
+		Utility.AssertOnErrorMsg(err, "failed to marshal data to JSON")
 		_, err = response.Write(jsonData)
-		if err != nil {
-			Utility.Assert(false)
-		}
+		Utility.AssertOnErrorMsg(err, "failed to write data to JSON")
 		return
 	default:
-		contentType = "text/plain"
-		response.Header().Set("Content-Type", contentType)
+		response.Header().Set("Content-Type", "text/plain")
 
 		_, err := fmt.Fprintf(response, "%+v", data)
-		if err != nil {
-			Utility.Assert(false)
-		}
+		Utility.AssertOnError(err)
 	}
 }
