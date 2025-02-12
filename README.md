@@ -96,7 +96,7 @@ Stoic-Go is a modular project designed for handling backend services, database m
 - Track successful migrations in the database Migration table.
 
 ## Notes for myself:
-- I'm going to use go-generate to do some metaprogramming so that I can get hte powerful workflow without init()
-- Would want to add a local version 
+- I'm going to use go-generate to do some metaprogramming with the tools
 - dsn := ORM.GetDSN(DB_ENGINE, HOST, PORT, USER, PASSWORD, DBNAME)
 - ORM.ConnectLocal("../SQLite.db)
+- I need to figure out how setData should work with returning something like a User for example
