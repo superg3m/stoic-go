@@ -22,7 +22,7 @@ func (u *User) CanCreate() []string {
 	if u.Email == userCopy.Email {
 		errors = append(errors, "User Duplicate Email")
 	}
-
+	
 	return errors
 }
 
