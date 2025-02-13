@@ -54,6 +54,22 @@ func CreateRecord(db *sqlx.DB, payload ModelPayload) (sql.Result, error) {
 func ReadRecord[T InterfaceCRUD](db *sqlx.DB, payload ModelPayload, model T) error {
 	pKeyQuery, uniqueQueries, _ := buildSQLReadQueries(payload)
 
+	{
+		allMatch := true
+		for i, pointer := range payload.UniquePointers {
+			query := uniqueQueries[i]
+			temp, err := Fetch[T](query, pointer)
+			if err != nil {
+				allMatch = false
+			}
+
+			if i == len(payload.UniquePointers)-1 && allMatch {
+				Utility.Copy(temp, model)
+				return nil
+			}
+		}
+	}
+
 	// ----------------------------------------------------------
 
 	{
@@ -65,17 +81,6 @@ func ReadRecord[T InterfaceCRUD](db *sqlx.DB, payload ModelPayload, model T) err
 	}
 
 	// ----------------------------------------------------------
-
-	{
-		for i, pointer := range payload.UniquePointers {
-			query := uniqueQueries[i]
-			temp, err := Fetch[T](query, pointer)
-			if err == nil {
-				Utility.Copy(temp, model)
-				return nil
-			}
-		}
-	}
 
 	return errors.New("failed to fetch record")
 }
