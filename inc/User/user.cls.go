@@ -16,8 +16,8 @@ var (
 type User struct {
 	DB *sqlx.DB
 
-	ID             int
-	Email          string
+	ID             int    // Primary Key
+	Email          string // Unique
 	EmailConfirmed bool
 	Joined         time.Time
 	LastLogin      *time.Time

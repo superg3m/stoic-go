@@ -8,14 +8,23 @@ import (
 )
 
 func (u *User) CanCreate() []string {
-	_, errors := FromEmail(u.Email)
+	userCopy := *u
+	read := userCopy.Read()
+	if read.IsBad() { // Can't find a duplicate
+		return nil
+	}
 
-	if errors != nil {
+	var errors []string = nil
+	if !Utility.ValidEmail(u.Email) {
+		errors = append(errors, "User Invalid Email")
+	}
+
+	if u.Email == userCopy.Email {
 		errors = append(errors, "User Duplicate Email")
 	}
 
-	if !Utility.ValidEmail(u.Email) {
-		errors = append(errors, "User Invalid Email")
+	if u.Username == userCopy.Username {
+		errors = append(errors, "User Duplicate Username")
 	}
 
 	return errors
