@@ -10,7 +10,7 @@ import (
 func (u *User) CanCreate() []string {
 	userCopy := *u
 	read := userCopy.Read()
-	if read.IsBad() { // Can't find a duplicate
+	if read.IsBad() {
 		return nil
 	}
 
@@ -22,7 +22,7 @@ func (u *User) CanCreate() []string {
 	if u.Email == userCopy.Email {
 		errors = append(errors, "User Duplicate Email")
 	}
-	
+
 	return errors
 }
 
