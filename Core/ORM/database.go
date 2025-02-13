@@ -67,7 +67,7 @@ func ReadRecord[T InterfaceCRUD](db *sqlx.DB, payload ModelPayload, model T) err
 	// ----------------------------------------------------------
 
 	{
-		for i, pointer := range payload.UniqueMemberNames {
+		for i, pointer := range payload.UniquePointers {
 			query := uniqueQueries[i]
 			temp, err := Fetch[T](query, pointer)
 			if err == nil {
