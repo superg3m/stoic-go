@@ -35,7 +35,22 @@ func (u *User) CanRead() []string {
 }
 
 func (u *User) CanUpdate() []string {
-	return nil
+	var errors []string = nil
+
+	if !Utility.ValidEmail(u.Email) {
+		errors = append(errors, "User Invalid Email")
+	}
+
+	dbUser, _ := FromEmail(u.Email) // DATABASE QUERY
+	if dbUser == nil || dbUser.ID != u.ID {
+		return nil
+	}
+
+	if dbUser.Email == u.Email {
+		errors = append(errors, "User Duplicate Email")
+	}
+
+	return errors
 }
 
 func (u *User) CanDelete() []string {
