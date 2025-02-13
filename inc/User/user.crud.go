@@ -8,8 +8,8 @@ import (
 )
 
 func (u *User) CanCreate() []string {
-	userCopy := *u
-	read := userCopy.Read()
+	dbUser := *u
+	read := dbUser.Read()
 	if read.IsBad() {
 		return nil
 	}
@@ -19,7 +19,7 @@ func (u *User) CanCreate() []string {
 		errors = append(errors, "User Invalid Email")
 	}
 
-	if u.Email == userCopy.Email {
+	if u.Email == dbUser.Email {
 		errors = append(errors, "User Duplicate Email")
 	}
 
@@ -35,8 +35,8 @@ func (u *User) CanRead() []string {
 }
 
 func (u *User) CanUpdate() []string {
-	userCopy := *u
-	read := userCopy.Read()
+	dbUser := *u
+	read := dbUser.Read()
 	if read.IsBad() {
 		return nil
 	}
@@ -46,7 +46,11 @@ func (u *User) CanUpdate() []string {
 		errors = append(errors, "User Invalid Email")
 	}
 
-	if u.Email == userCopy.Email {
+	if u.ID == dbUser.ID {
+		return nil
+	}
+
+	if u.Email == dbUser.Email {
 		errors = append(errors, "User Duplicate Email")
 	}
 
