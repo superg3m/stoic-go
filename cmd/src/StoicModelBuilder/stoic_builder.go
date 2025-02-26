@@ -16,14 +16,18 @@ import (
 // If files already exist, then just log: "File already exists for <TableName> table."
 
 type TemplateDataType struct {
-	TableName        string
-	Attributes       []Attribute
-	PrimaryKeys      []PairData
-	UniqueKeys       []PairData
-	SafeHTML         template.HTML
-	FromPrimaryKey   string
-	FromUniques      []string
-	PrimaryKeyParams string
+	TableName                  string
+	Attributes                 []Attribute
+	PrimaryKeys                []PairData
+	PrimaryKeyArgsWithTypes    string
+	PrimaryKeyArgsWithoutTypes string
+	UniqueKeys                 []PairData
+	UniqueKeyArgsWithTypes     string
+	UniqueKeyArgsWithoutTypes  string
+	SafeHTML                   template.HTML
+	FromPrimaryKey             string
+	FromUniques                []string
+	PrimaryKeyParams           string
 }
 
 func main() {
@@ -60,14 +64,15 @@ func main() {
 	uniqueKeys := table.generateUniques()
 
 	templateData := TemplateDataType{
-		TableName:   tableName,
-		Attributes:  attributes,
-		PrimaryKeys: primaryKeys,
-		UniqueKeys:  uniqueKeys,
-		SafeHTML:    template.HTML(`<`),
+		TableName:     tableName,
+		Attributes:    attributes,
+		PrimaryKeys:   primaryKeys,
+		PrimaryKeyArg: primaryKeyArg,
+		UniqueKeys:    uniqueKeys,
+		SafeHTML:      template.HTML(`<`),
 		// Precompute FromPrimaryKey
 		FromPrimaryKey:   generateFromPrimaryKey(primaryKeys),
-		PrimaryKeyParams: generatePrimaryKeyArgs(primaryKeys),
+		PrimaryKeyParams: strings.Join(primaryKeys),
 	}
 
 	tmplFile := "./cmd/bin/templates/cls.tmpl"
@@ -81,7 +86,7 @@ func main() {
 		Utility.AssertOnError(err)
 	}
 
-	filePtr, err := os.Create(fmt.Sprintf("%s/%s.cls.go", dirName, strings.ToLower(tableName)))
+	filePtr, err := os.Create(fmt.Sprintf("%s/%s.cls.go", dirName, tableName))
 	Utility.AssertOnError(err)
 
 	err = tmpl.Execute(filePtr, templateData)
@@ -93,7 +98,7 @@ func main() {
 	tmpl, err = template.ParseFiles(tmplFile)
 	Utility.AssertOnError(err)
 
-	filePtr, err = os.Create(fmt.Sprintf("./API/0.1/%s.api.go", strings.ToLower(tableName)))
+	filePtr, err = os.Create(fmt.Sprintf("./API/0.1/%s.api.go", tableName))
 	Utility.AssertOnError(err)
 
 	err = tmpl.Execute(filePtr, templateData)
@@ -105,7 +110,19 @@ func main() {
 	tmpl, err = template.ParseFiles(tmplFile)
 	Utility.AssertOnError(err)
 
-	filePtr, err = os.Create(fmt.Sprintf("%s/%s.crud.go", dirName, strings.ToLower(tableName)))
+	filePtr, err = os.Create(fmt.Sprintf("%s/%s.crud.go", dirName, tableName))
+	Utility.AssertOnError(err)
+
+	err = tmpl.Execute(filePtr, templateData)
+	Utility.AssertOnError(err)
+
+	// --------------------------------------------------------
+
+	tmplFile = "./cmd/bin/templates/model.tmpl"
+	tmpl, err = template.ParseFiles(tmplFile)
+	Utility.AssertOnError(err)
+
+	filePtr, err = os.Create(fmt.Sprintf("%s/%s.model.go", dirName, tableName))
 	Utility.AssertOnError(err)
 
 	err = tmpl.Execute(filePtr, templateData)
