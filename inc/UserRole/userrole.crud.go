@@ -7,7 +7,7 @@ import (
 
 func (model *UserRole) CanCreate() []string {
 	model, errors := FromUserID_RoleID(model.UserID, model.RoleID)
-	if errors != nil {
+	if model != nil {
 		errors = append(errors, "Duplicate User Role")
 		return errors
 	}
