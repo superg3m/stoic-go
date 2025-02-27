@@ -1,0 +1,40 @@
+package {{ .TableName }}
+
+import (
+	"github.com/jmoiron/sqlx"
+	"time"
+)
+
+type Meta struct {
+	DB *sqlx.DB
+
+	{{- range .Columns }}
+	{{ .Name }} {{ .Type }}
+	{{- end }}
+}
+
+func From{{ .FromPrimaryKey }}({{ .PrimaryKeyArgsWithTypes }}) (*{{ .TableName }}, []string) {
+    ret := New()
+    {{- range .PrimaryKeys }}
+    ret.{{ .Name }} = {{ .Name }}
+    {{- end }}
+    read := ret.Read()
+    if read.IsBad() {
+        return nil, read.GetErrors()
+    }
+
+    return ret, nil
+}
+
+{{- range .UniqueKeys }}
+func From{{ .Name }}({{ .Name }} {{ .Type }}) (*{{ $.TableName }}, []string) {
+    ret := New()
+    ret.{{ .Name }} = {{ .Name }}
+    read := ret.Read()
+    if read.IsBad() {
+        return nil, read.GetErrors()
+    }
+
+    return ret, nil
+}
+{{- end }}

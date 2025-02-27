@@ -1,18 +1,12 @@
 package {{ .TableName }}
 
 import (
-	"github.com/jmoiron/sqlx"
 	"github.com/superg3m/stoic-go/Core/ORM"
 	"time"
 )
 
-
 type {{ .TableName }} struct {
-	DB *sqlx.DB
-
-	{{- range .Columns }}
-	{{ .Name }} {{ .Type }}
-	{{- end }}
+    Meta
 }
 
 func New() *{{ .TableName }} {
@@ -39,31 +33,21 @@ func New() *{{ .TableName }} {
 	return ret
 }
 
-func From{{ .FromPrimaryKey }}({{ .PrimaryKeyArgsWithTypes }}) (*{{ .TableName }}, []string) {
-    ret := New()
-    {{- range .PrimaryKeys }}
-    ret.{{ .Name }} = {{ .Name }}
-    {{- end }}
-    read := ret.Read()
-    if read.IsBad() {
-        return nil, read.GetErrors()
-    }
-
-    return ret, nil
+func (model *{{ .TableName }}) CanCreate() []string {
+	return nil
 }
 
-{{- range .UniqueKeys }}
-func From{{ .Name }}({{ .Name }} {{ .Type }}) (*{{ $.TableName }}, []string) {
-    ret := New()
-    ret.{{ .Name }} = {{ .Name }}
-    read := ret.Read()
-    if read.IsBad() {
-        return nil, read.GetErrors()
-    }
-    
-    return ret, nil
+func (model *{{ .TableName }}) CanRead() []string {
+	return nil
 }
-{{- end }}
+
+func (model *{{ .TableName }}) CanUpdate() []string {
+	return nil
+}
+
+func (model *{{ .TableName }}) CanDelete() []string {
+	return nil
+}
 
 
 func init() {

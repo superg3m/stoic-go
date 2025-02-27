@@ -1,90 +1,34 @@
 package User
 
 import (
-	"github.com/superg3m/stoic-go/Core/Utility"
-	"reflect"
-
 	"github.com/superg3m/stoic-go/Core/ORM"
+	"reflect"
 )
 
-func (u *User) CanCreate() []string {
-	dbUser := *u
-	read := dbUser.Read()
-	if read.IsBad() {
-		return nil
-	}
-
-	var errors []string = nil
-	if !Utility.ValidEmail(u.Email) {
-		errors = append(errors, "User Invalid Email")
-	}
-
-	if u.Email == dbUser.Email {
-		errors = append(errors, "User Duplicate Email")
-	}
-
-	return errors
+func (model *User) Create() ORM.CrudReturn {
+	return ORM.Create(model)
 }
 
-func (u *User) CanRead() []string {
-	if u.ID > 0 {
-		return nil
-	}
-
-	return nil
+func (model *User) Read() ORM.CrudReturn {
+	return ORM.Read(model)
 }
 
-func (u *User) CanUpdate() []string {
-	dbUser := *u
-	read := dbUser.Read()
-	if read.IsBad() {
-		return nil
-	}
-
-	var errors []string = nil
-	if !Utility.ValidEmail(u.Email) {
-		errors = append(errors, "User Invalid Email")
-	}
-
-	if u.ID == dbUser.ID {
-		return nil
-	}
-
-	if u.Email == dbUser.Email {
-		errors = append(errors, "User Duplicate Email")
-	}
-
-	return errors
+func (model *User) Update() ORM.CrudReturn {
+	return ORM.Update(model)
 }
 
-func (u *User) CanDelete() []string {
-	return nil
+func (model *User) Delete() ORM.CrudReturn {
+	return ORM.Delete(model)
 }
 
-func (u *User) Create() ORM.CrudReturn {
-	return ORM.Create(u)
+func (model *User) SetCache() {
+	cache = *model
 }
 
-func (u *User) Read() ORM.CrudReturn {
-	return ORM.Read(u)
-}
-
-func (u *User) Update() ORM.CrudReturn {
-	return ORM.Update(u)
-}
-
-func (u *User) Delete() ORM.CrudReturn {
-	return ORM.Delete(u)
-}
-
-func (u *User) SetCache() {
-	cache = *u
-}
-
-func (u *User) GetCacheDiff() []string {
+func (model *User) GetCacheDiff() []string {
 	var mismatchedFields []string
 
-	v1 := reflect.ValueOf(*u)
+	v1 := reflect.ValueOf(*model)
 	v2 := reflect.ValueOf(cache)
 	userType := v1.Type()
 

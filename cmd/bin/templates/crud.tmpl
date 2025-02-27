@@ -5,22 +5,6 @@ import (
 	"reflect"
 )
 
-func (model *{{ .TableName }}) CanCreate() []string {
-	return nil
-}
-
-func (model *{{ .TableName }}) CanRead() []string {
-	return nil
-}
-
-func (model *{{ .TableName }}) CanUpdate() []string {
-	return nil
-}
-
-func (model *{{ .TableName }}) CanDelete() []string {
-	return nil
-}
-
 func (model *{{ .TableName }}) Create() ORM.CrudReturn {
 	return ORM.Create(model)
 }

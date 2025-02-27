@@ -160,30 +160,27 @@ func main() {
 	err = tmpl.Execute(filePtr, templateData)
 	Utility.AssertOnError(err)
 
-	/*
-		// --------------------------------------------------------
+	// --------------------------------------------------------
 
-			tmplFile = "./cmd/bin/templates/crud.tmpl"
-			tmpl, err = template.ParseFiles(tmplFile)
-			Utility.AssertOnError(err)
+	tmplFile = "./cmd/bin/templates/crud.tmpl"
+	tmpl, err = template.ParseFiles(tmplFile)
+	Utility.AssertOnError(err)
 
-			filePtr, err = os.Create(fmt.Sprintf("%s/%s.crud.go", dirName, tableName))
-			Utility.AssertOnError(err)
+	filePtr, err = os.Create(fmt.Sprintf("%s/%s.crud.go", dirName, tableName))
+	Utility.AssertOnError(err)
 
-			err = tmpl.Execute(filePtr, templateData)
-			Utility.AssertOnError(err)
+	err = tmpl.Execute(filePtr, templateData)
+	Utility.AssertOnError(err)
 
-			// --------------------------------------------------------
+	// --------------------------------------------------------
 
-			tmplFile = "./cmd/bin/templates/model.tmpl"
-			tmpl, err = template.ParseFiles(tmplFile)
-			Utility.AssertOnError(err)
+	tmplFile = "./cmd/bin/templates/meta.tmpl"
+	tmpl, err = template.ParseFiles(tmplFile)
+	Utility.AssertOnError(err)
 
-			filePtr, err = os.Create(fmt.Sprintf("%s/%s.model.go", dirName, tableName))
-			Utility.AssertOnError(err)
+	filePtr, err = os.Create(fmt.Sprintf("%s/%s.meta.go", dirName, tableName))
+	Utility.AssertOnError(err)
 
-			err = tmpl.Execute(filePtr, templateData)
-			Utility.AssertOnError(err)
-
-	*/
+	err = tmpl.Execute(filePtr, templateData)
+	Utility.AssertOnError(err)
 }

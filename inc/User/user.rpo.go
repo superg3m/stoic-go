@@ -1,6 +1,7 @@
 package User
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -10,7 +11,7 @@ import (
 
 func AllFromEmail(email string) ([]*User, error) {
 	if !Utility.ValidEmail(email) {
-		return nil, ERROR_INVALID_EMAIL
+		return nil, errors.New(ERROR_INVALID_EMAIL)
 	}
 
 	sql := "SELECT * FROM User WHERE email = ?"
