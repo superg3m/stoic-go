@@ -91,25 +91,6 @@ func main() {
 	uniqueArgs := strings.Join(primaryKeyNames, ", ")
 	uniqueArgsWithTypes := strings.Join(primaryKeyNamesWithTypes, ", ")
 
-	/*
-			'ClassName' => $table->name,
-			'Columns' => $table->columns,
-			'ColumnNameWithoutTypes => implode(", ", $ColumnArgsStrings),
-			'ColumnNameWithTypes => implode(", ", $ColumnArgsStrings),
-
-			'PrimaryKeys' => $table->primaryKeys,
-			'PrimaryKeyArgsStrings' => implode(", ", $PrimaryKeyArgsStrings),
-			'FromPrimaryKey' => implode("_", $PrimaryKeyArgsWithoutTypes),
-		  	'PrimaryKeyArgs' => implode(", ", $PrimaryKeyArgsWithoutTypes),
-		  	'PrimaryKeyArgsWithTypes' => implode(", ", $PrimaryKeyArgsWithTypes),
-
-			'UniqueKeys' => $table->uniqueKeys,
-			'FromUniqueKey' => implode("_", $UniqueKeyArgsWithoutTypes),
-			'UniqueKeyArgsWithoutTypes' => implode(", ", $UniqueKeyArgsWithoutTypes),
-			'UniqueKeyArgsWithTypes' => implode(", ", $UniqueKeyArgsWithTypes),
-			'UniqueKeyArgs' => implode(", ", $UniqueKeyArgsWithoutTypes),
-	*/
-
 	templateData := TemplateDataType{
 		TableName: tableName,
 
