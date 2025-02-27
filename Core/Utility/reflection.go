@@ -115,7 +115,7 @@ func GetStructMemberPointer(structure any, excludeList ...string) []any {
 	for i := 0; i < typeStruct.NumField(); i++ {
 		field := typeStruct.Field(i)
 
-		if field.Anonymous || slices.Contains(excludeList, field.Name) {
+		if slices.Contains(excludeList, field.Name) {
 			continue
 		}
 
