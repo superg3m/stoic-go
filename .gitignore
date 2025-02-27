@@ -1,4 +1,4 @@
-cmd/src/wgo/
+cmd/bin/*.exe
 .idea/
 
 ui/admin/.pnpm-store/

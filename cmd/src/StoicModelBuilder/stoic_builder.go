@@ -16,14 +16,24 @@ import (
 // If files already exist, then just log: "File already exists for <TableName> table."
 
 type TemplateDataType struct {
-	TableName        string
-	Attributes       []Attribute
-	PrimaryKeys      []PairData
-	UniqueKeys       []PairData
-	SafeHTML         template.HTML
-	FromPrimaryKey   string
-	FromUniques      []string
-	PrimaryKeyParams string
+	TableName           string
+	Columns             []TableColumn
+	ColumnNames         []string
+	ColumnArgs          string
+	ColumnArgsWithTypes string
+
+	PrimaryKeys             []TableColumn
+	PrimaryKeyNames         []string
+	PrimaryKeyArgs          string
+	PrimaryKeyArgsWithTypes string
+	FromPrimaryKey          string
+
+	UniqueKeys          []TableColumn
+	UniqueNames         []string
+	UniqueArgs          string
+	UniqueArgsWithTypes string
+	FromUniques         []string
+	SafeHTML            template.HTML
 }
 
 func main() {
@@ -48,66 +58,142 @@ func main() {
 
 	db := ORM.GetInstance()
 
-	table := Table{
-		TableName: tableName,
+	table := generateTable(tableName, db)
+	Utility.Assert(table != nil)
+
+	var columnNames []string
+	var columnNamesWithTypes []string
+	var primaryKeyNames []string
+	var primaryKeyNamesWithTypes []string
+	var uniqueNames []string
+	var uniqueNamesWithTypes []string
+
+	for _, column := range table.TableColumns {
+		columnNames = append(columnNames, column.Name)
+		columnNamesWithTypes = append(columnNamesWithTypes, fmt.Sprintf("%s %s", column.Name, column.Type))
+
+		if column.hasFlag(IS_KEY) {
+			primaryKeyNames = append(primaryKeyNames, column.Name)
+			primaryKeyNamesWithTypes = append(primaryKeyNamesWithTypes, fmt.Sprintf("%s %s", column.Name, column.Type))
+		} else if column.hasFlag(IS_UNIQUE) {
+			uniqueNames = append(uniqueNames, column.Name)
+			uniqueNamesWithTypes = append(uniqueNamesWithTypes, fmt.Sprintf("%s %s", column.Name, column.Type))
+		}
 	}
 
-	err = table.generateTable(tableName, db)
-	Utility.AssertOnError(err)
+	columnArgs := strings.Join(columnNames, ", ")
+	columnArgsWithTypes := strings.Join(columnNamesWithTypes, ", ")
 
-	attributes := table.generateAttributes()
-	primaryKeys := table.generatePrimaryKeys()
-	uniqueKeys := table.generateUniques()
+	primaryKeyArgs := strings.Join(primaryKeyNames, ", ")
+	primaryKeyArgsWithTypes := strings.Join(primaryKeyNamesWithTypes, ", ")
+	fromPrimaryKeyMethodName := strings.Join(primaryKeyNames, "_")
+
+	uniqueArgs := strings.Join(primaryKeyNames, ", ")
+	uniqueArgsWithTypes := strings.Join(primaryKeyNamesWithTypes, ", ")
 
 	templateData := TemplateDataType{
-		TableName:   tableName,
-		Attributes:  attributes,
-		PrimaryKeys: primaryKeys,
-		UniqueKeys:  uniqueKeys,
-		SafeHTML:    template.HTML(`<`),
-		// Precompute FromPrimaryKey
-		FromPrimaryKey:   generateFromPrimaryKey(primaryKeys),
-		PrimaryKeyParams: generatePrimaryKeyArgs(primaryKeys),
+		TableName: tableName,
+
+		Columns:             table.TableColumns,
+		ColumnNames:         columnNames,
+		ColumnArgs:          columnArgs,
+		ColumnArgsWithTypes: columnArgsWithTypes,
+
+		PrimaryKeys:             table.PrimaryKeys,
+		PrimaryKeyArgs:          primaryKeyArgs,
+		PrimaryKeyArgsWithTypes: primaryKeyArgsWithTypes,
+		FromPrimaryKey:          fromPrimaryKeyMethodName,
+
+		UniqueKeys:          table.UniqueKeys,
+		UniqueNames:         uniqueNames,
+		UniqueArgs:          uniqueArgs,
+		UniqueArgsWithTypes: uniqueArgsWithTypes,
+
+		SafeHTML: template.HTML(`<`),
 	}
 
 	tmplFile := "./cmd/bin/templates/cls.tmpl"
 	tmpl, err := template.ParseFiles(tmplFile)
 	Utility.AssertOnError(err)
-
 	dirName := fmt.Sprintf("./inc/%s", tableName)
-
-	if _, err := os.Stat(dirName); os.IsNotExist(err) {
+	if _, err = os.Stat(dirName); os.IsNotExist(err) {
 		err = os.Mkdir(dirName, 0755)
 		Utility.AssertOnError(err)
 	}
 
-	filePtr, err := os.Create(fmt.Sprintf("%s/%s.cls.go", dirName, strings.ToLower(tableName)))
-	Utility.AssertOnError(err)
+	{
+		clsFile := fmt.Sprintf("%s/%s.cls.go", dirName, tableName)
+		if _, err = os.Stat(clsFile); os.IsNotExist(err) {
+			filePtr, err := os.Create(clsFile)
+			Utility.AssertOnError(err)
 
-	err = tmpl.Execute(filePtr, templateData)
-	Utility.AssertOnError(err)
-
-	// --------------------------------------------------------
-
-	tmplFile = "./cmd/bin/templates/api.tmpl"
-	tmpl, err = template.ParseFiles(tmplFile)
-	Utility.AssertOnError(err)
-
-	filePtr, err = os.Create(fmt.Sprintf("./API/0.1/%s.api.go", strings.ToLower(tableName)))
-	Utility.AssertOnError(err)
-
-	err = tmpl.Execute(filePtr, templateData)
-	Utility.AssertOnError(err)
+			err = tmpl.Execute(filePtr, templateData)
+			Utility.AssertOnError(err)
+			err = filePtr.Close()
+			if err != nil {
+				return
+			}
+		}
+	}
 
 	// --------------------------------------------------------
 
-	tmplFile = "./cmd/bin/templates/crud.tmpl"
-	tmpl, err = template.ParseFiles(tmplFile)
-	Utility.AssertOnError(err)
+	{
+		tmplFile = "./cmd/bin/templates/api.tmpl"
+		tmpl, err = template.ParseFiles(tmplFile)
+		Utility.AssertOnError(err)
 
-	filePtr, err = os.Create(fmt.Sprintf("%s/%s.crud.go", dirName, strings.ToLower(tableName)))
-	Utility.AssertOnError(err)
+		apiFile := fmt.Sprintf("./API/0.1/%s.api.go", tableName)
+		if _, err = os.Stat(apiFile); os.IsNotExist(err) {
+			filePtr, err := os.Create(apiFile)
+			Utility.AssertOnError(err)
 
-	err = tmpl.Execute(filePtr, templateData)
-	Utility.AssertOnError(err)
+			err = tmpl.Execute(filePtr, templateData)
+			Utility.AssertOnError(err)
+			err = filePtr.Close()
+			if err != nil {
+				return
+			}
+		}
+	}
+
+	// --------------------------------------------------------
+
+	{
+		tmplFile = "./cmd/bin/templates/crud.tmpl"
+		tmpl, err = template.ParseFiles(tmplFile)
+		Utility.AssertOnError(err)
+
+		crudFile := fmt.Sprintf("%s/%s.crud.go", dirName, tableName)
+		if _, err = os.Stat(crudFile); os.IsNotExist(err) {
+			filePtr, _ := os.Create(crudFile)
+
+			err = tmpl.Execute(filePtr, templateData)
+			Utility.AssertOnError(err)
+			err = filePtr.Close()
+			if err != nil {
+				return
+			}
+		}
+	}
+
+	// --------------------------------------------------------
+
+	{
+		/*
+			tmplFile = "./cmd/bin/templates/meta.tmpl"
+			tmpl, err = template.ParseFiles(tmplFile)
+			Utility.AssertOnError(err)
+
+			filePtr, _ := os.Create(fmt.Sprintf("%s/%s.meta.go", dirName, tableName))
+
+			err = tmpl.Execute(filePtr, templateData)
+			Utility.AssertOnError(err)
+			err = filePtr.Close()
+			if err != nil {
+				return
+			}
+		*/
+	}
+
 }

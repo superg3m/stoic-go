@@ -1,18 +1,16 @@
 package {{ .TableName }}
 
 import (
-	"github.com/jmoiron/sqlx"
 	"github.com/superg3m/stoic-go/Core/ORM"
 	"time"
 )
 
-
 type {{ .TableName }} struct {
-	DB *sqlx.DB
+   	DB *sqlx.DB
 
-	{{- range .Attributes }}
-	{{ .Name }} {{ .Type }}
-	{{- end }}
+   	{{- range .Columns }}
+   	{{ .Name }} {{ .Type }}
+   	{{- end }}
 }
 
 func New() *{{ .TableName }} {
@@ -20,7 +18,7 @@ func New() *{{ .TableName }} {
 
 	//ret.DB = ORM.GetInstance()
 
-    {{- range .Attributes }}
+    {{- range .Columns }}
     {{- if eq .Type "string" }}
     ret.{{ .Name }} = ""
     {{- else if eq .Type "int" }}
@@ -39,7 +37,7 @@ func New() *{{ .TableName }} {
 	return ret
 }
 
-func From{{ .FromPrimaryKey }}({{ range $i, $pk := .PrimaryKeys }}{{ if $i }}, {{ end }}{{ $pk.Name }} {{ $pk.Type }}{{ end }}) (*{{ .TableName }}, []string) {
+func From{{ .FromPrimaryKey }}({{ .PrimaryKeyArgsWithTypes }}) (*{{ .TableName }}, []string) {
     ret := New()
     {{- range .PrimaryKeys }}
     ret.{{ .Name }} = {{ .Name }}
@@ -60,20 +58,19 @@ func From{{ .Name }}({{ .Name }} {{ .Type }}) (*{{ $.TableName }}, []string) {
     if read.IsBad() {
         return nil, read.GetErrors()
     }
-    
+
     return ret, nil
 }
 {{- end }}
 
-
 func init() {
 	ORM.RegisterTableName(&{{ .TableName }}{})
 
-    {{- range .Attributes }}
-    {{- if .Flags }}
-    ORM.RegisterTableColumn("{{ .Name }}", "{{ .Column }}", {{ .Flags }})
+    {{- range .Columns }}
+    {{- if .StrFlags }}
+    ORM.RegisterTableColumn("{{ .Name }}", "{{ .Name }}", {{ .StrFlags }})
     {{- else }}
-    ORM.RegisterTableColumn("{{ .Name }}", "{{ .Column }}")
+    ORM.RegisterTableColumn("{{ .Name }}", "{{ .Name }}")
     {{- end }}
     {{- end }}
 }
