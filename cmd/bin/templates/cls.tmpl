@@ -10,7 +10,7 @@ import (
 type {{ .TableName }} struct {
 	DB *sqlx.DB
 
-	{{- range .Attributes }}
+	{{- range .Columns }}
 	{{ .Name }} {{ .Type }}
 	{{- end }}
 }
@@ -20,7 +20,7 @@ func New() *{{ .TableName }} {
 
 	//ret.DB = ORM.GetInstance()
 
-    {{- range .Attributes }}
+    {{- range .Columns }}
     {{- if eq .Type "string" }}
     ret.{{ .Name }} = ""
     {{- else if eq .Type "int" }}
@@ -71,9 +71,9 @@ func init() {
 
     {{- range .Columns }}
     {{- if .StrFlags }}
-    ORM.RegisterTableColumn("{{ .Name }}", "{{ .Column }}", {{ .StrFlags }})
+    ORM.RegisterTableColumn("{{ .Name }}", "{{ .Name }}", {{ .StrFlags }})
     {{- else }}
-    ORM.RegisterTableColumn("{{ .Name }}", "{{ .Column }}")
+    ORM.RegisterTableColumn("{{ .Name }}", "{{ .Name }}")
     {{- end }}
     {{- end }}
 }

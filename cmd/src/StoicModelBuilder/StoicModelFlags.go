@@ -30,7 +30,7 @@ func generateFlags(isNull string, isKey string, extra string) int {
 	return flags
 }
 
-func generateStrFlags(isNull string, isKey string, extra string) []string {
+func generateStrFlags(isNull string, isKey string, extra string) string {
 	var flags []string
 
 	if isKey == "PRI" {
@@ -47,5 +47,5 @@ func generateStrFlags(isNull string, isKey string, extra string) []string {
 		flags = append(flags, "ORM.AUTO_INCREMENT")
 	}
 
-	return flags
+	return strings.Join(flags, "|")
 }

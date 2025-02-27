@@ -19,7 +19,7 @@ type TableColumn struct {
 	Name     string
 	Type     string
 	Flags    int
-	StrFlags []string
+	StrFlags string
 }
 
 func (column *TableColumn) hasFlag(checkFlag int) bool {

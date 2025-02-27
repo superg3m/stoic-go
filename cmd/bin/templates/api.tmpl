@@ -44,7 +44,7 @@ func get{{ .TableName }}(request *Router.StoicRequest, response *Router.StoicRes
     {{- end }}
     {{- end }}
 
-	entity, errors := {{ .TableName }}.From{{ .FromPrimaryKey }}({{ .PrimaryKeyParams }})
+	entity, errors := {{ .TableName }}.From{{ .FromPrimaryKey }}({{ .PrimaryKeyArgs }})
 	if errors != nil {
 		response.AddErrors(errors, "Failed to get {{ .TableName }}")
 		return
@@ -66,13 +66,13 @@ func update{{ .TableName }}(request *Router.StoicRequest, response *Router.Stoic
     {{- end }}
     {{- end }}
 
-	entity, errors := {{ .TableName }}.From{{ .FromPrimaryKey }}({{ .PrimaryKeyParams }})
+	entity, errors := {{ .TableName }}.From{{ .FromPrimaryKey }}({{ .PrimaryKeyArgs }})
 	if errors != nil {
 		response.AddErrors(errors, "Failed to get {{ .TableName }}")
 		return
 	}
 
-    {{- range .Attributes }}
+    {{- range .Columns }}
     {{- if eq .Type "string" }}
     entity.{{ .Name }} = request.GetStringParam("{{ .Name }}")
     {{- else if eq .Type "int" }}
@@ -106,7 +106,7 @@ func delete{{ .TableName }}(request *Router.StoicRequest, response *Router.Stoic
     {{- end }}
     {{- end }}
 
-	entity, errors := {{ .TableName }}.From{{ .FromPrimaryKey }}({{ .PrimaryKeyParams }})
+	entity, errors := {{ .TableName }}.From{{ .FromPrimaryKey }}({{ .PrimaryKeyArgs }})
 	if errors != nil {
 	    response.AddErrors(errors, "Failed to get {{ .TableName }}")
 		return
@@ -124,13 +124,13 @@ func delete{{ .TableName }}(request *Router.StoicRequest, response *Router.Stoic
 
 func init() {
 	Router.RegisterApiEndpoint("{{ .TableName }}/Create", create{{ .TableName }}, "POST",
-		Router.MiddlewareValidParams({{ range $i, $pk := .Attributes }}{{ if $i }}, {{ end }}"{{ $pk.Name }}"{{ end }}),
+		Router.MiddlewareValidParams({{ range $i, $pk := .Columns }}{{ if $i }}, {{ end }}"{{ $pk.Name }}"{{ end }}),
 	)
     Router.RegisterApiEndpoint("{{ .TableName }}/Get", get{{ .TableName }}, "GET",
         Router.MiddlewareValidParams({{ range $i, $pk := .PrimaryKeys }}{{ if $i }}, {{ end }}"{{ $pk.Name }}"{{ end }}),
     )
 	Router.RegisterApiEndpoint("{{ .TableName }}/Update", update{{ .TableName }}, "PATCH",
-		Router.MiddlewareValidParams({{ range $i, $pk := .Attributes }}{{ if $i }}, {{ end }}"{{ $pk.Name }}"{{ end }}),
+		Router.MiddlewareValidParams({{ range $i, $pk := .Columns }}{{ if $i }}, {{ end }}"{{ $pk.Name }}"{{ end }}),
 	)
 	Router.RegisterApiEndpoint("{{ .TableName }}/Delete", delete{{ .TableName }}, "DELETE",
 		Router.MiddlewareValidParams({{ range $i, $pk := .PrimaryKeys }}{{ if $i }}, {{ end }}"{{ $pk.Name }}"{{ end }}),
