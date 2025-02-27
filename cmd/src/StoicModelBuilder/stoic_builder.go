@@ -5,8 +5,6 @@ import (
 	"github.com/superg3m/stoic-go/Core/ORM"
 	"github.com/superg3m/stoic-go/Core/Utility"
 	"html/template"
-	"os"
-	"strings"
 )
 
 // ./cmd/bin/builder dsn password username dbname Table to build
@@ -16,18 +14,18 @@ import (
 // If files already exist, then just log: "File already exists for <TableName> table."
 
 type TemplateDataType struct {
-	TableName                  string
-	Attributes                 []Attribute
-	PrimaryKeys                []PairData
+	TableName string
+	//Columns                    []Attribute
+	//PrimaryKeys                []PairData
 	PrimaryKeyArgsWithTypes    string
 	PrimaryKeyArgsWithoutTypes string
-	UniqueKeys                 []PairData
-	UniqueKeyArgsWithTypes     string
-	UniqueKeyArgsWithoutTypes  string
-	SafeHTML                   template.HTML
-	FromPrimaryKey             string
-	FromUniques                []string
-	PrimaryKeyParams           string
+	//UniqueKeys                 []PairData
+	UniqueKeyArgsWithTypes    string
+	UniqueKeyArgsWithoutTypes string
+	SafeHTML                  template.HTML
+	FromPrimaryKey            string
+	FromUniques               []string
+	PrimaryKeyParams          string
 }
 
 func main() {
@@ -52,16 +50,11 @@ func main() {
 
 	db := ORM.GetInstance()
 
-	table := Table{
-		TableName: tableName,
-	}
+	table := generateTable(tableName, db)
+	Utility.Assert(table != nil)
 
-	err = table.generateTable(tableName, db)
-	Utility.AssertOnError(err)
+	return
 
-	attributes := table.generateAttributes()
-	primaryKeys := table.generatePrimaryKeys()
-	uniqueKeys := table.generateUniques()
 	/*
 			'ClassName' => $table->name,
 			'Columns' => $table->columns,
@@ -81,71 +74,74 @@ func main() {
 			'UniqueKeyArgs' => implode(", ", $UniqueKeyArgsWithoutTypes),
 	*/
 
-	templateData := TemplateDataType{
-		TableName:     tableName,
-		columns:       columns,
-		ColumnArgsStrings:
+	/*
+		templateData := TemplateDataType{
+			TableName:     tableName,
+			columns:       columns,
+			ColumnArgsStrings:
 
-		Attributes:    attributes,
-		PrimaryKeys:   primaryKeys,
-		PrimaryKeyArg: primaryKeyArg,
-		UniqueKeys:    uniqueKeys,
-		SafeHTML:      template.HTML(`<`),
-		// Precompute FromPrimaryKey
-		FromPrimaryKey:   generateFromPrimaryKey(primaryKeys),
-		PrimaryKeyParams: strings.Join(primaryKeys),
-	}
+			Attributes:    attributes,
+			PrimaryKeys:   primaryKeys,
+			PrimaryKeyArg: primaryKeyArg,
+			UniqueKeys:    uniqueKeys,
+			SafeHTML:      template.HTML(`<`),
+			// Precompute FromPrimaryKey
+			FromPrimaryKey:   generateFromPrimaryKey(primaryKeys),
+			PrimaryKeyParams: strings.Join(primaryKeys),
+		}
 
-	tmplFile := "./cmd/bin/templates/cls.tmpl"
-	tmpl, err := template.ParseFiles(tmplFile)
-	Utility.AssertOnError(err)
-
-	dirName := fmt.Sprintf("./inc/%s", tableName)
-
-	if _, err := os.Stat(dirName); os.IsNotExist(err) {
-		err = os.Mkdir(dirName, 0755)
+		tmplFile := "./cmd/bin/templates/cls.tmpl"
+		tmpl, err := template.ParseFiles(tmplFile)
 		Utility.AssertOnError(err)
-	}
 
-	filePtr, err := os.Create(fmt.Sprintf("%s/%s.cls.go", dirName, tableName))
-	Utility.AssertOnError(err)
+		dirName := fmt.Sprintf("./inc/%s", tableName)
 
-	err = tmpl.Execute(filePtr, templateData)
-	Utility.AssertOnError(err)
+		if _, err := os.Stat(dirName); os.IsNotExist(err) {
+			err = os.Mkdir(dirName, 0755)
+			Utility.AssertOnError(err)
+		}
 
-	// --------------------------------------------------------
+		filePtr, err := os.Create(fmt.Sprintf("%s/%s.cls.go", dirName, tableName))
+		Utility.AssertOnError(err)
 
-	tmplFile = "./cmd/bin/templates/api.tmpl"
-	tmpl, err = template.ParseFiles(tmplFile)
-	Utility.AssertOnError(err)
+		err = tmpl.Execute(filePtr, templateData)
+		Utility.AssertOnError(err)
 
-	filePtr, err = os.Create(fmt.Sprintf("./API/0.1/%s.api.go", tableName))
-	Utility.AssertOnError(err)
+		// --------------------------------------------------------
 
-	err = tmpl.Execute(filePtr, templateData)
-	Utility.AssertOnError(err)
+		tmplFile = "./cmd/bin/templates/api.tmpl"
+		tmpl, err = template.ParseFiles(tmplFile)
+		Utility.AssertOnError(err)
 
-	// --------------------------------------------------------
+		filePtr, err = os.Create(fmt.Sprintf("./API/0.1/%s.api.go", tableName))
+		Utility.AssertOnError(err)
 
-	tmplFile = "./cmd/bin/templates/crud.tmpl"
-	tmpl, err = template.ParseFiles(tmplFile)
-	Utility.AssertOnError(err)
+		err = tmpl.Execute(filePtr, templateData)
+		Utility.AssertOnError(err)
 
-	filePtr, err = os.Create(fmt.Sprintf("%s/%s.crud.go", dirName, tableName))
-	Utility.AssertOnError(err)
+		// --------------------------------------------------------
 
-	err = tmpl.Execute(filePtr, templateData)
-	Utility.AssertOnError(err)
+		tmplFile = "./cmd/bin/templates/crud.tmpl"
+		tmpl, err = template.ParseFiles(tmplFile)
+		Utility.AssertOnError(err)
 
-	// --------------------------------------------------------
+		filePtr, err = os.Create(fmt.Sprintf("%s/%s.crud.go", dirName, tableName))
+		Utility.AssertOnError(err)
 
-	tmplFile = "./cmd/bin/templates/model.tmpl"
-	tmpl, err = template.ParseFiles(tmplFile)
-	Utility.AssertOnError(err)
+		err = tmpl.Execute(filePtr, templateData)
+		Utility.AssertOnError(err)
 
-	filePtr, err = os.Create(fmt.Sprintf("%s/%s.model.go", dirName, tableName))
-	Utility.AssertOnError(err)
+		// --------------------------------------------------------
 
-	err = tmpl.Execute(filePtr, templateData)
-	Utility.AssertOnError(err)
+		tmplFile = "./cmd/bin/templates/model.tmpl"
+		tmpl, err = template.ParseFiles(tmplFile)
+		Utility.AssertOnError(err)
+
+		filePtr, err = os.Create(fmt.Sprintf("%s/%s.model.go", dirName, tableName))
+		Utility.AssertOnError(err)
+
+		err = tmpl.Execute(filePtr, templateData)
+		Utility.AssertOnError(err)
+	
+	*/
 }

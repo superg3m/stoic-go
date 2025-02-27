@@ -1,36 +1,12 @@
 package main
 
+/*
 import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/superg3m/stoic-go/Core/Utility"
 	"strings"
 )
-
-type TableRow struct {
-	Field  string
-	Type   string
-	IsNull string
-	IsKey  string
-	Extra  string
-}
-
-type Table struct {
-	TableName string
-	TableRows []TableRow
-}
-
-type Attribute struct {
-	Name   string
-	Type   string
-	Column string
-	Flags  string
-}
-
-type PairData struct {
-	Name string
-	Type string
-}
 
 func stringToBool(str string) bool {
 	if strings.ToUpper(str) == "NO" {
@@ -76,32 +52,6 @@ func extraHas(extra string, has string) bool {
 	}
 
 	return false
-}
-
-func (t *Table) generateTable(tableName string, db *sqlx.DB) error {
-	tableRows, err := FetchTableRowALL(db, tableName)
-	if err != nil {
-		return err
-	}
-	t.TableRows = tableRows
-	return nil
-}
-
-func (r *TableRow) generateAttribute() Attribute {
-	return Attribute{
-		Name:   r.Field,
-		Type:   mapSQLTypeToGoType(r.Type, r.IsNull),
-		Column: r.Field,
-		Flags:  extraToFlags(r.Extra, r.IsNull, r.IsKey),
-	}
-}
-
-func (t *Table) generateAttributes() []Attribute {
-	var ret []Attribute
-	for _, row := range t.TableRows {
-		ret = append(ret, row.generateAttribute())
-	}
-	return ret
 }
 
 func (r *TableRow) generatePrimaryKey() string {
@@ -150,44 +100,6 @@ func (t *Table) generateUniques() []PairData {
 }
 
 // FetchTableRowALL retrieves all the rows for a given table.
-func FetchTableRowALL(db *sqlx.DB, tableName string) ([]TableRow, error) {
-	var results []TableRow
-	query := `
-	SELECT
-	COLUMN_NAME AS Field,
-	COLUMN_TYPE AS Type,
-	IS_NULLABLE AS IsNull,
-	COLUMN_KEY AS IsKey,
-	EXTRA
-	FROM
-	INFORMATION_SCHEMA.COLUMNS
-	WHERE
-	TABLE_NAME = ? AND TABLE_SCHEMA = 'stoic'
-	ORDER BY 
-    ORDINAL_POSITION
-	`
-
-	rows, err := db.Queryx(query, tableName)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var row TableRow
-		pointers := Utility.GetStructMemberPointer(&row)
-		err := rows.Scan(pointers...)
-		Utility.AssertOnErrorMsg(err, fmt.Sprintf("Fetch: failed to scan row into struct: %s", err))
-
-		results = append(results, row)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("rows iteration error: %v", err)
-	}
-
-	return results, nil
-}
 
 func mapSQLTypeToGoType(sqlType string, isNull string) string {
 	isNullable := stringToBool(isNull)
@@ -236,3 +148,5 @@ func generatePrimaryKeyArgs(primaryKeys []PairData) string {
 
 	return ret
 }
+
+*/
