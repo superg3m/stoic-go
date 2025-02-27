@@ -5,6 +5,8 @@ import (
 	"github.com/superg3m/stoic-go/Core/ORM"
 	"github.com/superg3m/stoic-go/Core/Utility"
 	"html/template"
+	"os"
+	"strings"
 )
 
 // ./cmd/bin/builder dsn password username dbname Table to build
@@ -14,18 +16,24 @@ import (
 // If files already exist, then just log: "File already exists for <TableName> table."
 
 type TemplateDataType struct {
-	TableName string
-	//Columns                    []Attribute
-	//PrimaryKeys                []PairData
-	PrimaryKeyArgsWithTypes    string
-	PrimaryKeyArgsWithoutTypes string
-	//UniqueKeys                 []PairData
-	UniqueKeyArgsWithTypes    string
-	UniqueKeyArgsWithoutTypes string
-	SafeHTML                  template.HTML
-	FromPrimaryKey            string
-	FromUniques               []string
-	PrimaryKeyParams          string
+	TableName           string
+	Columns             []TableColumn
+	ColumnNames         []string
+	ColumnArgs          string
+	ColumnArgsWithTypes string
+
+	PrimaryKeys             []TableColumn
+	PrimaryKeyNames         []string
+	PrimaryKeyArgs          string
+	PrimaryKeyArgsWithTypes string
+	FromPrimaryKey          string
+
+	UniqueKeys          []TableColumn
+	UniqueNames         []string
+	UniqueArgs          string
+	UniqueArgsWithTypes string
+	FromUniques         []string
+	SafeHTML            template.HTML
 }
 
 func main() {
@@ -53,7 +61,35 @@ func main() {
 	table := generateTable(tableName, db)
 	Utility.Assert(table != nil)
 
-	return
+	var columnNames []string
+	var columnNamesWithTypes []string
+	var primaryKeyNames []string
+	var primaryKeyNamesWithTypes []string
+	var uniqueNames []string
+	var uniqueNamesWithTypes []string
+
+	for _, column := range table.TableColumns {
+		columnNames = append(columnNames, column.Name)
+		columnNamesWithTypes = append(columnNamesWithTypes, fmt.Sprintf("%s %s", column.Name, column.Type))
+
+		if column.hasFlag(IS_KEY) {
+			primaryKeyNames = append(primaryKeyNames, column.Name)
+			primaryKeyNamesWithTypes = append(primaryKeyNamesWithTypes, fmt.Sprintf("%s %s", column.Name, column.Type))
+		} else if column.hasFlag(IS_UNIQUE) {
+			uniqueNames = append(uniqueNames, column.Name)
+			uniqueNamesWithTypes = append(uniqueNamesWithTypes, fmt.Sprintf("%s %s", column.Name, column.Type))
+		}
+	}
+
+	columnArgs := strings.Join(columnNames, ", ")
+	columnArgsWithTypes := strings.Join(columnNamesWithTypes, ", ")
+
+	primaryKeyArgs := strings.Join(primaryKeyNames, ", ")
+	primaryKeyArgsWithTypes := strings.Join(primaryKeyNamesWithTypes, ", ")
+	fromPrimaryKeyMethodName := strings.Join(primaryKeyNames, "_")
+
+	uniqueArgs := strings.Join(primaryKeyNames, ", ")
+	uniqueArgsWithTypes := strings.Join(primaryKeyNamesWithTypes, ", ")
 
 	/*
 			'ClassName' => $table->name,
@@ -74,39 +110,45 @@ func main() {
 			'UniqueKeyArgs' => implode(", ", $UniqueKeyArgsWithoutTypes),
 	*/
 
+	templateData := TemplateDataType{
+		TableName: tableName,
+
+		Columns:             table.TableColumns,
+		ColumnNames:         columnNames,
+		ColumnArgs:          columnArgs,
+		ColumnArgsWithTypes: columnArgsWithTypes,
+
+		PrimaryKeys:             table.PrimaryKeys,
+		PrimaryKeyArgs:          primaryKeyArgs,
+		PrimaryKeyArgsWithTypes: primaryKeyArgsWithTypes,
+		FromPrimaryKey:          fromPrimaryKeyMethodName,
+
+		UniqueKeys:          table.UniqueKeys,
+		UniqueNames:         uniqueNames,
+		UniqueArgs:          uniqueArgs,
+		UniqueArgsWithTypes: uniqueArgsWithTypes,
+
+		SafeHTML: template.HTML(`<`),
+	}
+
+	tmplFile := "./cmd/bin/templates/cls.tmpl"
+	tmpl, err := template.ParseFiles(tmplFile)
+	Utility.AssertOnError(err)
+
+	dirName := fmt.Sprintf("./inc/%s", tableName)
+
+	if _, err := os.Stat(dirName); os.IsNotExist(err) {
+		err = os.Mkdir(dirName, 0755)
+		Utility.AssertOnError(err)
+	}
+
+	filePtr, err := os.Create(fmt.Sprintf("%s/%s.cls.go", dirName, tableName))
+	Utility.AssertOnError(err)
+
+	err = tmpl.Execute(filePtr, templateData)
+	Utility.AssertOnError(err)
+	
 	/*
-		templateData := TemplateDataType{
-			TableName:     tableName,
-			columns:       columns,
-			ColumnArgsStrings:
-
-			Attributes:    attributes,
-			PrimaryKeys:   primaryKeys,
-			PrimaryKeyArg: primaryKeyArg,
-			UniqueKeys:    uniqueKeys,
-			SafeHTML:      template.HTML(`<`),
-			// Precompute FromPrimaryKey
-			FromPrimaryKey:   generateFromPrimaryKey(primaryKeys),
-			PrimaryKeyParams: strings.Join(primaryKeys),
-		}
-
-		tmplFile := "./cmd/bin/templates/cls.tmpl"
-		tmpl, err := template.ParseFiles(tmplFile)
-		Utility.AssertOnError(err)
-
-		dirName := fmt.Sprintf("./inc/%s", tableName)
-
-		if _, err := os.Stat(dirName); os.IsNotExist(err) {
-			err = os.Mkdir(dirName, 0755)
-			Utility.AssertOnError(err)
-		}
-
-		filePtr, err := os.Create(fmt.Sprintf("%s/%s.cls.go", dirName, tableName))
-		Utility.AssertOnError(err)
-
-		err = tmpl.Execute(filePtr, templateData)
-		Utility.AssertOnError(err)
-
 		// --------------------------------------------------------
 
 		tmplFile = "./cmd/bin/templates/api.tmpl"
@@ -142,6 +184,6 @@ func main() {
 
 		err = tmpl.Execute(filePtr, templateData)
 		Utility.AssertOnError(err)
-	
+
 	*/
 }

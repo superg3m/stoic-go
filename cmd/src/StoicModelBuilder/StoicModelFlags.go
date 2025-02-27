@@ -1,15 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 )
 
 const (
 	IS_KEY         int = 1 << iota
-	SHOULD_INSERT      = 1 << iota
-	SHOULD_UPDATE      = 1 << iota
-	ALLOWS_NULLS       = 1 << iota
+	NULLABLE           = 1 << iota
 	IS_UNIQUE          = 1 << iota
 	AUTO_INCREMENT     = 1 << iota
 )
@@ -23,7 +20,7 @@ func generateFlags(isNull string, isKey string, extra string) int {
 	}
 
 	if isNull == "NO" {
-		flags |= ALLOWS_NULLS
+		flags |= NULLABLE
 	}
 
 	if strings.Contains(extra, "auto_increment") {
@@ -35,8 +32,6 @@ func generateFlags(isNull string, isKey string, extra string) int {
 
 func generateStrFlags(isNull string, isKey string, extra string) []string {
 	var flags []string
-
-	fmt.Println(isKey, isNull, extra)
 
 	if isKey == "PRI" {
 		flags = append(flags, "ORM.KEY")

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/superg3m/stoic-go/Core/Utility"
+	"strings"
 )
 
 type SQLColumn struct {
@@ -21,15 +22,15 @@ type TableColumn struct {
 	StrFlags []string
 }
 
-func (table *TableColumn) printColumn() {
-	fmt.Printf("ColumnName: %s \n", table.Name)
-	fmt.Printf("Type: %s \n", table.Type)
-	fmt.Printf("Flags: %v \n", table.StrFlags)
+func (column *TableColumn) hasFlag(checkFlag int) bool {
+	return column.Flags&checkFlag == 1
 }
 
 type Table struct {
 	TableName    string
 	TableColumns []TableColumn
+	PrimaryKeys  []TableColumn
+	UniqueKeys   []TableColumn
 }
 
 func generateTable(tableName string, db *sqlx.DB) *Table {
@@ -39,14 +40,43 @@ func generateTable(tableName string, db *sqlx.DB) *Table {
 
 	ret.TableColumns = tableColumns
 	ret.TableName = tableName
+	for _, column := range ret.TableColumns {
+		if column.hasFlag(IS_KEY) {
+			ret.PrimaryKeys = append(ret.PrimaryKeys, column)
+		} else if column.hasFlag(IS_UNIQUE) {
+			ret.UniqueKeys = append(ret.UniqueKeys, column)
+		}
+	}
 
 	return ret
+}
+
+func mapSQLTypeToGoType(sqlType string, isNull string) string {
+	if strings.Contains(sqlType, "varchar") {
+		return "string"
+	}
+
+	switch strings.ToLower(sqlType) {
+	case "integer", "int":
+		return "int"
+	case "varchar", "nvarchar":
+		return "string"
+	case "timestamp", "datetime":
+		if isNull == "NO" {
+			return "time.Time"
+		}
+		return "*time.Time"
+	case "tinyint":
+		return "bool"
+	default:
+		return "any"
+	}
 }
 
 func SQLColumnToTableColumn(sqlColumn SQLColumn) TableColumn {
 	tableColumn := TableColumn{}
 	tableColumn.Name = sqlColumn.Name
-	tableColumn.Type = sqlColumn.Type
+	tableColumn.Type = mapSQLTypeToGoType(sqlColumn.Type, sqlColumn.IsNull)
 	tableColumn.Flags = generateFlags(sqlColumn.IsNull, sqlColumn.IsKey, sqlColumn.Extra)
 	tableColumn.StrFlags = generateStrFlags(sqlColumn.IsNull, sqlColumn.IsKey, sqlColumn.Extra)
 
@@ -86,8 +116,6 @@ func FetchTableColumns(db *sqlx.DB, tableName string) ([]TableColumn, error) {
 
 		results = append(results, tableColumn)
 	}
-
-	fmt.Println(results)
 
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("rows iteration error: %v", err)

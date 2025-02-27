@@ -39,7 +39,7 @@ func New() *{{ .TableName }} {
 	return ret
 }
 
-func From{{ .FromPrimaryKey }}({{ range $i, $pk := .PrimaryKeys }}{{ if $i }}, {{ end }}{{ $pk.Name }} {{ $pk.Type }}{{ end }}) (*{{ .TableName }}, []string) {
+func From{{ .FromPrimaryKey }}({{ .PrimaryKeyArgsWithTypes }}) (*{{ .TableName }}, []string) {
     ret := New()
     {{- range .PrimaryKeys }}
     ret.{{ .Name }} = {{ .Name }}
@@ -69,9 +69,9 @@ func From{{ .Name }}({{ .Name }} {{ .Type }}) (*{{ $.TableName }}, []string) {
 func init() {
 	ORM.RegisterTableName(&{{ .TableName }}{})
 
-    {{- range .Attributes }}
-    {{- if .Flags }}
-    ORM.RegisterTableColumn("{{ .Name }}", "{{ .Column }}", {{ .Flags }})
+    {{- range .Columns }}
+    {{- if .StrFlags }}
+    ORM.RegisterTableColumn("{{ .Name }}", "{{ .Column }}", {{ .StrFlags }})
     {{- else }}
     ORM.RegisterTableColumn("{{ .Name }}", "{{ .Column }}")
     {{- end }}
