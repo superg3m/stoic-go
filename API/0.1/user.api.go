@@ -97,15 +97,15 @@ func deleteUser(request *Router.StoicRequest, response *Router.StoicResponse) {
 }
 
 func init() {
-	Router.RegisterApiEndpoint("/User/Create", createUser, "POST",
+	Router.RegisterApiEndpoint("User/Create", createUser, "POST",
 		Router.MiddlewareValidParams("username", "email", "password"),
 	)
 
-	Router.RegisterApiEndpoint("/User/Update", updateUser, "POST",
+	Router.RegisterApiEndpoint("User/Update", updateUser, "POST",
 		Router.MiddlewareValidParams("id", "email", "password", "emailConfirmed"),
 	)
 
-	Router.RegisterApiEndpoint("/User/Delete", deleteUser, "POST",
+	Router.RegisterApiEndpoint("User/Delete", deleteUser, "POST",
 		Router.MiddlewareValidParams("id"),
 	)
 }

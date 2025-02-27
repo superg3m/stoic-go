@@ -55,7 +55,7 @@ func adaptHandler(handler StoicHandlerFunc, middlewareList []StoicMiddleware) ht
 func RegisterApiEndpoint(path string, handler StoicHandlerFunc, method string, middlewares ...StoicMiddleware) {
 	Utility.Assert(commonMiddlewares != nil)
 
-	resolvedPath := fmt.Sprintf("%s%s", prefix, path)
+	resolvedPath := fmt.Sprintf("%s/%s", prefix, path)
 	middlewareList := append(commonMiddlewares, middlewares...)
 
 	Router.HandleFunc(resolvedPath, adaptHandler(handler, middlewareList)).Methods(method, "OPTIONS")
