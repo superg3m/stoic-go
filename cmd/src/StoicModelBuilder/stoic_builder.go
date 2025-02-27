@@ -134,53 +134,83 @@ func main() {
 	tmplFile := "./cmd/bin/templates/cls.tmpl"
 	tmpl, err := template.ParseFiles(tmplFile)
 	Utility.AssertOnError(err)
-
 	dirName := fmt.Sprintf("./inc/%s", tableName)
-
-	if _, err := os.Stat(dirName); os.IsNotExist(err) {
+	if _, err = os.Stat(dirName); os.IsNotExist(err) {
 		err = os.Mkdir(dirName, 0755)
 		Utility.AssertOnError(err)
 	}
 
-	filePtr, err := os.Create(fmt.Sprintf("%s/%s.cls.go", dirName, tableName))
-	Utility.AssertOnError(err)
+	{
+		clsFile := fmt.Sprintf("%s/%s.cls.go", dirName, tableName)
+		if _, err = os.Stat(clsFile); os.IsNotExist(err) {
+			filePtr, err := os.Create(clsFile)
+			Utility.AssertOnError(err)
 
-	err = tmpl.Execute(filePtr, templateData)
-	Utility.AssertOnError(err)
-
-	// --------------------------------------------------------
-
-	tmplFile = "./cmd/bin/templates/api.tmpl"
-	tmpl, err = template.ParseFiles(tmplFile)
-	Utility.AssertOnError(err)
-
-	filePtr, err = os.Create(fmt.Sprintf("./API/0.1/%s.api.go", tableName))
-	Utility.AssertOnError(err)
-
-	err = tmpl.Execute(filePtr, templateData)
-	Utility.AssertOnError(err)
+			err = tmpl.Execute(filePtr, templateData)
+			Utility.AssertOnError(err)
+			err = filePtr.Close()
+			if err != nil {
+				return
+			}
+		}
+	}
 
 	// --------------------------------------------------------
 
-	tmplFile = "./cmd/bin/templates/crud.tmpl"
-	tmpl, err = template.ParseFiles(tmplFile)
-	Utility.AssertOnError(err)
+	{
+		tmplFile = "./cmd/bin/templates/api.tmpl"
+		tmpl, err = template.ParseFiles(tmplFile)
+		Utility.AssertOnError(err)
 
-	filePtr, err = os.Create(fmt.Sprintf("%s/%s.crud.go", dirName, tableName))
-	Utility.AssertOnError(err)
+		apiFile := fmt.Sprintf("./API/0.1/%s.api.go", tableName)
+		if _, err = os.Stat(apiFile); os.IsNotExist(err) {
+			filePtr, err := os.Create(apiFile)
+			Utility.AssertOnError(err)
 
-	err = tmpl.Execute(filePtr, templateData)
-	Utility.AssertOnError(err)
+			err = tmpl.Execute(filePtr, templateData)
+			Utility.AssertOnError(err)
+			err = filePtr.Close()
+			if err != nil {
+				return
+			}
+		}
+	}
 
 	// --------------------------------------------------------
 
-	tmplFile = "./cmd/bin/templates/meta.tmpl"
-	tmpl, err = template.ParseFiles(tmplFile)
-	Utility.AssertOnError(err)
+	{
+		tmplFile = "./cmd/bin/templates/crud.tmpl"
+		tmpl, err = template.ParseFiles(tmplFile)
+		Utility.AssertOnError(err)
 
-	filePtr, err = os.Create(fmt.Sprintf("%s/%s.meta.go", dirName, tableName))
-	Utility.AssertOnError(err)
+		crudFile := fmt.Sprintf("%s/%s.crud.go", dirName, tableName)
+		if _, err = os.Stat(crudFile); os.IsNotExist(err) {
+			filePtr, _ := os.Create(crudFile)
 
-	err = tmpl.Execute(filePtr, templateData)
-	Utility.AssertOnError(err)
+			err = tmpl.Execute(filePtr, templateData)
+			Utility.AssertOnError(err)
+			err = filePtr.Close()
+			if err != nil {
+				return
+			}
+		}
+	}
+
+	// --------------------------------------------------------
+
+	{
+		tmplFile = "./cmd/bin/templates/meta.tmpl"
+		tmpl, err = template.ParseFiles(tmplFile)
+		Utility.AssertOnError(err)
+
+		filePtr, _ := os.Create(fmt.Sprintf("%s/%s.meta.go", dirName, tableName))
+
+		err = tmpl.Execute(filePtr, templateData)
+		Utility.AssertOnError(err)
+		err = filePtr.Close()
+		if err != nil {
+			return
+		}
+	}
+
 }

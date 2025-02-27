@@ -202,7 +202,7 @@ func Close() {
 }
 
 func buildSQLReadQueries(payload ModelPayload) (primaryQuery string, uniqueQueries []string, err error) {
-	Utility.Assert(len(payload.ColumnNames) > 0)
+	Utility.AssertMsg(len(payload.ColumnNames) > 0, "No members in the table")
 
 	primaryKeyColumns := getColumnNames(payload.TableName, payload.PrimaryKeyMemberNames)
 	if len(primaryKeyColumns) == 0 {

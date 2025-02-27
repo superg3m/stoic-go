@@ -98,12 +98,15 @@ func GetStructMemberNames(structure StackAny, excludeList ...string) []string {
 	return fieldNames
 }
 
-func GetStructMemberPointer(structure HeapAny, excludeList ...string) []any {
+func GetStructMemberPointer(structure any, excludeList ...string) []any {
 	value := reflect.ValueOf(structure)
+
 	if value.Kind() == reflect.Ptr {
 		value = value.Elem()
 	} else {
-		AssertMsg(false, "structure must be a pointer")
+		ptr := reflect.New(reflect.TypeOf(structure))
+		ptr.Elem().Set(value)
+		value = ptr.Elem()
 	}
 
 	typeStruct := value.Type()

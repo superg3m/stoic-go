@@ -1,15 +1,12 @@
 package LoginKey
 
 import (
-	"github.com/jmoiron/sqlx"
 	"github.com/superg3m/stoic-go/Core/ORM"
 	"github.com/superg3m/stoic-go/Core/Utility"
 )
 
-type LoginKeyProvider int
-
 const (
-	PASSWORD LoginKeyProvider = iota
+	PASSWORD int = iota
 	FACEBOOK
 	TWITTER
 	TWITCH
@@ -18,20 +15,11 @@ const (
 )
 
 func isValidProvider(value int) bool {
-	return value >= int(PASSWORD) && value <= int(REDDIT)
-}
-
-func getProvider(value int) LoginKeyProvider {
-	Utility.AssertMsg(isValidProvider(value), "Invalid Provider value: %d", value)
-
-	return LoginKeyProvider(value)
+	return value >= PASSWORD && value <= REDDIT
 }
 
 type LoginKey struct {
-	DB       *sqlx.DB
-	UserID   int
-	Provider LoginKeyProvider
-	Key      string
+	Meta
 }
 
 func New() *LoginKey {
@@ -45,21 +33,24 @@ func New() *LoginKey {
 	return ret
 }
 
-func (loginKey *LoginKey) HashKey() {
-	loginKey.Key = Utility.Sha256HashString(loginKey.Key)
+func (model *LoginKey) CanCreate() []string {
+	return nil
 }
 
-func FromUserID_Provider(UserID int, Provider LoginKeyProvider) (*LoginKey, []string) {
-	ret := New()
-	ret.UserID = UserID
-	ret.Provider = getProvider(int(Provider))
+func (model *LoginKey) CanRead() []string {
+	return nil
+}
 
-	read := ret.Read()
-	if read.IsBad() {
-		return nil, read.GetErrors()
-	}
+func (model *LoginKey) CanUpdate() []string {
+	return nil
+}
 
-	return ret, nil
+func (model *LoginKey) CanDelete() []string {
+	return nil
+}
+
+func (loginKey *LoginKey) HashKey() {
+	loginKey.Key = Utility.Sha256HashString(loginKey.Key)
 }
 
 func init() {

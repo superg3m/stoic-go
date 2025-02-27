@@ -23,11 +23,12 @@ type ModelPayload struct {
 
 func getModelPayload[T InterfaceCRUD](model T) ModelPayload {
 	stackModel := Utility.DereferencePointer(model)
+	meta := Utility.GetMemberValue(stackModel, "Meta")
 
 	tableName := Utility.GetTypeName(stackModel)
-	memberNames := Utility.GetStructMemberNames(stackModel, excludeList...)
+	memberNames := Utility.GetStructMemberNames(meta, excludeList...)
 	columnNames := getColumnNames(tableName, memberNames)
-	pointers := Utility.GetStructMemberPointer(model, excludeList...)
+	pointers := Utility.GetStructMemberPointer(meta, excludeList...)
 
 	var (
 		primaryKeyMemberNames []string
@@ -54,7 +55,7 @@ func getModelPayload[T InterfaceCRUD](model T) ModelPayload {
 	}
 
 	var formattedTimeValues []any
-	types := Utility.GetStructMemberTypes(stackModel, excludeList...)
+	types := Utility.GetStructMemberTypes(meta, excludeList...)
 
 	for i, memberName := range memberNames {
 		fieldType, exists := types[memberName]
@@ -66,7 +67,7 @@ func getModelPayload[T InterfaceCRUD](model T) ModelPayload {
 				formattedTimeValues = append(formattedTimeValues, formattedTime)
 			}
 		} else {
-			originalValue := Utility.GetStructValues(stackModel, excludeList...)
+			originalValue := Utility.GetStructValues(meta, excludeList...)
 			formattedTimeValues = append(formattedTimeValues, originalValue[i])
 		}
 	}

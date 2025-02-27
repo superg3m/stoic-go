@@ -18,8 +18,9 @@ func init() {
 
 func RegisterTableName(table InterfaceCRUD) {
 	stackModel := Utility.DereferencePointer(table)
+	meta := Utility.GetMemberValue(stackModel, "Meta")
 	tempTableName = Utility.GetTypeName(stackModel)
-	tempTypes = Utility.GetStructMemberTypes(stackModel, excludeList...)
+	tempTypes = Utility.GetStructMemberTypes(meta, excludeList...)
 }
 
 func RegisterTableColumn(memberName string, columnName string, flags ...ORM_FLAG) {
