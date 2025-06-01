@@ -14,12 +14,18 @@ type StoicResponse struct {
 }
 
 func (response *StoicResponse) SetData(data any) {
-	switch reflect.TypeOf(data).Kind() {
+	t := reflect.TypeOf(data)
+	if t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+
+	switch t.Kind() {
 	case reflect.Struct, reflect.Map, reflect.Slice, reflect.Array:
 		response.Header().Set("Content-Type", "application/json")
 
 		jsonData, err := json.Marshal(data)
 		Utility.AssertOnErrorMsg(err, "failed to marshal data to JSON")
+
 		_, err = response.Write(jsonData)
 		Utility.AssertOnErrorMsg(err, "failed to write data to JSON")
 		return
