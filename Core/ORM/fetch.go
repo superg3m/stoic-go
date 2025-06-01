@@ -31,26 +31,28 @@ func Fetch[T InterfaceCRUD](sql string, bindParams ...any) (T, error) {
 
 func FetchAll[T InterfaceCRUD](sql string, bindParams ...any) ([]T, error) {
 	var results []T
-
+	
 	rows, errQuery := GetInstance().Queryx(sql, bindParams...)
 	if errQuery != nil {
 		return nil, errQuery
 	}
-
+	
 	defer rows.Close()
 
 	for rows.Next() {
-		dest := *new(T)
+		newValuePtr := reflect.New(reflect.TypeOf((*T)(nil)).Elem().Elem())
+		newValue := newValuePtr.Interface().(T)
 
-		pointers := Utility.GetStructMemberPointer(&dest, excludeList...)
-		err := rows.Scan(pointers...)
-		Utility.AssertOnErrorMsg(err, fmt.Sprintf("Fetch: failed to scan row into struct: %s", err))
+		pointers := Utility.GetStructMemberPointer(newValue, excludeList...)
+		if err := rows.Scan(pointers...); err != nil {
+			return nil, fmt.Errorf("Fetch: failed to scan row into struct: %w", err)
+		}
 
-		results = append(results, dest)
+		results = append(results, newValue)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("FetchAll: error during rows iteration: %s", err)
+		return nil, fmt.Errorf("FetchAll: row iteration error: %w", err)
 	}
 
 	return results, nil
