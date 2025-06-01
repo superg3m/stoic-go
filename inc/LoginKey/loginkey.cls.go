@@ -45,10 +45,6 @@ func New() *LoginKey {
 	return ret
 }
 
-func (loginKey *LoginKey) HashKey() {
-	loginKey.Key = Utility.Sha256HashString(loginKey.Key)
-}
-
 func FromUserID_Provider(UserID int, Provider LoginKeyProvider) (*LoginKey, []string) {
 	ret := New()
 	ret.UserID = UserID

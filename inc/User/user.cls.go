@@ -14,14 +14,18 @@ var (
 )
 
 type User struct {
-	DB *sqlx.DB
+	DB *sqlx.DB `json:"-"` // Excluded from JSON
 
-	ID             int    // Primary Key
-	Email          string // Unique
-	EmailConfirmed bool
-	Joined         time.Time
-	LastLogin      *time.Time
-	LastActive     *time.Time
+	ID             int        `json:"id"`
+	Email          string     `json:"email"`
+	EmailConfirmed bool       `json:"email_confirmed"`
+	Joined         time.Time  `json:"-"`
+	LastLogin      *time.Time `json:"-"`
+	LastActive     *time.Time `json:"-"`
+}
+
+type CookieData struct {
+	ID int `json:"ID"`
 }
 
 func New() *User {

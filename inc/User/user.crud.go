@@ -8,15 +8,15 @@ import (
 )
 
 func (u *User) CanCreate() []string {
-	dbUser := *u
-	read := dbUser.Read()
-	if read.IsBad() {
-		return nil
-	}
-
 	var errors []string = nil
 	if !Utility.ValidEmail(u.Email) {
 		errors = append(errors, "User Invalid Email")
+	}
+
+	dbUser := *u
+	read := dbUser.Read()
+	if read.IsBad() {
+		return errors
 	}
 
 	if u.Email == dbUser.Email {
