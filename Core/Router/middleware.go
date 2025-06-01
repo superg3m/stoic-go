@@ -38,12 +38,11 @@ func MiddlewareCORS() StoicMiddleware {
 	return func(next StoicHandlerFunc) StoicHandlerFunc {
 		return func(req *StoicRequest, res *StoicResponse) {
 			headers := res.Header()
-			headers.Add("Access-Control-Allow-Origin", "*")
-			headers.Add("Vary", "Origin")
-			headers.Add("Vary", "Access-Control-Request-Method")
-			headers.Add("Vary", "Access-Control-Request-Headers")
-			headers.Add("Access-Control-Allow-Headers", "Content-Type, Origin, Accept, token")
-			headers.Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+			headers.Set("Access-Control-Allow-Origin", "http://localhost:5173") // Set frontend origin
+			headers.Set("Access-Control-Allow-Credentials", "true")             // Allow cookies
+			headers.Set("Vary", "Origin, Access-Control-Request-Method, Access-Control-Request-Headers")
+			headers.Set("Access-Control-Allow-Headers", "Content-Type, Origin, Accept, token")
+			headers.Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 
 			if req.Request.Method == "OPTIONS" {
 				res.WriteHeader(http.StatusOK)
