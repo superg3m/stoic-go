@@ -48,7 +48,7 @@ func (r *StoicRequest) GetParamMap() map[string]interface{} {
 				}
 			}
 		} else {
-			panic(fmt.Sprintf("unsupported content type: %s", contentType))
+			// panic(fmt.Sprintf("unsupported content type: %s", contentType))
 		}
 
 		return paramMap
