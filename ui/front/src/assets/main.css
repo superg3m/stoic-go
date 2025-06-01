@@ -1,0 +1,10 @@
+@import './base.css';
+
+#app {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  font-weight: normal;
+  overflow-x: clip;
+  overflow-y: clip;
+}
