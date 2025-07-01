@@ -44,7 +44,6 @@ router.beforeEach(async (to, from, next) => {
   const authorized = await isAuthorized();
 
   if (authorized && to.path === "/") {
-
     return next('/home');
   }
 
