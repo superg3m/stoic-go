@@ -5,12 +5,6 @@
 Stoic-Go is a modular project designed for handling backend services, database migrations, and runtime utility tasks. It includes tools for routing, logging, migrations, and dynamic recompilation.  
   
 ### Key Components
-docker pull mysql:latest
-docker run --name mysql -e MYSQL_ROOT_PASSWORD=P@55word -p 3306:3306 -d mysql
-
-mysql -uroot -p
-CREATE DATABASE stoic;
-
 - **Command-line Tools (`cmd/bin`)**:  
   - **StoicMigration**: Manages database migrations.
     - Build: `cd ./cmd/src/StoicMigration ; go build -o StoicMigration.exe ; move ./StoicMigration.exe ../../bin/StoicMigration.exe ; cd ../../..`
