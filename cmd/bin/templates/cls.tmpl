@@ -1,13 +1,13 @@
 package {{ .TableName }}
 
 import (
-	"github.com/superg3m/stoic-go/Core/ORM"
 	"github.com/jmoiron/sqlx"
+	"github.com/superg3m/stoic-go/Core/ORM"
 	"time"
 )
 
 type {{ .TableName }} struct {
-   	DB *sqlx.DB
+   	DB *sqlx.DB `json:"-"`
 
    	{{- range .Columns }}
    	{{ .Name }} {{ .Type }}

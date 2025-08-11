@@ -14,14 +14,14 @@ var (
 )
 
 type User struct {
-	DB *sqlx.DB `json:"-"` // Excluded from JSON
+	DB *sqlx.DB `json:"-"`
 
-	ID             int        `json:"id"`
-	Email          string     `json:"email"`
-	EmailConfirmed bool       `json:"email_confirmed"`
-	Joined         time.Time  `json:"-"`
-	LastLogin      *time.Time `json:"-"`
-	LastActive     *time.Time `json:"-"`
+	ID             int    `json:"id"`
+	Email          string `json:"email"`
+	EmailConfirmed bool   `json:"email_confirmed"`
+	Joined         time.Time
+	LastLogin      *time.Time
+	LastActive     *time.Time
 }
 
 type CookieData struct {

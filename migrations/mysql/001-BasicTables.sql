@@ -26,7 +26,17 @@ CREATE TABLE IF NOT EXISTS `TodoItem` (
     CONSTRAINT `FK_OwnerID` FOREIGN KEY (`OwnerID`) REFERENCES `User` (`ID`) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS `UserVisibilities` (
+    `UserID`      INT     NOT NULL,
+    `RealName`    NVARCHAR(256) NOT NULL,
+    `Description` NVARCHAR(256) NOT NULL,
+    `Gender`      NVARCHAR(256) NOT NULL,
+    PRIMARY KEY (`UserID`),
+    CONSTRAINT `FK_UserVisibilitiesUser` FOREIGN KEY (`UserID`) REFERENCES `User` (`ID`) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
 -- StoicMigration Down
+DROP TABLE IF EXISTS `UserVisibilities`;
 DROP TABLE IF EXISTS `LoginKey`;
 DROP TABLE IF EXISTS `TodoItem`;
 DROP TABLE IF EXISTS `User`;

@@ -9,7 +9,7 @@ import (
 func create{{ .TableName }}(request *Router.StoicRequest, response *Router.StoicResponse) {
 	entity := {{ .TableName }}.New()
 
-    {{- range .PrimaryKeys }}
+    {{- range .Columns }}
     {{- if eq .Type "string" }}
     entity.{{ .Name }} = request.GetStringParam("{{ .Name }}")
     {{- else if eq .Type "int" }}
@@ -126,13 +126,13 @@ func init() {
 	Router.RegisterApiEndpoint("{{ .TableName }}/Create", create{{ .TableName }}, "POST",
 		Router.MiddlewareValidParams({{ range $i, $pk := .Columns }}{{ if $i }}, {{ end }}"{{ $pk.Name }}"{{ end }}),
 	)
-    Router.RegisterApiEndpoint("{{ .TableName }}/Get", get{{ .TableName }}, "GET",
+    Router.RegisterApiEndpoint("{{ .TableName }}/Get", get{{ .TableName }}, "POST",
         Router.MiddlewareValidParams({{ range $i, $pk := .PrimaryKeys }}{{ if $i }}, {{ end }}"{{ $pk.Name }}"{{ end }}),
     )
-	Router.RegisterApiEndpoint("{{ .TableName }}/Update", update{{ .TableName }}, "PATCH",
+	Router.RegisterApiEndpoint("{{ .TableName }}/Update", update{{ .TableName }}, "POST",
 		Router.MiddlewareValidParams({{ range $i, $pk := .Columns }}{{ if $i }}, {{ end }}"{{ $pk.Name }}"{{ end }}),
 	)
-	Router.RegisterApiEndpoint("{{ .TableName }}/Delete", delete{{ .TableName }}, "DELETE",
+	Router.RegisterApiEndpoint("{{ .TableName }}/Delete", delete{{ .TableName }}, "POST",
 		Router.MiddlewareValidParams({{ range $i, $pk := .PrimaryKeys }}{{ if $i }}, {{ end }}"{{ $pk.Name }}"{{ end }}),
 	)
 }

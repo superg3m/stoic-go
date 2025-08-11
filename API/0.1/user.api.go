@@ -16,6 +16,15 @@ func checkUserAuth(request *Router.StoicRequest, response *Router.StoicResponse)
 	cookie, err := request.Cookie("go_garden_auth_token")
 	if err != nil {
 		response.AddError("Unauthorized!")
+		http.SetCookie(response, &http.Cookie{
+			Name:     "go_garden_auth_token",
+			Value:    "SECRET_VALUE",
+			Expires:  time.Now().Add(0 * time.Hour),
+			HttpOnly: true,
+			Secure:   true,
+			SameSite: http.SameSiteNoneMode,
+			Path:     "/",
+		})
 		return
 	}
 
@@ -141,6 +150,8 @@ func updateUser(request *Router.StoicRequest, response *Router.StoicResponse) {
 		response.AddErrors(errors, "Failed to get user from Email")
 		return
 	}
+
+	// user.LastLogin = Utility.NewTime(time.Now())
 
 	if email != "" {
 		user.Email = email
