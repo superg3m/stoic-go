@@ -34,20 +34,7 @@ Stoic-Go is a modular project designed for handling backend services, database m
   
 2. **test**: Runs unit and integration tests.  
   
-## Goals  
-  
-### Core Functionality
-  
-#### Package `utils.go`  
-- [ ] Functions:  
-  - `AssertOnError(err error, format string, args ...any)`  
-  - `LoggerInit()`  
-  - Logging: `LogInfo()`, `LogWarn()`, `LogDebug()`, `LogError()`, `LogFatal()`  
-  - `LogOnError(err error, format string, args ...any)`  
-  - Generic casting: `castAny[T any](v any) T`  
-  
 ### Runtime Tools  
-  
 - Install `wgo`:  
   ```  
   cd ./cmd/src/wgo-main  
@@ -56,17 +43,9 @@ Stoic-Go is a modular project designed for handling backend services, database m
 - Run with hot recompilation:  
   ```  
   ./cmd/bin/wgo run main.go -w "*.go"  
-  ```  
-  
-### TODO  
-- Add models from Stoic-PHP.  
-- Consolidate into a single package:  
-  - `StoicCore.Router`  
-  - `StoicCore.ORM`  
-  - `StoicCore.Utility`  
+  ```   
   
 ## Services  
-  
 - **Router Package** (Uses Gorilla Mux):  
   - `router.go`:  
     - `NewRouter()`  
@@ -90,8 +69,7 @@ Stoic-Go is a modular project designed for handling backend services, database m
     - Functions for parameter handling (`Has`, `GetStringParam`, `GetIntParam`, etc.).  
   
 ## Future Work  
-- ORM, Stripe
-- Pre-computation for `FromX` methods to simplify templates.  
+- Stripe
 - Replace panics with robust error handling. 
 - Track successful migrations in the database Migration table.
 
@@ -99,6 +77,3 @@ Stoic-Go is a modular project designed for handling backend services, database m
 - I'm going to use go-generate to do some metaprogramming with the tools
 - dsn := ORM.GetDSN(DB_ENGINE, HOST, PORT, USER, PASSWORD, DBNAME)
 - ORM.ConnectLocal("../SQLite.db)
-- I need to figure out how setData should work with returning something like a User for example
-- CanUpdate(), CanCreate() should be CRUD return
-- Remove the valid params middleware doesn't really make sense opt for what zsf-php tryGetParams
