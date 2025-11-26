@@ -20,7 +20,7 @@ Stoic-Go is a modular project designed for handling backend services, database m
   
 ## Features and Usage  
   
-### `Exec.ps1` Commands  
+### `Exec.ps1` Commands (This doesn't exist yet, use commands above) 
 1. **init**: Sets up the development environment.  
    - **Dockerized Services**:  
      - SMTP for emails.  
