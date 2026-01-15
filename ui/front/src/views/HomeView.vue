@@ -1,8 +1,7 @@
 <script setup>
 import {onMounted, ref} from 'vue';
 import Draggable from 'vuedraggable';
-import router from "@/router/index.js";
-import {isAuthorized, UserStore} from "@/UserStore.js";
+import { UserStore } from "@/UserStore.js";
 
 const newTodoText = ref('');
 const todos = ref([]);
@@ -76,8 +75,8 @@ async function onChangeTodo(event){
 async function tryUpdate(todo, status) {
   try {
     todo.Status = status;
-    await fetch("http://localhost:8080/TodoItem/Update", {
-      method: "POST",
+    await fetch("http://localhost:8080/TodoItem", {
+      method: "PATCH",
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
@@ -85,7 +84,7 @@ async function tryUpdate(todo, status) {
       body: JSON.stringify(todo)
     })
 
-  }catch(e){
+  } catch(e){
     console.error(e)
   }
 }
@@ -100,8 +99,9 @@ const removeTodo = async (todo, list) => {
     const todoRequest = {
       "ID": todo.ID,
     };
-    await fetch("http://localhost:8080/TodoItem/Delete", {
-      method: "POST",
+
+    await fetch("http://localhost:8080/TodoItem", {
+      method: "DELETE",
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
@@ -117,17 +117,12 @@ const removeTodo = async (todo, list) => {
 
 onMounted(async () => {
   try {
-    const todoRequest = {
-      "OwnerID": UserStore.User.id,
-    };
-
-    const response = await fetch("http://localhost:8080/TodoItem/Get", {
-      method: "POST",
+    const response = await fetch(`http://localhost:8080/TodoItem?OwnerID=${UserStore.User.id}`, {
+      method: "GET",
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(todoRequest)
     });
 
     const todosResponse = await response.json()
@@ -278,20 +273,6 @@ h2 {
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 14px;
-}
-
-.add-todo-btn {
-  padding: 10px 15px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.add-todo-btn:hover {
-  background-color: #45a049;
 }
 
 .lists-container {

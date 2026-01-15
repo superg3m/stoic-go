@@ -123,16 +123,16 @@ func delete{{ .TableName }}(request *Router.StoicRequest, response *Router.Stoic
 }
 
 func init() {
-	Router.RegisterApiEndpoint("{{ .TableName }}/Create", create{{ .TableName }}, "POST",
+	Router.RegisterApiEndpoint("{{ .TableName }}", create{{ .TableName }}, "POST",
 		Router.MiddlewareValidParams({{ range $i, $pk := .Columns }}{{ if $i }}, {{ end }}"{{ $pk.Name }}"{{ end }}),
 	)
-    Router.RegisterApiEndpoint("{{ .TableName }}/Get", get{{ .TableName }}, "POST",
+    Router.RegisterApiEndpoint("{{ .TableName }}", get{{ .TableName }}, "GET",
         Router.MiddlewareValidParams({{ range $i, $pk := .PrimaryKeys }}{{ if $i }}, {{ end }}"{{ $pk.Name }}"{{ end }}),
     )
-	Router.RegisterApiEndpoint("{{ .TableName }}/Update", update{{ .TableName }}, "POST",
+	Router.RegisterApiEndpoint("{{ .TableName }}", update{{ .TableName }}, "PATCH",
 		Router.MiddlewareValidParams({{ range $i, $pk := .Columns }}{{ if $i }}, {{ end }}"{{ $pk.Name }}"{{ end }}),
 	)
-	Router.RegisterApiEndpoint("{{ .TableName }}/Delete", delete{{ .TableName }}, "POST",
+	Router.RegisterApiEndpoint("{{ .TableName }}", delete{{ .TableName }}, "DELETE",
 		Router.MiddlewareValidParams({{ range $i, $pk := .PrimaryKeys }}{{ if $i }}, {{ end }}"{{ $pk.Name }}"{{ end }}),
 	)
 }

@@ -42,7 +42,7 @@ func MiddlewareCORS() StoicMiddleware {
 			headers.Set("Access-Control-Allow-Credentials", "true")             // Allow cookies
 			headers.Set("Vary", "Origin, Access-Control-Request-Method, Access-Control-Request-Headers")
 			headers.Set("Access-Control-Allow-Headers", "Content-Type, Origin, Accept, token")
-			headers.Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+			headers.Set("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS")
 
 			if req.Request.Method == "OPTIONS" {
 				res.WriteHeader(http.StatusOK)

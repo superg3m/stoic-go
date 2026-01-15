@@ -26,7 +26,7 @@ func (r *StoicRequest) GetParamMap() map[string]interface{} {
 		return paramMap
 	}
 
-	if r.Method == "POST" {
+	if r.Method == "POST" || r.Method == "PATCH" || r.Method == "DELETE" {
 		contentType := r.Header.Get("Content-Type")
 		body := readRequestBody(r)
 
@@ -48,7 +48,7 @@ func (r *StoicRequest) GetParamMap() map[string]interface{} {
 				}
 			}
 		} else {
-			// panic(fmt.Sprintf("unsupported content type: %s", contentType))
+			panic(fmt.Sprintf("unsupported content type: %s", contentType))
 		}
 
 		return paramMap

@@ -74,16 +74,16 @@ func deleteTodoItem(request *Router.StoicRequest, response *Router.StoicResponse
 }
 
 func init() {
-	Router.RegisterApiEndpoint("TodoItem/Create", createTodoItem, "POST",
+	Router.RegisterApiEndpoint("TodoItem", createTodoItem, "POST",
 		Router.MiddlewareValidParams("OwnerID", "Message", "Status"),
 	)
-	Router.RegisterApiEndpoint("TodoItem/Get", getTodoItem, "POST",
+	Router.RegisterApiEndpoint("TodoItem", getTodoItem, "GET",
 		Router.MiddlewareValidParams("OwnerID"),
 	)
-	Router.RegisterApiEndpoint("TodoItem/Update", updateTodoItem, "POST",
+	Router.RegisterApiEndpoint("TodoItem", updateTodoItem, "PATCH",
 		Router.MiddlewareValidParams("ID", "OwnerID", "Message", "Status"),
 	)
-	Router.RegisterApiEndpoint("TodoItem/Delete", deleteTodoItem, "POST",
+	Router.RegisterApiEndpoint("TodoItem", deleteTodoItem, "DELETE",
 		Router.MiddlewareValidParams("ID"),
 	)
 }

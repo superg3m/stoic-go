@@ -8,17 +8,9 @@ export const UserStore = reactive({
 
 async function getUser(userId) {
   try {
-    const bodyObj = {
-      "id": userId
-    };
-
-    const response = await fetch("http://localhost:8080/User/Get", {
-      method: "POST",
+    const response = await fetch(`http://localhost:8080/User?id=${userId}`, {
+      method: "GET",
       credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(bodyObj)
     });
 
     const text = await response.text()

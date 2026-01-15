@@ -2,10 +2,8 @@
 import { ref } from 'vue';
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
-import FloatLabel from 'primevue/floatlabel';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
-import PrimeColorPicker from "@/components/PrimeColorPicker.vue";
 import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
 import router from '@/router';
@@ -58,7 +56,6 @@ async function tryLogin() {
       life: 3000
     });
 
-    // redirects to the homepage on a successful sign in
     await router.push('/home');
   } catch (error) {
     toast.add({
@@ -77,7 +74,7 @@ async function tryRegister() {
   };
 
   try {
-    const response = await fetch("http://localhost:8080/User/Create", {
+    const response = await fetch("http://localhost:8080/User", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -96,6 +93,8 @@ async function tryRegister() {
           life: 3000
         });
       }
+
+      return
     }
 
     const successText = await response.text();

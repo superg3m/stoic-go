@@ -8,7 +8,6 @@ import router from '@/router';
 import {isAuthorized, UserStore} from "@/UserStore.js"
 import Dialog from 'primevue/dialog';
 
-
 const toast = useToast();
 const email = ref('');
 const password = ref('');
@@ -17,11 +16,8 @@ const oldPassword = ref('');
 const newUEmail = ref('');
 const oldUEmail = ref('');
 
-
-
 const visibleEmail = ref(false);
 const visiblePass = ref(false);
-
 
 async function tryDelete() {
   const user = {
@@ -31,8 +27,8 @@ async function tryDelete() {
   };
 
   try {
-    const response = await fetch("http://localhost:8080/User/Delete", {
-      method: "POST",
+    const response = await fetch("http://localhost:8080/User", {
+      method: "DELETE",
       headers: {
         "Content-Type": "application/json",
       },
@@ -55,7 +51,6 @@ async function tryDelete() {
     }
 
     await onLogout();
-
     await router.push('/');
 
     const successText = await response.text();
@@ -116,8 +111,8 @@ async function updatePassword() {
   visiblePass.value = false;
 
   try{
-    const response = await fetch("http://localhost:8080/User/Update", {
-      method: "POST",
+    const response = await fetch("http://localhost:8080/User", {
+      method: "PATCH",
       headers: {
         "Content-Type": "application/json",
       },
@@ -166,8 +161,8 @@ async function updateEmail() {
   visibleEmail.value = false;
 
   try{
-    const response = await fetch("http://localhost:8080/User/Update", {
-      method: "POST",
+    const response = await fetch("http://localhost:8080/User", {
+      method: "PATCH",
       headers: {
         "Content-Type": "application/json",
       },
@@ -200,16 +195,13 @@ async function updateEmail() {
 
   }
 }
-
 </script>
 
-
 <template>
+  <Toast />
   <div class="Card">
     <Card style="width: 25rem; overflow: hidden">
       <template #header>
-        <!--<img alt="user header" src="https://primefaces.org/cdn/primevue/images/usercard.png" />
-        -->
       </template>
       <template #title>
         <h2 class="text-center">GoGarden Settings</h2>
