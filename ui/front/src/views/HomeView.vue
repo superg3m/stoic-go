@@ -27,7 +27,7 @@ const addTodo = async () => {
       "Status": 0
     };
 
-    const response = await fetch("http://localhost:8080/TodoItem/Create", {
+    const response = await fetch("http://localhost:8080/TodoItem", {
       method: "POST",
       credentials: "include",
       headers: {
