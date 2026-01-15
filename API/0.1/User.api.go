@@ -212,15 +212,12 @@ func init() {
 	Router.RegisterApiEndpoint("User", createUser, "POST",
 		Router.MiddlewareValidParams("email", "password"),
 	)
-
 	Router.RegisterApiEndpoint("User", getUser, "GET",
 		Router.MiddlewareValidParams("id"),
 	)
-
 	Router.RegisterApiEndpoint("User", updateUser, "PATCH",
 		Router.MiddlewareValidParams("id", "email", "oldPassword", "newPassword"),
 	)
-
 	Router.RegisterApiEndpoint("User", deleteUser, "DELETE",
 		Router.MiddlewareValidParams("id"),
 	)
