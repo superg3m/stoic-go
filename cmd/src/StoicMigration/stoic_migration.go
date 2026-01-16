@@ -11,8 +11,8 @@ import (
 	"github.com/superg3m/stoic-go/Core/Utility"
 )
 
-const STOIC_MIGRATION_UP_STR = "-- StoicMigration Up"
-const STOIC_MIGRATION_DOWN_STR = "-- StoicMigration Down"
+const STOIC_MIGRATION_UP_STR = "-- StoicMigration Up\n"
+const STOIC_MIGRATION_DOWN_STR = "-- StoicMigration Down\n"
 
 type MigrationMode int
 
@@ -21,13 +21,8 @@ const (
 	MIGRATION_MODE_DOWN
 )
 
-func hasMigrationString(data []byte, migrationStr string) bool {
-	s := string(data)
-	return strings.Contains(s, migrationStr)
-}
-
 func getSqlCommandsFromFile(mode MigrationMode, filePath string) ([]string, error) {
-	migrationStr := []string{"-- StoicMigration Up\n", "-- StoicMigration Down\n"}
+	migrationStr := []string{STOIC_MIGRATION_UP_STR, STOIC_MIGRATION_DOWN_STR}
 	delimitor := ';'
 
 	otherMode := int(mode)
