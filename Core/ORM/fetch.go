@@ -2,11 +2,12 @@ package ORM
 
 import (
 	"fmt"
+	"github.com/jmoiron/sqlx"
 	"github.com/superg3m/stoic-go/Core/Utility"
 	"reflect"
 )
 
-func Fetch[T InterfaceCRUD](sql string, bindParams ...any) (T, error) {
+func Fetch[T InterfaceCRUD](db *sqlx.DB, sql string, bindParams ...any) (T, error) {
 	var dest T
 
 	tType := reflect.TypeOf(dest)
@@ -16,7 +17,7 @@ func Fetch[T InterfaceCRUD](sql string, bindParams ...any) (T, error) {
 		dest = *new(T)
 	}
 
-	row := GetInstance().QueryRowx(sql, bindParams...)
+	row := db.QueryRowx(sql, bindParams...)
 
 	pointers := Utility.GetStructMemberPointer(dest, excludeList...)
 	err := row.Scan(pointers...)
@@ -29,14 +30,14 @@ func Fetch[T InterfaceCRUD](sql string, bindParams ...any) (T, error) {
 	return dest, nil
 }
 
-func FetchAll[T InterfaceCRUD](sql string, bindParams ...any) ([]T, error) {
+func FetchAll[T InterfaceCRUD](db *sqlx.DB, sql string, bindParams ...any) ([]T, error) {
 	var results []T
-	
-	rows, errQuery := GetInstance().Queryx(sql, bindParams...)
+
+	rows, errQuery := db.Queryx(sql, bindParams...)
 	if errQuery != nil {
 		return nil, errQuery
 	}
-	
+
 	defer rows.Close()
 
 	for rows.Next() {

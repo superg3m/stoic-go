@@ -31,13 +31,16 @@ type Table struct {
 	TableColumns []TableColumn
 	PrimaryKeys  []TableColumn
 	UniqueKeys   []TableColumn
+
+	RequireTimeInclude bool
 }
 
 func generateTable(tableName string, db *sqlx.DB) *Table {
 	ret := &Table{}
-	tableColumns, err := FetchTableColumns(db, tableName)
+	tableColumns, requireTimeInclude, err := FetchTableColumns(db, tableName)
 	Utility.AssertOnError(err)
 
+	ret.RequireTimeInclude = requireTimeInclude
 	ret.TableColumns = tableColumns
 	ret.TableName = tableName
 	for _, column := range ret.TableColumns {
@@ -51,39 +54,41 @@ func generateTable(tableName string, db *sqlx.DB) *Table {
 	return ret
 }
 
-func mapSQLTypeToGoType(sqlType string, isNull string) string {
+func mapSQLTypeToGoType(sqlType string, isNull string) (string, bool) {
 	if strings.Contains(sqlType, "varchar") {
-		return "string"
+		return "string", false
 	}
 
 	switch strings.ToLower(sqlType) {
 	case "integer", "int":
-		return "int"
+		return "int", false
 	case "varchar", "nvarchar":
-		return "string"
+		return "string", false
 	case "timestamp", "datetime":
 		if isNull == "NO" {
-			return "time.Time"
+			return "time.Time", true
 		}
-		return "*time.Time"
+		return "*time.Time", true
 	case "tinyint":
-		return "bool"
+		return "bool", false
 	default:
-		return "any"
+		return "any", false
 	}
 }
 
-func SQLColumnToTableColumn(sqlColumn SQLColumn) TableColumn {
+func SQLColumnToTableColumn(sqlColumn SQLColumn) (TableColumn, bool) {
+	requireTimeInclude := false
+
 	tableColumn := TableColumn{}
 	tableColumn.Name = sqlColumn.Name
-	tableColumn.Type = mapSQLTypeToGoType(sqlColumn.Type, sqlColumn.IsNull)
+	tableColumn.Type, requireTimeInclude = mapSQLTypeToGoType(sqlColumn.Type, sqlColumn.IsNull)
 	tableColumn.Flags = generateFlags(sqlColumn.IsNull, sqlColumn.IsKey, sqlColumn.Extra)
 	tableColumn.StrFlags = generateStrFlags(sqlColumn.IsNull, sqlColumn.IsKey, sqlColumn.Extra)
 
-	return tableColumn
+	return tableColumn, requireTimeInclude
 }
 
-func FetchTableColumns(db *sqlx.DB, tableName string) ([]TableColumn, error) {
+func FetchTableColumns(db *sqlx.DB, tableName string) ([]TableColumn, bool, error) {
 	var results []TableColumn
 	sql := `
 	SELECT
@@ -102,24 +107,28 @@ func FetchTableColumns(db *sqlx.DB, tableName string) ([]TableColumn, error) {
 
 	rows, err := db.Queryx(sql, tableName)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	defer rows.Close()
 
+	requireTimeInclude := false
 	for rows.Next() {
 		var sqlColumn SQLColumn
 		pointers := Utility.GetStructMemberPointer(&sqlColumn)
 		err := rows.Scan(pointers...)
 		Utility.AssertOnErrorMsg(err, fmt.Sprintf("Fetch: failed to scan row into struct: %s", err))
 
-		tableColumn := SQLColumnToTableColumn(sqlColumn)
+		tableColumn, shouldRequireTimeInclude := SQLColumnToTableColumn(sqlColumn)
+		if requireTimeInclude == false {
+			requireTimeInclude = shouldRequireTimeInclude
+		}
 
 		results = append(results, tableColumn)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("rows iteration error: %v", err)
+		return nil, false, fmt.Errorf("rows iteration error: %v", err)
 	}
 
-	return results, nil
+	return results, requireTimeInclude, nil
 }

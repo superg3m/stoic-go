@@ -21,18 +21,6 @@ const (
 	MIGRATION_MODE_DOWN
 )
 
-// ./cmd/bin/migration up
-
-// migration parse
-
-// migration up
-// migraiton down
-
-// migration execute sql
-// store migrations that have succesfully ran
-
-// Need db connection
-
 func hasMigrationString(data []byte, migrationStr string) bool {
 	s := string(data)
 	return strings.Contains(s, migrationStr)
@@ -120,21 +108,23 @@ func findFilesWithExtension(root, ext string) ([]string, error) {
 }
 
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Println("Usage: <program> [up|down]")
+	if len(os.Args) < 3 {
+		fmt.Println("Usage: <program> dbName [up|down]")
 		os.Exit(1)
 	}
 
-	arg := os.Args[1]
+	dbNameArg := os.Args[1]
+
+	modeArg := os.Args[1]
 	mode := MIGRATION_MODE_DOWN
 
-	switch arg {
+	switch modeArg {
 	case "up":
 		mode = MIGRATION_MODE_UP
 	case "down":
 		mode = MIGRATION_MODE_DOWN
 	default:
-		fmt.Printf("Invalid argument: %s\n", arg)
+		fmt.Printf("Invalid argument: %s\n", modeArg)
 		fmt.Println("Valid options are: 'up' or 'down'")
 		os.Exit(1)
 	}
@@ -146,11 +136,11 @@ func main() {
 	PORT := Utility.CastAny[int](siteSettings["dbPort"])
 	USER := Utility.CastAny[string](siteSettings["dbUser"])
 	PASSWORD := Utility.CastAny[string](siteSettings["dbPass"])
-	DBNAME := Utility.CastAny[string](siteSettings["dbName"])
+	DBNAME := dbNameArg
 
 	dsn := ORM.GetDSN(DB_ENGINE, HOST, PORT, USER, PASSWORD, DBNAME)
-	ORM.Connect(DB_ENGINE, dsn)
-	defer ORM.Close()
+	db := ORM.Connect(DBNAME, DB_ENGINE, dsn)
+	defer ORM.Close(DBNAME)
 
 	files, _ := findFilesWithExtension(fmt.Sprintf("./migrations/%s", DB_ENGINE), ".sql")
 
@@ -165,7 +155,7 @@ func main() {
 		}
 
 		for _, element := range sqlUpCommands {
-			_, err := ORM.GetInstance().Exec(element)
+			_, err := db.Exec(element)
 			Utility.AssertOnError(err)
 		}
 	}

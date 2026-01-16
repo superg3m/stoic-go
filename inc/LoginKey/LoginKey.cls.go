@@ -37,7 +37,7 @@ type LoginKey struct {
 func New() *LoginKey {
 	ret := new(LoginKey)
 
-	//ret.DB = ORM.GetInstance()
+	// ret.DB = ORM.Connect()
 	ret.UserID = 0
 	ret.Provider = 0
 	ret.Key = ""

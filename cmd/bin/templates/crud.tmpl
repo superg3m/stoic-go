@@ -22,19 +22,19 @@ func (model *{{ .TableName }}) CanDelete() []string {
 }
 
 func (model *{{ .TableName }}) Create() ORM.CrudReturn {
-	return ORM.Create(model)
+	return ORM.Create(model, model.DB)
 }
 
 func (model *{{ .TableName }}) Read() ORM.CrudReturn {
-	return ORM.Read(model)
+	return ORM.Read(model, model.DB)
 }
 
 func (model *{{ .TableName }}) Update() ORM.CrudReturn {
-	return ORM.Update(model)
+	return ORM.Update(model, model.DB)
 }
 
 func (model *{{ .TableName }}) Delete() ORM.CrudReturn {
-	return ORM.Delete(model)
+	return ORM.Delete(model, model.DB)
 }
 
 func (model *{{ .TableName }}) SetCache() {
@@ -48,7 +48,7 @@ func (model *{{ .TableName }}) GetCacheDiff() []string {
 	v2 := reflect.ValueOf(cache)
 	userType := v1.Type()
 
-	for i := 0; i {{ .SafeHTML }} v1.NumField(); i++ {
+	for i := 0; i {{ .SafeHTMLSignLT }} v1.NumField(); i++ {
 		f1 := v1.Field(i)
 		f2 := v2.Field(i)
 

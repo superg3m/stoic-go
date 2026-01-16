@@ -1,6 +1,7 @@
 package ORM
 
 import (
+	"github.com/jmoiron/sqlx"
 	"slices"
 
 	"github.com/superg3m/stoic-go/Core/Utility"
@@ -23,7 +24,7 @@ type InterfaceCRUD interface {
 
 var excludeList = []string{"DB"}
 
-func Create[T InterfaceCRUD](model T) CrudReturn {
+func Create[T InterfaceCRUD](model T, db *sqlx.DB) CrudReturn {
 	ret := CreateCRUD()
 
 	errors := model.CanCreate()
@@ -35,7 +36,7 @@ func Create[T InterfaceCRUD](model T) CrudReturn {
 	payload := getModelPayload(model)
 	hasAutoIncrement := createValidate(payload)
 
-	result, err := CreateRecord(GetInstance(), payload)
+	result, err := CreateRecord(db, payload)
 	if err != nil {
 		ret.AddError(err.Error())
 		return ret
@@ -51,7 +52,7 @@ func Create[T InterfaceCRUD](model T) CrudReturn {
 	return ret
 }
 
-func Read[T InterfaceCRUD](model T) CrudReturn {
+func Read[T InterfaceCRUD](model T, db *sqlx.DB) CrudReturn {
 	ret := CreateCRUD()
 
 	errors := model.CanRead()
@@ -62,7 +63,7 @@ func Read[T InterfaceCRUD](model T) CrudReturn {
 
 	payload := getModelPayload(model)
 
-	err := ReadRecord(GetInstance(), payload, model)
+	err := ReadRecord(db, payload, model)
 	if err != nil {
 		ret.AddError(err.Error())
 		return ret
@@ -73,7 +74,7 @@ func Read[T InterfaceCRUD](model T) CrudReturn {
 	return ret
 }
 
-func Update[T InterfaceCRUD](model T) CrudReturn {
+func Update[T InterfaceCRUD](model T, db *sqlx.DB) CrudReturn {
 	ret := CreateCRUD()
 
 	errors := model.CanUpdate()
@@ -85,7 +86,7 @@ func Update[T InterfaceCRUD](model T) CrudReturn {
 	payload := getModelPayload(model)
 	updateValidate(payload, model)
 
-	_, err := UpdateRecord(GetInstance(), payload)
+	_, err := UpdateRecord(db, payload)
 	if err != nil {
 		ret.AddError(err.Error())
 		return ret
@@ -96,7 +97,7 @@ func Update[T InterfaceCRUD](model T) CrudReturn {
 	return ret
 }
 
-func Delete[T InterfaceCRUD](model T) CrudReturn {
+func Delete[T InterfaceCRUD](model T, db *sqlx.DB) CrudReturn {
 	ret := CreateCRUD()
 
 	errors := model.CanDelete()
@@ -105,14 +106,14 @@ func Delete[T InterfaceCRUD](model T) CrudReturn {
 		return ret
 	}
 
-	read := Read(model)
+	read := Read(model, db)
 	if read.IsBad() {
 		ret.AddErrors(ret.GetErrors(), "Failed to delete")
 		return ret
 	}
 
 	payload := getModelPayload(model)
-	_, err := DeleteRecord(GetInstance(), payload)
+	_, err := DeleteRecord(db, payload)
 	if err != nil {
 		ret.AddError(err.Error())
 		return ret

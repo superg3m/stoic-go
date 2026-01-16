@@ -58,7 +58,7 @@ func ReadRecord[T InterfaceCRUD](db *sqlx.DB, payload ModelPayload, model T) err
 		allMatch := true
 		for i, pointer := range payload.UniquePointers {
 			query := uniqueQueries[i]
-			temp, err := Fetch[T](query, pointer)
+			temp, err := Fetch[T](db, query, pointer)
 			if err != nil {
 				allMatch = false
 			}
@@ -73,7 +73,7 @@ func ReadRecord[T InterfaceCRUD](db *sqlx.DB, payload ModelPayload, model T) err
 	// ----------------------------------------------------------
 
 	{
-		temp, err := Fetch[T](pKeyQuery, payload.PrimaryKeyPointers...)
+		temp, err := Fetch[T](db, pKeyQuery, payload.PrimaryKeyPointers...)
 		if err == nil {
 			Utility.Copy(temp, model)
 			return nil
@@ -170,27 +170,37 @@ func GetDSN(dbEngine, host string, port int, user, password, dbname string) stri
 	}
 }
 
-var db *sqlx.DB
+var databaseRegistry = make(map[string]*sqlx.DB)
 
-func GetInstance() *sqlx.DB {
-	Utility.Assert(db != nil)
-	return db
+func GetInstance(dbName string) *sqlx.DB {
+	if db, ok := databaseRegistry[dbName]; ok {
+		return db
+	} else {
+		Utility.AssertMsg(false, "Database: %s not found in registry", dbName)
+	}
+
+	return nil
 }
 
-func Connect(dbEngine, dsn string) *sqlx.DB {
-	if db != nil {
-		return db
+func Connect(dbName, dbEngine, dsn string) *sqlx.DB {
+	if _, ok := databaseRegistry[dbName]; ok {
+		Utility.AssertMsg(false, "Database: %s has already been registered", dbName)
+		return nil
 	}
 
 	dbNew, err := sqlx.Connect(dbEngine, dsn)
 	Utility.AssertOnError(err)
 
-	db = dbNew
-
-	return db
+	databaseRegistry[dbName] = dbNew
+	return databaseRegistry[dbName]
 }
 
-func Close() {
+func Close(dbName string) {
+	db, ok := databaseRegistry[dbName]
+	if !ok {
+		Utility.AssertMsg(false, "Database: %s not found in registry", dbName)
+	}
+
 	Utility.AssertMsg(db != nil, "Database Must have a active connection first before attempting to close")
 
 	err := db.Close()
@@ -198,7 +208,7 @@ func Close() {
 		return
 	}
 
-	db = nil
+	delete(databaseRegistry, dbName)
 }
 
 func buildSQLReadQueries(payload ModelPayload) (primaryQuery string, uniqueQueries []string, err error) {

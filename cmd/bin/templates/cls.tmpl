@@ -3,7 +3,9 @@ package {{ .TableName }}
 import (
 	"github.com/jmoiron/sqlx"
 	"github.com/superg3m/stoic-go/Core/ORM"
-	"time"
+	 {{- if .RequireTimeInclude }}
+	 "time"
+	 {{- end }}
 )
 
 type {{ .TableName }} struct {
@@ -14,10 +16,12 @@ type {{ .TableName }} struct {
    	{{- end }}
 }
 
+var DatabaseName = "{{ .DatabaseName }}"
+
 func New() *{{ .TableName }} {
 	ret := new({{ .TableName }})
 
-	//ret.DB = ORM.GetInstance()
+	ret.DB = ORM.GetInstance(DatabaseName)
 
     {{- range .Columns }}
     {{- if eq .Type "string" }}

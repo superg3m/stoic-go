@@ -62,19 +62,19 @@ func (u *User) CanDelete() []string {
 }
 
 func (u *User) Create() ORM.CrudReturn {
-	return ORM.Create(u)
+	return ORM.Create(u, u.DB)
 }
 
 func (u *User) Read() ORM.CrudReturn {
-	return ORM.Read(u)
+	return ORM.Read(u, u.DB)
 }
 
 func (u *User) Update() ORM.CrudReturn {
-	return ORM.Update(u)
+	return ORM.Update(u, u.DB)
 }
 
 func (u *User) Delete() ORM.CrudReturn {
-	return ORM.Delete(u)
+	return ORM.Delete(u, u.DB)
 }
 
 func (u *User) SetCache() {

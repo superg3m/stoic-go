@@ -17,10 +17,12 @@ import (
 
 type TemplateDataType struct {
 	TableName           string
+	DatabaseName        string
 	Columns             []TableColumn
 	ColumnNames         []string
 	ColumnArgs          string
 	ColumnArgsWithTypes string
+	RequireTimeInclude  bool
 
 	PrimaryKeys             []TableColumn
 	PrimaryKeyNames         []string
@@ -33,10 +35,16 @@ type TemplateDataType struct {
 	UniqueArgs          string
 	UniqueArgsWithTypes string
 	FromUniques         []string
-	SafeHTML            template.HTML
+
+	SafeHTMLSignLT template.HTML
 }
 
 func main() {
+	databaseName := ""
+	fmt.Print("Enter dbName: ")
+	_, err := fmt.Scanln(&databaseName)
+	Utility.AssertOnError(err)
+
 	siteSettings := Utility.GetSiteSettings()
 	siteSettings = siteSettings["settings"].(map[string]any)
 	DB_ENGINE := Utility.CastAny[string](siteSettings["dbEngine"])
@@ -44,19 +52,18 @@ func main() {
 	PORT := Utility.CastAny[int](siteSettings["dbPort"])
 	USER := Utility.CastAny[string](siteSettings["dbUser"])
 	PASSWORD := Utility.CastAny[string](siteSettings["dbPass"])
-	DBNAME := Utility.CastAny[string](siteSettings["dbName"])
 
-	dsn := ORM.GetDSN(DB_ENGINE, HOST, PORT, USER, PASSWORD, DBNAME)
-	ORM.Connect(DB_ENGINE, dsn)
-	defer ORM.Close()
+	dsn := ORM.GetDSN(DB_ENGINE, HOST, PORT, USER, PASSWORD, databaseName)
+	ORM.Connect(databaseName, DB_ENGINE, dsn)
+	defer ORM.Close(databaseName)
 
 	tableName := ""
 	fmt.Print("Enter TableName: ")
-	_, err := fmt.Scanln(&tableName)
+	_, err = fmt.Scanln(&tableName)
 	fmt.Println("")
 	Utility.AssertOnError(err)
 
-	db := ORM.GetInstance()
+	db := ORM.GetInstance(databaseName)
 
 	table := generateTable(tableName, db)
 	Utility.Assert(table != nil)
@@ -92,12 +99,14 @@ func main() {
 	uniqueArgsWithTypes := strings.Join(primaryKeyNamesWithTypes, ", ")
 
 	templateData := TemplateDataType{
-		TableName: tableName,
+		TableName:    tableName,
+		DatabaseName: databaseName,
 
 		Columns:             table.TableColumns,
 		ColumnNames:         columnNames,
 		ColumnArgs:          columnArgs,
 		ColumnArgsWithTypes: columnArgsWithTypes,
+		RequireTimeInclude:  table.RequireTimeInclude,
 
 		PrimaryKeys:             table.PrimaryKeys,
 		PrimaryKeyArgs:          primaryKeyArgs,
@@ -109,7 +118,7 @@ func main() {
 		UniqueArgs:          uniqueArgs,
 		UniqueArgsWithTypes: uniqueArgsWithTypes,
 
-		SafeHTML: template.HTML(`<`),
+		SafeHTMLSignLT: template.HTML(`<`),
 	}
 
 	tmplFile := "./cmd/bin/templates/cls.tmpl"

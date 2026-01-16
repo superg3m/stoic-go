@@ -22,19 +22,19 @@ func (model *TodoItem) CanDelete() []string {
 }
 
 func (model *TodoItem) Create() ORM.CrudReturn {
-	return ORM.Create(model)
+	return ORM.Create(model, model.DB)
 }
 
 func (model *TodoItem) Read() ORM.CrudReturn {
-	return ORM.Read(model)
+	return ORM.Read(model, model.DB)
 }
 
 func (model *TodoItem) Update() ORM.CrudReturn {
-	return ORM.Update(model)
+	return ORM.Update(model, model.DB)
 }
 
 func (model *TodoItem) Delete() ORM.CrudReturn {
-	return ORM.Delete(model)
+	return ORM.Delete(model, model.DB)
 }
 
 func (model *TodoItem) SetCache() {

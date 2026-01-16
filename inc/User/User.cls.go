@@ -2,6 +2,9 @@ package User
 
 import (
 	"errors"
+	"fmt"
+	"github.com/superg3m/stoic-go/Core/Utility"
+	"strings"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -28,10 +31,12 @@ type CookieData struct {
 	ID int `json:"ID"`
 }
 
+var DatabaseName = "stoic"
+
 func New() *User {
 	user := new(User)
 
-	//user.DB = db
+	user.DB = ORM.GetInstance(DatabaseName)
 
 	user.ID = 0
 	user.Email = ""
@@ -67,6 +72,41 @@ func FromEmail(email string) (*User, []string) {
 	user.SetCache()
 
 	return user, nil
+}
+
+func AllFromEmail(email string) ([]*User, error) {
+	if !Utility.ValidEmail(email) {
+		return nil, ERROR_INVALID_EMAIL
+	}
+
+	sql := "SELECT * FROM User WHERE email = ?"
+	users, _ := ORM.FetchAll[*User](ORM.GetInstance(DatabaseName), sql, email)
+
+	return users, nil
+}
+
+func GetUserList() (string, error) {
+	var admins []*User
+
+	sql := `
+	SELECT * 
+	FROM User LEFT JOIN UserRole ON User.ID = UserRole.UserID
+	WHERE UserRole.ID IS NOT NULL
+	`
+
+	admins, err := ORM.FetchAll[*User](ORM.GetInstance(DatabaseName), sql)
+	if err != nil {
+		fmt.Printf("Error getting admins: %s\n", err)
+		return "", fmt.Errorf("getExcludedUserList: %w", err)
+	}
+
+	var ret []string
+
+	for _, user := range admins {
+		ret = append(ret, user.Email)
+	}
+
+	return strings.Join(ret, ","), nil
 }
 
 // Register ORM metadata

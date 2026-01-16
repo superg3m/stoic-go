@@ -53,8 +53,8 @@ func main() {
 	}
 
 	dsn := ORM.GetDSN(DB_ENGINE, HOST, PORT, USER, PASSWORD, DBNAME)
-	ORM.Connect(DB_ENGINE, dsn)
-	defer ORM.Close()
+	ORM.Connect(DBNAME, DB_ENGINE, dsn)
+	defer ORM.Close(DBNAME)
 
 	go gracefulShutdown(server)
 
