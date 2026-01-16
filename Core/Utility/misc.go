@@ -6,10 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/spf13/cast"
 	"net/mail"
 	"os"
 	"path/filepath"
-	"strconv"
 	"time"
 )
 
@@ -49,68 +49,18 @@ func CastAny[T any](v any) T {
 
 	switch any(new(T)).(type) {
 	case *int:
-		switch v := v.(type) {
-		case int:
-			result = v
-		case string:
-			intValue, err := strconv.Atoi(v)
-			AssertOnError(err)
-			result = intValue
-		case float64:
-			result = int(v)
-		case bool:
-			if v {
-				result = 1
-			} else {
-				result = 0
-			}
-		}
+		result = cast.ToInt(v)
 	case *string:
-		switch v := v.(type) {
-		case int:
-			result = strconv.Itoa(v)
-		case float64:
-			result = strconv.FormatFloat(v, 'f', -1, 64)
-		case bool:
-			result = strconv.FormatBool(v)
-		case string:
-			result = v
-		}
+		result = cast.ToString(v)
 	case *bool:
-		switch v := v.(type) {
-		case bool:
-			result = v
-		case string:
-			boolValue, err := strconv.ParseBool(v)
-			AssertOnError(err)
-			result = boolValue
-		case int:
-			result = v != 0
-		case float64:
-			result = v != 0.0
-		}
+		result = cast.ToBool(v)
 	case *float64:
-		switch v := v.(type) {
-		case float64:
-			result = v
-		case string:
-			floatValue, err := strconv.ParseFloat(v, 64)
-			AssertOnError(err)
-			result = floatValue
-		case int:
-			result = float64(v)
-		case bool:
-			if v {
-				result = 1.0
-			} else {
-				result = 0.0
-			}
-		}
+		result = cast.ToFloat64(v)
+	case *[]string:
+		result = cast.ToStringSlice(v)
 	}
 
-	ret, ok := result.(T)
-	Assert(ok)
-	return ret
+	return result.(T)
 }
 
 func findFileAtDepth(filename string, maxDepth int) (string, error) {

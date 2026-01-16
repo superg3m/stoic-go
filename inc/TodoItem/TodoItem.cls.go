@@ -15,14 +15,10 @@ type TodoItem struct {
 
 var DatabaseName = "stoic"
 
-func GetDBInstance() *sqlx.DB {
-	return ORM.GetInstance(DatabaseName)
-}
-
 func New() *TodoItem {
 	ret := new(TodoItem)
 
-	//ret.DB = ORM.GetInstance()
+	ret.DB = ORM.GetInstance(DatabaseName)
 	ret.ID = 0
 	ret.OwnerID = 0
 	ret.Message = ""
@@ -44,7 +40,7 @@ func FromID(ID int) (*TodoItem, []string) {
 
 func AllFromOwnerID(OwnerID int) []*TodoItem {
 	sql := "SELECT * From TodoItem WHERE OwnerID = ?"
-	todos, _ := ORM.FetchAll[*TodoItem](GetDBInstance(), sql, OwnerID)
+	todos, _ := ORM.FetchAll[*TodoItem](ORM.GetInstance(DatabaseName), sql, OwnerID)
 	return todos
 }
 

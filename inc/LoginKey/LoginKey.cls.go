@@ -34,10 +34,12 @@ type LoginKey struct {
 	Key      string
 }
 
+var DatabaseName = "stoic"
+
 func New() *LoginKey {
 	ret := new(LoginKey)
 
-	// ret.DB = ORM.Connect()
+	ret.DB = ORM.GetInstance(DatabaseName)
 	ret.UserID = 0
 	ret.Provider = 0
 	ret.Key = ""

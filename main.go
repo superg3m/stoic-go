@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/superg3m/stoic-go/Core/ORM"
 	"log"
 	"net/http"
 	"os"
@@ -12,7 +13,6 @@ import (
 	"time"
 
 	_ "github.com/superg3m/stoic-go/API/0.1"
-	"github.com/superg3m/stoic-go/Core/ORM"
 	_ "github.com/superg3m/stoic-go/Core/ORM"
 	"github.com/superg3m/stoic-go/Core/Router"
 	"github.com/superg3m/stoic-go/Core/Utility"
@@ -33,15 +33,6 @@ func gracefulShutdown(server *http.Server) {
 	Utility.LogDebug("Server gracefully stopped.")
 }
 
-const (
-	DB_ENGINE = "mysql"
-	HOST      = "localhost"
-	PORT      = 3306
-	USER      = "root"
-	PASSWORD  = "P@55word"
-	DBNAME    = "stoic"
-)
-
 func main() {
 	const SERVER_PORT = ":8080"
 
@@ -52,14 +43,28 @@ func main() {
 		Handler: Router.Router,
 	}
 
-	dsn := ORM.GetDSN(DB_ENGINE, HOST, PORT, USER, PASSWORD, DBNAME)
-	ORM.Connect(DBNAME, DB_ENGINE, dsn)
-	defer ORM.Close(DBNAME)
+	siteSettings := Utility.GetSiteSettings()
+	siteSettings = siteSettings["settings"].(map[string]any)
+	DB_ENGINE := Utility.CastAny[string](siteSettings["dbEngine"])
+	HOST := Utility.CastAny[string](siteSettings["dbHost"])
+	PORT := Utility.CastAny[int](siteSettings["dbPort"])
+	USER := Utility.CastAny[string](siteSettings["dbUser"])
+	PASSWORD := Utility.CastAny[string](siteSettings["dbPass"])
+	DBNAMES := Utility.CastAny[[]string](siteSettings["dbNames"])
+
+	for _, DBNAME := range DBNAMES {
+		dsn := ORM.GetDSN(DB_ENGINE, HOST, PORT, USER, PASSWORD, DBNAME)
+		ORM.Register(DBNAME, DB_ENGINE, dsn)
+	}
 
 	go gracefulShutdown(server)
 
 	Utility.LogDebug(fmt.Sprintf("Starting server on %s", SERVER_PORT))
 	if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 		log.Fatalf("Server failed: %v", err)
+	}
+
+	for _, DBNAME := range DBNAMES {
+		ORM.Close(DBNAME)
 	}
 }

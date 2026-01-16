@@ -174,6 +174,8 @@ var databaseRegistry = make(map[string]*sqlx.DB)
 
 func GetInstance(dbName string) *sqlx.DB {
 	if db, ok := databaseRegistry[dbName]; ok {
+		Utility.Assert(db != nil)
+
 		return db
 	} else {
 		Utility.AssertMsg(false, "Database: %s not found in registry", dbName)
@@ -182,7 +184,7 @@ func GetInstance(dbName string) *sqlx.DB {
 	return nil
 }
 
-func Connect(dbName, dbEngine, dsn string) *sqlx.DB {
+func Register(dbName, dbEngine, dsn string) *sqlx.DB {
 	if _, ok := databaseRegistry[dbName]; ok {
 		Utility.AssertMsg(false, "Database: %s has already been registered", dbName)
 		return nil

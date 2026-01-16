@@ -13,7 +13,7 @@
         "dbHost": "localhost",
         "dbUser": "root",
 		"dbPass": "P@55word",
-		"dbName": "stoic",
+		"dbNames": ["stoic"],
 		"dbPort": "3306",
 		"apiPath": "http:\/\/localhost\/api"
 	}
