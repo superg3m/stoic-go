@@ -50,12 +50,19 @@ func CastAny[T any](v any) T {
 	switch any(new(T)).(type) {
 	case *int:
 		result = cast.ToInt(v)
-	case *string:
-		result = cast.ToString(v)
 	case *bool:
 		result = cast.ToBool(v)
 	case *float64:
 		result = cast.ToFloat64(v)
+	case *string:
+		result = cast.ToString(v)
+
+	case *[]int:
+		result = cast.ToIntSlice(v)
+	case *[]bool:
+		result = cast.ToBoolSlice(v)
+	case *[]float64:
+		result = cast.ToFloat64Slice(v)
 	case *[]string:
 		result = cast.ToStringSlice(v)
 	}
