@@ -50,14 +50,14 @@ func (model *{{ .TableName }}) GetCacheDiff() []string {
 
 	v1 := reflect.ValueOf(*model)
 	v2 := reflect.ValueOf(*cache)
-	userType := v1.Type()
+	t := v1.Type()
 
 	for i := 0; i {{ .SafeHTMLSignLT }} v1.NumField(); i++ {
 		f1 := v1.Field(i)
 		f2 := v2.Field(i)
 
 		if !reflect.DeepEqual(f1.Interface(), f2.Interface()) {
-			mismatchedFields = append(mismatchedFields, userType.Field(i).Name)
+			mismatchedFields = append(mismatchedFields, t.Field(i).Name)
 		}
 	}
 
@@ -65,4 +65,4 @@ func (model *{{ .TableName }}) GetCacheDiff() []string {
 }
 
 var _ ORM.InterfaceCRUD = &{{ .TableName }}{}
-var cache = = new({{ .TableName }})
+var cache = new({{ .TableName }})
