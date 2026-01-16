@@ -108,9 +108,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	dbNameArg := os.Args[1]
-
-	modeArg := os.Args[1]
+	modeArg := os.Args[2]
 	mode := MIGRATION_MODE_DOWN
 
 	switch modeArg {
@@ -131,7 +129,7 @@ func main() {
 	PORT := Utility.CastAny[int](siteSettings["dbPort"])
 	USER := Utility.CastAny[string](siteSettings["dbUser"])
 	PASSWORD := Utility.CastAny[string](siteSettings["dbPass"])
-	DBNAME := dbNameArg
+	DBNAME := os.Args[1]
 
 	dsn := ORM.GetDSN(DB_ENGINE, HOST, PORT, USER, PASSWORD, DBNAME)
 	db := ORM.Register(DBNAME, DB_ENGINE, dsn)

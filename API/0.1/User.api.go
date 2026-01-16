@@ -151,7 +151,7 @@ func updateUser(request *Router.StoicRequest, response *Router.StoicResponse) {
 		return
 	}
 
-	// user.LastLogin = Utility.NewTime(time.Now())
+	user.LastLogin = Utility.NewTime(time.Now())
 
 	if email != "" {
 		user.Email = email
