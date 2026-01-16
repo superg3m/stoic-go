@@ -38,14 +38,18 @@ func (model *TodoItem) Delete() ORM.CrudReturn {
 }
 
 func (model *TodoItem) SetCache() {
-	cache = *model
+	*cache = *model
 }
 
 func (model *TodoItem) GetCacheDiff() []string {
+	if cache.DB == nil {
+		cache = New()
+	}
+
 	var mismatchedFields []string
 
 	v1 := reflect.ValueOf(*model)
-	v2 := reflect.ValueOf(cache)
+	v2 := reflect.ValueOf(*cache)
 	userType := v1.Type()
 
 	for i := 0; i < v1.NumField(); i++ {
@@ -61,4 +65,4 @@ func (model *TodoItem) GetCacheDiff() []string {
 }
 
 var _ ORM.InterfaceCRUD = &TodoItem{}
-var cache TodoItem
+var cache *TodoItem = new(TodoItem)

@@ -64,7 +64,7 @@ func ReadRecord[T InterfaceCRUD](db *sqlx.DB, payload ModelPayload, model T) err
 			}
 
 			if i == len(payload.UniquePointers)-1 && allMatch {
-				Utility.Copy(temp, model)
+				Utility.Copy(temp, model, excludeList...)
 				return nil
 			}
 		}
@@ -75,7 +75,7 @@ func ReadRecord[T InterfaceCRUD](db *sqlx.DB, payload ModelPayload, model T) err
 	{
 		temp, err := Fetch[T](db, pKeyQuery, payload.PrimaryKeyPointers...)
 		if err == nil {
-			Utility.Copy(temp, model)
+			Utility.Copy(temp, model, excludeList...)
 			return nil
 		}
 	}

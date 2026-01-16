@@ -39,14 +39,18 @@ func (model *LoginKey) Delete() ORM.CrudReturn {
 }
 
 func (model *LoginKey) SetCache() {
-	cache = *model
+	*cache = *model
 }
 
 func (model *LoginKey) GetCacheDiff() []string {
+	if cache.DB == nil {
+		cache = New()
+	}
+
 	var mismatchedFields []string
 
 	v1 := reflect.ValueOf(*model)
-	v2 := reflect.ValueOf(cache)
+	v2 := reflect.ValueOf(*cache)
 	userType := v1.Type()
 
 	for i := 0; i < v1.NumField(); i++ {
@@ -62,4 +66,4 @@ func (model *LoginKey) GetCacheDiff() []string {
 }
 
 var _ ORM.InterfaceCRUD = &LoginKey{}
-var cache LoginKey
+var cache = new(LoginKey)

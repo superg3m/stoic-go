@@ -78,14 +78,18 @@ func (u *User) Delete() ORM.CrudReturn {
 }
 
 func (u *User) SetCache() {
-	cache = *u
+	*cache = *u
 }
 
 func (u *User) GetCacheDiff() []string {
+	if cache.DB == nil {
+		cache = New()
+	}
+
 	var mismatchedFields []string
 
 	v1 := reflect.ValueOf(*u)
-	v2 := reflect.ValueOf(cache)
+	v2 := reflect.ValueOf(*cache)
 	userType := v1.Type()
 
 	for i := 0; i < v1.NumField(); i++ {
@@ -101,4 +105,4 @@ func (u *User) GetCacheDiff() []string {
 }
 
 var _ ORM.InterfaceCRUD = &User{}
-var cache User
+var cache = new(User)

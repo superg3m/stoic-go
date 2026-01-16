@@ -188,14 +188,33 @@ func SetNil[T any](target T) (T, error) {
 	}
 }
 
-func Copy[T any](source T, dest T) {
-	v := reflect.ValueOf(source)
-	if v.Kind() == reflect.Ptr {
-		v = v.Elem()
+func Copy[T any](source T, dest T, ignoreFields ...string) {
+	s_struct := reflect.ValueOf(source)
+	s_t := reflect.TypeOf(source)
+	if s_struct.Kind() == reflect.Ptr {
+		s_struct = s_struct.Elem()
+		s_t = s_t.Elem()
 	}
 
-	destVal := reflect.ValueOf(dest).Elem()
-	AssertMsg(v.Type().AssignableTo(destVal.Type()), "types are not compatible: %v to %v", v.Type(), destVal.Type())
+	d_struct := reflect.ValueOf(dest)
+	d_t := reflect.TypeOf(dest)
+	if d_struct.Kind() == reflect.Ptr {
+		d_struct = d_struct.Elem()
+		d_t = d_t.Elem()
+	}
 
-	destVal.Set(v)
+	for i := 0; i < s_t.NumField(); i++ {
+		s_field := s_t.Field(i)
+		d_field := d_t.Field(i)
+
+		Assert(s_field.Name == d_field.Name)
+		if slices.Contains(ignoreFields, s_field.Name) {
+			continue
+		}
+
+		s_value := s_struct.Field(i)
+		d_value := d_struct.Field(i)
+
+		d_value.Set(s_value)
+	}
 }
