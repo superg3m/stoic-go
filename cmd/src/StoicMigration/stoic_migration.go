@@ -139,7 +139,7 @@ func main() {
 	DBNAME := dbNameArg
 
 	dsn := ORM.GetDSN(DB_ENGINE, HOST, PORT, USER, PASSWORD, DBNAME)
-	db := ORM.Connect(DBNAME, DB_ENGINE, dsn)
+	db := ORM.Register(DBNAME, DB_ENGINE, dsn)
 	defer ORM.Close(DBNAME)
 
 	files, _ := findFilesWithExtension(fmt.Sprintf("./migrations/%s", DB_ENGINE), ".sql")

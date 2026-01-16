@@ -54,7 +54,7 @@ func main() {
 	PASSWORD := Utility.CastAny[string](siteSettings["dbPass"])
 
 	dsn := ORM.GetDSN(DB_ENGINE, HOST, PORT, USER, PASSWORD, databaseName)
-	ORM.Connect(databaseName, DB_ENGINE, dsn)
+	ORM.Register(databaseName, DB_ENGINE, dsn)
 	defer ORM.Close(databaseName)
 
 	tableName := ""
