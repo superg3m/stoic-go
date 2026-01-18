@@ -3,7 +3,7 @@ import LoginView from '../views/LoginView.vue'
 import SettingsView from "@/views/SettingsView.vue";
 import HomeView from '@/views/HomeView.vue';
 import ResourcesView from '@/views/ResourcesView.vue';
-import {isAuthorized} from "@/UserStore.js";
+import {isAuthorized} from "@/UserStore.ts";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),

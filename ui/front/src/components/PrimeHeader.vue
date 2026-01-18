@@ -1,7 +1,7 @@
 <script setup>
 import {onBeforeMount, ref} from "vue";
 import router from "@/router/index.js";
-import {isAuthorized, UserStore} from "@/UserStore.js";
+import {isAuthorized, UserStore} from "@/UserStore.ts";
 import PrimeColorPicker from "@/components/PrimeColorPicker.vue";
 
 
@@ -64,7 +64,7 @@ async function onLogout() {
     <Drawer v-model:visible="sideBarVisible" position="right" :style="{height: 'fit-content', position: 'absolute', top: 0}">
       <div class="drawer-header">
         <Avatar image="https://i.imgur.com/670yOS4.png" :style="{width: '48px', height: '48px'}" shape="circle" class="avatar-large" />
-        <h1 class="user-name">{{UserStore.User.email}}</h1>
+        <h1 class="user-name">{{UserStore.User.Email}}</h1>
       </div>
       <template #footer>
         <div class="drawer-footer">

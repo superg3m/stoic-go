@@ -1,7 +1,7 @@
 <script setup>
 import {onMounted, ref} from 'vue';
 import Draggable from 'vuedraggable';
-import { UserStore } from "@/UserStore.js";
+import { UserStore } from "@/UserStore.ts";
 
 const newTodoText = ref('');
 const todos = ref([]);
@@ -22,7 +22,7 @@ const addTodo = async () => {
 
   try {
     const todoRequest = {
-      "OwnerID": UserStore.User.id,
+      "OwnerID": UserStore.User.ID,
       "Message": newTodoText.value.trim(),
       "Status": 0
     };
@@ -45,7 +45,7 @@ const addTodo = async () => {
   todos.value.push({
     ID: newID,
     Message: newTodoText.value.trim(),
-    OwnerID: UserStore.User.id,
+    OwnerID: UserStore.User.ID,
     Status: 0
   });
   newTodoText.value = '';
@@ -90,7 +90,7 @@ async function tryUpdate(todo, status) {
 }
 
 const removeTodo = async (todo, list) => {
-  const index = list.findIndex(t => t.id === todo.id);
+  const index = list.findIndex(t => t.ID === todo.ID);
   if (index === -1) {
     return
   }
@@ -117,7 +117,7 @@ const removeTodo = async (todo, list) => {
 
 onMounted(async () => {
   try {
-    const response = await fetch(`http://localhost:8080/TodoItem?OwnerID=${UserStore.User.id}`, {
+    const response = await fetch(`http://localhost:8080/TodoItem?OwnerID=${UserStore.User.ID}`, {
       method: "GET",
       credentials: "include",
       headers: {

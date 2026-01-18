@@ -12,7 +12,7 @@ type {{ .TableName }} struct {
    	DB *sqlx.DB `json:"-"`
 
    	{{- range .Columns }}
-   	{{ .Name }} {{ .Type }}
+   	{{ .Name }} {{ .Type }} `json:"{{ .Name }}"`
    	{{- end }}
 }
 

@@ -3,9 +3,10 @@ package API
 import (
 	"encoding/base64"
 	"encoding/json"
-	"github.com/superg3m/stoic-go/Core/Utility"
 	"net/http"
 	"time"
+
+	"github.com/superg3m/stoic-go/Core/Utility"
 
 	"github.com/superg3m/stoic-go/Core/Router"
 	"github.com/superg3m/stoic-go/inc/LoginKey"
@@ -44,8 +45,8 @@ func checkUserAuth(request *Router.StoicRequest, response *Router.StoicResponse)
 }
 
 func loginUser(request *Router.StoicRequest, response *Router.StoicResponse) {
-	email := request.GetStringParam("email")
-	password := request.GetStringParam("password")
+	email := request.GetStringParam("Email")
+	password := request.GetStringParam("Password")
 
 	user, errors := User.FromEmail(email)
 	if user == nil {
@@ -99,8 +100,8 @@ func logoutUser(request *Router.StoicRequest, response *Router.StoicResponse) {
 }
 
 func createUser(request *Router.StoicRequest, response *Router.StoicResponse) {
-	email := request.GetStringParam("email")
-	password := request.GetStringParam("password")
+	email := request.GetStringParam("Email")
+	password := request.GetStringParam("Password")
 
 	user := User.New()
 	user.Email = email
@@ -129,7 +130,8 @@ func createUser(request *Router.StoicRequest, response *Router.StoicResponse) {
 }
 
 func getUser(request *Router.StoicRequest, response *Router.StoicResponse) {
-	id := request.GetIntParam("id")
+	id := request.GetIntParam("ID")
+
 	user, errors := User.FromID(id)
 	if errors != nil {
 		response.AddErrors(errors, "Failed to get user from ID")
@@ -140,43 +142,50 @@ func getUser(request *Router.StoicRequest, response *Router.StoicResponse) {
 }
 
 func updateUser(request *Router.StoicRequest, response *Router.StoicResponse) {
-	id := request.GetIntParam("id")
-	email := request.GetStringParam("email")
-	oldPassword := request.GetStringParam("oldPassword")
-	newPassword := request.GetStringParam("newPassword")
+	id := request.GetIntParam("ID")
+	email := request.GetStringParam("Email")
+	oldPassword := request.GetStringParam("OldPassword")
+	newPassword := request.GetStringParam("NewPassword")
 
 	user, errors := User.FromID(id)
 	if errors != nil {
-		response.AddErrors(errors, "Failed to get user from Email")
+		response.AddErrors(errors, "Failed to get user from id")
 		return
 	}
-
-	user.LastLogin = Utility.NewTime(time.Now())
 
 	if email != "" {
 		user.Email = email
-	}
-	update := user.Update()
-	if update.IsBad() {
-		response.AddErrors(update.GetErrors(), "Failed to update user")
-		return
+
+		user.LastLogin = Utility.NewTime(time.Now())
+		update := user.Update()
+		if update.IsBad() {
+			response.AddErrors(update.GetErrors(), "Failed to update user")
+			return
+		}
 	}
 
-	loginKey, errors2 := LoginKey.FromUserID_Provider(user.ID, LoginKey.PASSWORD)
-	if errors2 != nil {
-		response.AddErrors(errors2, "Failed to get LoginKey from UserID and Provider")
-		return
+	if oldPassword != "" {
+		loginKey, errors2 := LoginKey.FromUserID_Provider(user.ID, LoginKey.PASSWORD)
+		if errors2 != nil {
+			response.AddErrors(errors2, "Failed to get LoginKey from UserID and Provider")
+			return
+		}
+
+		if loginKey.Key != Utility.Sha256HashString(oldPassword) {
+			response.AddError("Old password don't match!")
+			return
+		}
+
+		loginKey.Key = Utility.Sha256HashString(newPassword)
+		update := loginKey.Update()
+		if update.IsBad() {
+			response.AddErrors(update.GetErrors(), "Failed to update login key")
+			return
+		}
 	}
 
-	if loginKey.Key != Utility.Sha256HashString(oldPassword) {
-		response.AddError("Old password don't match!")
-		return
-	}
-
-	loginKey.Key = Utility.Sha256HashString(newPassword)
-	update = loginKey.Update()
-	if update.IsBad() {
-		response.AddErrors(update.GetErrors(), "Failed to update login key")
+	if email == "" && oldPassword == "" && newPassword == "" {
+		response.AddError("New email must not be empty!")
 		return
 	}
 
@@ -184,7 +193,7 @@ func updateUser(request *Router.StoicRequest, response *Router.StoicResponse) {
 }
 
 func deleteUser(request *Router.StoicRequest, response *Router.StoicResponse) {
-	id := request.GetIntParam("id")
+	id := request.GetIntParam("ID")
 
 	user, errors := User.FromID(id)
 	if errors != nil {
@@ -203,22 +212,22 @@ func deleteUser(request *Router.StoicRequest, response *Router.StoicResponse) {
 
 func init() {
 	Router.RegisterApiEndpoint("User/Login", loginUser, "POST",
-		Router.MiddlewareValidParams("email", "password"),
+		Router.MiddlewareValidParams("Email", "Password"),
 	)
 
 	Router.RegisterApiEndpoint("User/Logout", logoutUser, "POST")
 	Router.RegisterApiEndpoint("User/Authorized", checkUserAuth, "POST")
 
 	Router.RegisterApiEndpoint("User", createUser, "POST",
-		Router.MiddlewareValidParams("email", "password"),
+		Router.MiddlewareValidParams("Email", "Password"),
 	)
 	Router.RegisterApiEndpoint("User", getUser, "GET",
-		Router.MiddlewareValidParams("id"),
+		Router.MiddlewareValidParams("ID"),
 	)
 	Router.RegisterApiEndpoint("User", updateUser, "PATCH",
-		Router.MiddlewareValidParams("id", "email", "oldPassword", "newPassword"),
+		Router.MiddlewareValidParams("ID", "Email", "OldPassword", "NewPassword"),
 	)
 	Router.RegisterApiEndpoint("User", deleteUser, "DELETE",
-		Router.MiddlewareValidParams("id"),
+		Router.MiddlewareValidParams("ID"),
 	)
 }

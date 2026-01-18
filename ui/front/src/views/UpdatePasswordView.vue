@@ -5,7 +5,7 @@ import Card from 'primevue/card';
 import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
 import router from '@/router';
-import {isAuthorized} from "@/UserStore.js";
+import {isAuthorized} from "@/UserStore.ts";
 </script>
 
 

@@ -19,8 +19,8 @@ const toggleForm = () => {
 
 async function tryLogin() {
   const user = {
-    "email": email.value,
-    "password": password.value
+    "Email": email.value,
+    "Password": password.value
   };
 
   try {
@@ -69,8 +69,8 @@ async function tryLogin() {
 
 async function tryRegister() {
   const user = {
-    "email": email.value,
-    "password": password.value
+    "Email": email.value,
+    "Password": password.value
   };
 
   try {

@@ -3,9 +3,10 @@ package User
 import (
 	"errors"
 	"fmt"
-	"github.com/superg3m/stoic-go/Core/Utility"
 	"strings"
 	"time"
+
+	"github.com/superg3m/stoic-go/Core/Utility"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/superg3m/stoic-go/Core/ORM"
@@ -19,12 +20,12 @@ var (
 type User struct {
 	DB *sqlx.DB `json:"-"`
 
-	ID             int    `json:"id"`
-	Email          string `json:"email"`
-	EmailConfirmed bool   `json:"email_confirmed"`
-	Joined         time.Time
-	LastLogin      *time.Time
-	LastActive     *time.Time
+	ID             int        `json:"ID"`
+	Email          string     `json:"Email"`
+	EmailConfirmed bool       `json:"EmailConfirmed"`
+	Joined         time.Time  `json:"Joined"`
+	LastLogin      *time.Time `json:"LastLogin"`
+	LastActive     *time.Time `json:"LastActive"`
 }
 
 type CookieData struct {

@@ -28,7 +28,8 @@ func getProvider(value int) LoginKeyProvider {
 }
 
 type LoginKey struct {
-	DB       *sqlx.DB
+	DB *sqlx.DB
+
 	UserID   int
 	Provider LoginKeyProvider
 	Key      string

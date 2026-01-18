@@ -5,25 +5,20 @@ import Card from 'primevue/card';
 import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
 import router from '@/router';
-import {isAuthorized, UserStore} from "@/UserStore.js"
+import { UserStore } from "@/UserStore.ts"
 import Dialog from 'primevue/dialog';
 
 const toast = useToast();
-const email = ref('');
-const password = ref('');
 const newPassword = ref('');
 const oldPassword = ref('');
-const newUEmail = ref('');
-const oldUEmail = ref('');
+const newEmail = ref('');
 
 const visibleEmail = ref(false);
 const visiblePass = ref(false);
 
 async function tryDelete() {
   const user = {
-    "id": UserStore.User.id,
-    "email": email.value,
-    "password": password.value
+    "ID": UserStore.User.ID
   };
 
   try {
@@ -101,11 +96,10 @@ async function updatePFP() {
 
 async function updatePassword() {
   const user = {
-    "id": UserStore.User.id,
-    "email": email.value,
-    "password": password.value,
-    "newPassword": newPassword.value,
-    "oldPassword": oldPassword.value
+    "ID": UserStore.User.ID,
+    "Email": "",
+    "NewPassword": newPassword.value,
+    "OldPassword": oldPassword.value
   }
 
   visiblePass.value = false;
@@ -151,16 +145,15 @@ async function updatePassword() {
 
 async function updateEmail() {
   const user = {
-    "id": UserStore.User.id,
-    "email": newUEmail.value,
-    "password": password.value,
-    "newPassword": password.value,
-    "oldPassword": password.value
+    "ID": UserStore.User.ID,
+    "Email": newEmail.value,
+    "OldPassword": '', // if empty don't update it
+    "NewPassword": '', // if empty don't update it
   }
 
   visibleEmail.value = false;
 
-  try{
+  try {
     const response = await fetch("http://localhost:8080/User", {
       method: "PATCH",
       headers: {
@@ -216,15 +209,10 @@ async function updateEmail() {
           <div class="card flex justify-center">
             <Button label="Update Email" @click="visibleEmail = true" />
             <Dialog v-model:visible="visibleEmail" modal header="Edit User Email" :style="{ width: '25rem' }">
-              <div class="flex items-center gap-4 mb-4">
-                <label for="email" class="font-semibold w-24">Old Email</label>
-                <div> </div>
-                <InputText id="email" class="flex-auto" v-model="oldUEmail" autocomplete="off"/>
-              </div>
               <div class="flex items-center gap-4 mb-8">
                 <label for="newEmail" class="font-semibold w-24">New Email</label>
                 <div> </div>
-                <InputText id="newEmail" class="flex-auto" v-model="newUEmail" autocomplete="off" />
+                <InputText id="newEmail" class="flex-auto" v-model="newEmail" autocomplete="off" />
               </div>
               <div class="buttons">
                 <div class="flex justify-end gap-2">

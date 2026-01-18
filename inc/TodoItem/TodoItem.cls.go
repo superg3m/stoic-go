@@ -6,11 +6,12 @@ import (
 )
 
 type TodoItem struct {
-	DB      *sqlx.DB
-	ID      int
-	OwnerID int
-	Message string
-	Status  int
+	DB *sqlx.DB `json:"-"`
+
+	ID      int    `json:"ID"`
+	OwnerID int    `json:"OwnerID"`
+	Message string `json:"Message"`
+	Status  int    `json:"Status"`
 }
 
 var DatabaseName = "stoic"
@@ -38,10 +39,10 @@ func FromID(ID int) (*TodoItem, []string) {
 	return ret, nil
 }
 
-func AllFromOwnerID(OwnerID int) []*TodoItem {
+func AllFromOwnerID(OwnerID int) ([]*TodoItem, error) {
 	sql := "SELECT * From TodoItem WHERE OwnerID = ?"
-	todos, _ := ORM.FetchAll[*TodoItem](ORM.GetInstance(DatabaseName), sql, OwnerID)
-	return todos
+	todos, err := ORM.FetchAll[*TodoItem](ORM.GetInstance(DatabaseName), sql, OwnerID)
+	return todos, err
 }
 
 func init() {

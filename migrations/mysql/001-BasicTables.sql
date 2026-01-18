@@ -4,8 +4,8 @@ CREATE TABLE IF NOT EXISTS `User` (
     `Email` NVARCHAR(256) NOT NULL UNIQUE,
     `EmailConfirmed` TINYINT NOT NULL,
     `Joined` DATETIME NOT NULL,
-    `LastLogin` TIME NULL,
-    `LastActive` DATETIME NULL,
+    `LastLogin` TIMESTAMP NULL,
+    `LastActive` TIMESTAMP NULL,
     PRIMARY KEY (`ID`)
 );
 

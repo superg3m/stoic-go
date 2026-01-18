@@ -170,6 +170,7 @@ func GetStructValues(structure StackAny, excludeList ...string) []any {
 	return values
 }
 
+// DereferencePointer TODO(Jovanni): Investigate this feels sketch
 func DereferencePointer(p any) any {
 	v := reflect.ValueOf(p)
 	AssertMsg(v.Kind() == reflect.Ptr, "argument must be a pointer")

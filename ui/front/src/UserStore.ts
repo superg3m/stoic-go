@@ -1,14 +1,29 @@
 import { reactive } from 'vue'
 
-export const UserStore = reactive({
+type UserType = {
+  ID: number
+  Email:  string
+  EmailConfirmed: boolean
+  Joined: any
+  LastLogin: any
+  LastActive: any
+}
+
+type UserStoreType = {
+  Authorized: boolean
+  User: UserType
+  PFP: string
+}
+
+export const UserStore = reactive<UserStoreType>({
   Authorized: false,
   User: null,
   PFP: "https://i.imgur.com/670yOS4.png"
 })
 
-async function getUser(userId) {
+async function getUser(userId: number) {
   try {
-    const response = await fetch(`http://localhost:8080/User?id=${userId}`, {
+    const response = await fetch(`http://localhost:8080/User?ID=${userId}`, {
       method: "GET",
       credentials: "include",
     });

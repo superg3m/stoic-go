@@ -2,6 +2,7 @@ package API
 
 import (
 	"fmt"
+
 	"github.com/superg3m/stoic-go/Core/Router"
 	"github.com/superg3m/stoic-go/inc/TodoItem"
 )
@@ -23,8 +24,8 @@ func createTodoItem(request *Router.StoicRequest, response *Router.StoicResponse
 
 func getTodoItem(request *Router.StoicRequest, response *Router.StoicResponse) {
 	OwnerID := request.GetIntParam("OwnerID")
-	todos := TodoItem.AllFromOwnerID(OwnerID)
-	if todos == nil {
+	todos, err := TodoItem.AllFromOwnerID(OwnerID)
+	if err != nil {
 		response.AddError("Failed to get todo items")
 		return
 	}
