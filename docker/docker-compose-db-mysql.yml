@@ -1,9 +1,0 @@
-services:
-  db:
-    image: mysql
-    container_name: ${PROJECT_NAME}-db
-    environment:
-      MYSQL_DATABASE: zsf
-      MYSQL_ROOT_PASSWORD: P@55word
-    volumes:
-      - ./init-scripts/mysql-init.sql:/docker-entrypoint-initdb.d/mysql-init.sql
