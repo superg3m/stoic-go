@@ -61,11 +61,7 @@ func main() {
 	db := ORM.Register(databaseName, DB_ENGINE, dsn)
 	defer ORM.Close(databaseName)
 
-	sql := `SELECT COUNT(*)
-	FROM INFORMATION_SCHEMA.TABLES
-	WHERE TABLE_SCHEMA = ?
-	AND TABLE_NAME = ?;
-	`
+	sql := `select 1 from ? limit 1;`
 	_, err := db.Queryx(sql, tableName, databaseName)
 	Utility.AssertOnError(err)
 
