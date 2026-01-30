@@ -63,8 +63,8 @@ func main() {
 
 	sql := `SELECT COUNT(*)
 	FROM INFORMATION_SCHEMA.TABLES
-	WHERE TABLE_SCHEMA = 'your_database_name'
-	AND TABLE_NAME = 'your_table_name';
+	WHERE TABLE_SCHEMA = '?'
+	AND TABLE_NAME = '?';
 	`
 	_, err := db.Queryx(sql, tableName, databaseName)
 	Utility.AssertOnError(err)
