@@ -56,7 +56,7 @@ func generateTable(tableName string, db *sqlx.DB, databaseName string) *Table {
 }
 
 func mapSQLTypeToGoType(sqlType string, isNull string) (string, bool) {
-	if strings.Contains(sqlType, "varchar") {
+	if strings.Contains(sqlType, "char") {
 		return "string", false
 	}
 

@@ -99,6 +99,10 @@ func main() {
 		Utility.LogWarn("No primary key method name for table %s.", tableName)
 	}
 
+	if table.PrimaryKeys == nil {
+		Utility.LogWarn("No primary keys for table %s.", tableName)
+	}
+
 	uniqueArgs := strings.Join(primaryKeyNames, ", ")
 	uniqueArgsWithTypes := strings.Join(primaryKeyNamesWithTypes, ", ")
 
