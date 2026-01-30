@@ -8,7 +8,6 @@ import (
 
 func create{{ .TableName }}(request *Router.StoicRequest, response *Router.StoicResponse) {
 	entity := {{ .TableName }}.New()
-
     {{- range .Columns }}
     {{- if eq .Type "string" }}
     entity.{{ .Name }} = request.GetStringParam("{{ .Name }}")
@@ -20,7 +19,6 @@ func create{{ .TableName }}(request *Router.StoicRequest, response *Router.Stoic
     entity.{{ .Name }} = request.GetFloatParam("{{ .Name }}")
     {{- end }}
     {{- end }}
-
 
     create := entity.Create()
     if create.IsBad() {

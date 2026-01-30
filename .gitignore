@@ -6,5 +6,5 @@ ui/admin/pnpm-lock.yaml
 
 ui/front/.pnpm-store/
 ui/front/pnpm-lock.yaml
-.idea/vcs.xml
+.idea
 .DS_Store
