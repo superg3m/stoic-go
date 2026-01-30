@@ -17,6 +17,10 @@ func create{{ .TableName }}(request *Router.StoicRequest, response *Router.Stoic
     entity.{{ .Name }} = request.GetBoolParam("{{ .Name }}")
     {{- else if eq .Type "float" }}
     entity.{{ .Name }} = request.GetFloatParam("{{ .Name }}")
+    {{- else if eq .Type "time.Time" }}
+    entity.{{ .Name }} = time.Parse(time.RFC3339, request.GetStringParam("{{ .Name }}"))
+    {{- else if eq .Type "*time.Time" }}
+    entity.{{ .Name }} = Utility.NewTime(time.Parse(time.RFC3339, request.GetStringParam("{{ .Name }}")))
     {{- end }}
     {{- end }}
 
@@ -111,7 +115,6 @@ func delete{{ .TableName }}(request *Router.StoicRequest, response *Router.Stoic
 	}
 
 	del := entity.Delete()
-
 	if del.IsBad() {
 	    response.AddErrors(del.GetErrors(), "Failed to delete {{ .TableName }}")
 	    return
