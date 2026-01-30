@@ -58,10 +58,16 @@ func main() {
 	PASSWORD := Utility.CastAny[string](siteSettings["dbPass"])
 
 	dsn := ORM.GetDSN(DB_ENGINE, HOST, PORT, USER, PASSWORD, databaseName)
-	ORM.Register(databaseName, DB_ENGINE, dsn)
+	db := ORM.Register(databaseName, DB_ENGINE, dsn)
 	defer ORM.Close(databaseName)
 
-	db := ORM.GetInstance(databaseName)
+	sql := `SELECT COUNT(*)
+	FROM INFORMATION_SCHEMA.TABLES
+	WHERE TABLE_SCHEMA = 'your_database_name'
+	AND TABLE_NAME = 'your_table_name';
+	`
+	_, err := db.Queryx(sql, tableName, databaseName)
+	Utility.AssertOnError(err)
 
 	table := generateTable(tableName, db, databaseName)
 	Utility.Assert(table != nil)
