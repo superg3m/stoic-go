@@ -41,10 +41,13 @@ type TemplateDataType struct {
 }
 
 func main() {
-	databaseName := ""
-	fmt.Print("Enter dbName: ")
-	_, err := fmt.Scanln(&databaseName)
-	Utility.AssertOnError(err)
+	if len(os.Args) < 3 {
+		fmt.Println("Usage: <program> <dbName> <TableName>")
+		os.Exit(1)
+	}
+
+	databaseName := os.Args[1]
+	tableName := os.Args[2]
 
 	siteSettings := Utility.GetSiteSettings()
 	siteSettings = siteSettings["settings"].(map[string]any)
@@ -57,12 +60,6 @@ func main() {
 	dsn := ORM.GetDSN(DB_ENGINE, HOST, PORT, USER, PASSWORD, databaseName)
 	ORM.Register(databaseName, DB_ENGINE, dsn)
 	defer ORM.Close(databaseName)
-
-	tableName := ""
-	fmt.Print("Enter TableName: ")
-	_, err = fmt.Scanln(&tableName)
-	fmt.Println("")
-	Utility.AssertOnError(err)
 
 	db := ORM.GetInstance(databaseName)
 
@@ -212,5 +209,4 @@ func main() {
 			}
 		*/
 	}
-
 }

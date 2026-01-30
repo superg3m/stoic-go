@@ -4,6 +4,9 @@ import (
     "fmt"
 	"github.com/superg3m/stoic-go/Core/Router"
 	"github.com/superg3m/stoic-go/inc/{{ .TableName }}"
+    {{- if .RequireTimeInclude }}
+    "time"
+    {{- end }}
 )
 
 func create{{ .TableName }}(request *Router.StoicRequest, response *Router.StoicResponse) {
