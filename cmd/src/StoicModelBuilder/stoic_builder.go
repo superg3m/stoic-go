@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/superg3m/stoic-go/Core/ORM"
-	"github.com/superg3m/stoic-go/Core/Utility"
 	"html/template"
 	"os"
 	"strings"
+
+	"github.com/superg3m/stoic-go/Core/ORM"
+	"github.com/superg3m/stoic-go/Core/Utility"
 )
 
 // ./cmd/bin/builder dsn password username dbname Table to build
@@ -65,7 +66,7 @@ func main() {
 
 	db := ORM.GetInstance(databaseName)
 
-	table := generateTable(tableName, db)
+	table := generateTable(tableName, db, databaseName)
 	Utility.Assert(table != nil)
 
 	var columnNames []string
@@ -94,6 +95,9 @@ func main() {
 	primaryKeyArgs := strings.Join(primaryKeyNames, ", ")
 	primaryKeyArgsWithTypes := strings.Join(primaryKeyNamesWithTypes, ", ")
 	fromPrimaryKeyMethodName := strings.Join(primaryKeyNames, "_")
+	if fromPrimaryKeyMethodName == "" {
+		Utility.LogWarn("No primary key method name for table %s.", tableName)
+	}
 
 	uniqueArgs := strings.Join(primaryKeyNames, ", ")
 	uniqueArgsWithTypes := strings.Join(primaryKeyNamesWithTypes, ", ")

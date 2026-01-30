@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/jmoiron/sqlx"
 	"github.com/superg3m/stoic-go/Core/Utility"
-	"strings"
 )
 
 type SQLColumn struct {
@@ -35,9 +36,9 @@ type Table struct {
 	RequireTimeInclude bool
 }
 
-func generateTable(tableName string, db *sqlx.DB) *Table {
+func generateTable(tableName string, db *sqlx.DB, databaseName string) *Table {
 	ret := &Table{}
-	tableColumns, requireTimeInclude, err := FetchTableColumns(db, tableName)
+	tableColumns, requireTimeInclude, err := FetchTableColumns(db, tableName, databaseName)
 	Utility.AssertOnError(err)
 
 	ret.RequireTimeInclude = requireTimeInclude
@@ -88,7 +89,7 @@ func SQLColumnToTableColumn(sqlColumn SQLColumn) (TableColumn, bool) {
 	return tableColumn, requireTimeInclude
 }
 
-func FetchTableColumns(db *sqlx.DB, tableName string) ([]TableColumn, bool, error) {
+func FetchTableColumns(db *sqlx.DB, tableName string, databaseName string) ([]TableColumn, bool, error) {
 	var results []TableColumn
 	sql := `
 	SELECT
@@ -100,12 +101,12 @@ func FetchTableColumns(db *sqlx.DB, tableName string) ([]TableColumn, bool, erro
 	FROM
 	INFORMATION_SCHEMA.COLUMNS
 	WHERE
-	TABLE_NAME = ? AND TABLE_SCHEMA = 'stoic'
+	TABLE_NAME = ? AND TABLE_SCHEMA = ?
 	ORDER BY 
     ORDINAL_POSITION
 	`
 
-	rows, err := db.Queryx(sql, tableName)
+	rows, err := db.Queryx(sql, tableName, databaseName)
 	if err != nil {
 		return nil, false, err
 	}
