@@ -61,9 +61,9 @@ func main() {
 	db := ORM.Register(databaseName, DB_ENGINE, dsn)
 	defer ORM.Close(databaseName)
 
-	sql := `select 1 from ? limit 1;`
-	_, err := db.Queryx(sql, tableName)
-	Utility.AssertMsg(err == nil, "Table name: %s does not exists", tableName)
+	sql := fmt.Sprintf(`SELECT 1 FROM %s LIMIT 1`, tableName)
+	_, err := db.Queryx(sql)
+	Utility.AssertOnError(err)
 
 	table := generateTable(tableName, db, databaseName)
 	Utility.Assert(table != nil)
