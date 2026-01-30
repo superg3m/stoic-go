@@ -63,7 +63,7 @@ func main() {
 
 	sql := `select 1 from ? limit 1;`
 	_, err := db.Queryx(sql, tableName, databaseName)
-	Utility.AssertMsg(err == nil, "Tablename: %s does not exists", tableName)
+	Utility.AssertMsg(err == nil, "Table name: %s does not exists", tableName)
 
 	table := generateTable(tableName, db, databaseName)
 	Utility.Assert(table != nil)
