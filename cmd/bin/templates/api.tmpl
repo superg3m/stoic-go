@@ -18,9 +18,9 @@ func create{{ .TableName }}(request *Router.StoicRequest, response *Router.Stoic
     {{- else if eq .Type "float" }}
     entity.{{ .Name }} = request.GetFloatParam("{{ .Name }}")
     {{- else if eq .Type "time.Time" }}
-    entity.{{ .Name }} = time.Parse(time.RFC3339, request.GetStringParam("{{ .Name }}"))
+    entity.{{ .Name }}, _ = time.Parse(time.RFC3339, request.GetStringParam("{{ .Name }}"))
     {{- else if eq .Type "*time.Time" }}
-    entity.{{ .Name }} = Utility.NewTime(time.Parse(time.RFC3339, request.GetStringParam("{{ .Name }}")))
+    entity.{{ .Name }}, _ = Utility.NewTime(time.Parse(time.RFC3339, request.GetStringParam("{{ .Name }}")))
     {{- end }}
     {{- end }}
 
@@ -43,6 +43,10 @@ func get{{ .TableName }}(request *Router.StoicRequest, response *Router.StoicRes
     {{ .Name }} := request.GetBoolParam("{{ .Name }}")
     {{- else if eq .Type "float" }}
     {{ .Name }} := request.GetFloatParam("{{ .Name }}")
+    {{- else if eq .Type "time.Time" }}
+    {{ .Name }}, _ := time.Parse(time.RFC3339, request.GetStringParam("{{ .Name }}"))
+    {{- else if eq .Type "*time.Time" }}
+    {{ .Name }}, _ := Utility.NewTime(time.Parse(time.RFC3339, request.GetStringParam("{{ .Name }}")))
     {{- end }}
     {{- end }}
 
@@ -65,6 +69,10 @@ func update{{ .TableName }}(request *Router.StoicRequest, response *Router.Stoic
     {{ .Name }} := request.GetBoolParam("{{ .Name }}")
     {{- else if eq .Type "float" }}
     {{ .Name }} := request.GetFloatParam("{{ .Name }}")
+    {{- else if eq .Type "time.Time" }}
+    {{ .Name }}, _ := time.Parse(time.RFC3339, request.GetStringParam("{{ .Name }}"))
+    {{- else if eq .Type "*time.Time" }}
+    {{ .Name }}, _ := Utility.NewTime(time.Parse(time.RFC3339, request.GetStringParam("{{ .Name }}")))
     {{- end }}
     {{- end }}
 
@@ -105,6 +113,10 @@ func delete{{ .TableName }}(request *Router.StoicRequest, response *Router.Stoic
     {{ .Name }} := request.GetBoolParam("{{ .Name }}")
     {{- else if eq .Type "float" }}
     {{ .Name }} := request.GetFloatParam("{{ .Name }}")
+    {{- else if eq .Type "time.Time" }}
+    {{ .Name }}, _ := time.Parse(time.RFC3339, request.GetStringParam("{{ .Name }}"))
+    {{- else if eq .Type "*time.Time" }}
+    {{ .Name }}, _ := Utility.NewTime(time.Parse(time.RFC3339, request.GetStringParam("{{ .Name }}")))
     {{- end }}
     {{- end }}
 
