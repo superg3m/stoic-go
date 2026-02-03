@@ -17,13 +17,14 @@ import (
 // If files already exist, then just log: "File already exists for <TableName> table."
 
 type TemplateDataType struct {
-	TableName           string
-	DatabaseName        string
-	Columns             []TableColumn
-	ColumnNames         []string
-	ColumnArgs          string
-	ColumnArgsWithTypes string
-	RequireTimeInclude  bool
+	TableName                   string
+	DatabaseName                string
+	Columns                     []TableColumn
+	ColumnsWithoutAutoIncrement []TableColumn
+	ColumnNames                 []string
+	ColumnArgs                  string
+	ColumnArgsWithTypes         string
+	RequireTimeInclude          bool
 
 	PrimaryKeys             []TableColumn
 	PrimaryKeyNames         []string
@@ -70,10 +71,18 @@ func main() {
 
 	var columnNames []string
 	var columnNamesWithTypes []string
+
 	var primaryKeyNames []string
 	var primaryKeyNamesWithTypes []string
 	var uniqueNames []string
 	var uniqueNamesWithTypes []string
+
+	var ColumnsWithoutAutoIncrement []TableColumn
+	for _, column := range table.TableColumns {
+		if !column.hasFlag(AUTO_INCREMENT) {
+			ColumnsWithoutAutoIncrement = append(ColumnsWithoutAutoIncrement, column)
+		}
+	}
 
 	for _, column := range table.TableColumns {
 		columnNames = append(columnNames, column.Name)
@@ -109,11 +118,12 @@ func main() {
 		TableName:    tableName,
 		DatabaseName: databaseName,
 
-		Columns:             table.TableColumns,
-		ColumnNames:         columnNames,
-		ColumnArgs:          columnArgs,
-		ColumnArgsWithTypes: columnArgsWithTypes,
-		RequireTimeInclude:  table.RequireTimeInclude,
+		Columns:                     table.TableColumns,
+		ColumnsWithoutAutoIncrement: ColumnsWithoutAutoIncrement,
+		ColumnNames:                 columnNames,
+		ColumnArgs:                  columnArgs,
+		ColumnArgsWithTypes:         columnArgsWithTypes,
+		RequireTimeInclude:          table.RequireTimeInclude,
 
 		PrimaryKeys:             table.PrimaryKeys,
 		PrimaryKeyArgs:          primaryKeyArgs,

@@ -11,7 +11,7 @@ import (
 
 func create{{ .TableName }}(request *Router.StoicRequest, response *Router.StoicResponse) {
 	entity := {{ .TableName }}.New()
-    {{- range .Columns }}
+    {{- range .ColumnsWithoutAutoIncrement }}
     {{- if eq .Type "string" }}
     entity.{{ .Name }} = request.GetStringParam("{{ .Name }}")
     {{- else if eq .Type "int" }}
@@ -85,7 +85,7 @@ func update{{ .TableName }}(request *Router.StoicRequest, response *Router.Stoic
 		return
 	}
 
-    {{- range .Columns }}
+    {{- range .ColumnsWithoutAutoIncrement }}
     {{- if eq .Type "string" }}
     entity.{{ .Name }} = request.GetStringParam("{{ .Name }}")
     {{- else if eq .Type "int" }}
@@ -140,7 +140,7 @@ func delete{{ .TableName }}(request *Router.StoicRequest, response *Router.Stoic
 
 func init() {
 	Router.RegisterApiEndpoint("{{ .TableName }}", create{{ .TableName }}, "POST",
-		Router.MiddlewareValidParams({{ range $i, $pk := .Columns }}{{ if $i }}, {{ end }}"{{ $pk.Name }}"{{ end }}),
+		Router.MiddlewareValidParams({{ range $i, $pk := .ColumnsWithoutAutoIncrement }}{{ if $i }}, {{ end }}"{{ $pk.Name }}"{{ end }}),
 	)
     Router.RegisterApiEndpoint("{{ .TableName }}", get{{ .TableName }}, "GET",
         Router.MiddlewareValidParams({{ range $i, $pk := .PrimaryKeys }}{{ if $i }}, {{ end }}"{{ $pk.Name }}"{{ end }}),

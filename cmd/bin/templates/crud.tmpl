@@ -6,19 +6,23 @@ import (
 )
 
 func (model *{{ .TableName }}) CanCreate() []string {
-	return nil
+    var errors []string = nil
+	return errors
 }
 
 func (model *{{ .TableName }}) CanRead() []string {
-	return nil
+    var errors []string = nil
+	return errors
 }
 
 func (model *{{ .TableName }}) CanUpdate() []string {
-	return nil
+    var errors []string = nil
+	return errors
 }
 
 func (model *{{ .TableName }}) CanDelete() []string {
-	return nil
+    var errors []string = nil
+	return errors
 }
 
 func (model *{{ .TableName }}) Create() ORM.CrudReturn {

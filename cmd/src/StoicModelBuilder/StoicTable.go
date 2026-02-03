@@ -24,7 +24,7 @@ type TableColumn struct {
 }
 
 func (column *TableColumn) hasFlag(checkFlag int) bool {
-	return column.Flags&checkFlag == 1
+	return column.Flags&checkFlag != 0
 }
 
 type Table struct {
