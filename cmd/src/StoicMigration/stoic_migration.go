@@ -11,18 +11,23 @@ import (
 	"github.com/superg3m/stoic-go/Core/Utility"
 )
 
-const STOIC_MIGRATION_UP_STR = "-- StoicMigration Up\n"
 const STOIC_MIGRATION_DOWN_STR = "-- StoicMigration Down\n"
+const STOIC_MIGRATION_UP_STR = "-- StoicMigration Up\n"
 
 type MigrationMode int
 
 const (
-	MIGRATION_MODE_UP MigrationMode = iota
-	MIGRATION_MODE_DOWN
+	MIGRATION_MODE_DOWN MigrationMode = iota
+	MIGRATION_MODE_UP
 )
 
+type Migration struct {
+	ID            int    `db:"ID"`
+	MigrationFile string `db:"MigrationFile"`
+}
+
 func getSqlCommandsFromFile(mode MigrationMode, filePath string) ([]string, error) {
-	migrationStr := []string{STOIC_MIGRATION_UP_STR, STOIC_MIGRATION_DOWN_STR}
+	migrationStr := []string{STOIC_MIGRATION_DOWN_STR, STOIC_MIGRATION_UP_STR}
 	delimitor := ';'
 
 	otherMode := int(mode)
@@ -137,17 +142,38 @@ func main() {
 
 	files, _ := findFilesWithExtension(fmt.Sprintf("./migrations/%s", DB_ENGINE), ".sql")
 
-	for _, file := range files {
-		sqlUpCommands, err := getSqlCommandsFromFile(mode, file)
+	if mode == MIGRATION_MODE_UP {
+		sqlCommands, err := getSqlCommandsFromFile(mode, files[0])
+		Utility.AssertOnError(err)
+
+		for _, element := range sqlCommands {
+			_, err := db.Exec(element)
+			Utility.AssertOnError(err)
+		}
+	}
+
+	for _, file := range files[mode:] {
+		sqlCommands, err := getSqlCommandsFromFile(mode, file)
 		Utility.AssertOnError(err)
 
 		if mode == MIGRATION_MODE_UP {
-			Utility.LogSuccess("Migration Up: %s", file)
+			sql_migration_check := `SELECT * FROM Migration WHERE MigrationFile = ?`
+			var arr []Migration
+			_ = db.Select(&arr, sql_migration_check, file)
+			if len(arr) != 0 {
+				Utility.LogWarn("Migration Up %s | Skipping...", file)
+				continue
+			} else {
+				sql_insert := `INSERT INTO Migration (MigrationFile) VALUES (?)`
+				_, err := db.Exec(sql_insert, file)
+				Utility.AssertOnError(err)
+				Utility.LogSuccess("Migration Up: %s", file)
+			}
 		} else {
 			Utility.LogDebug("Migration Down: %s", file)
 		}
 
-		for _, element := range sqlUpCommands {
+		for _, element := range sqlCommands {
 			_, err := db.Exec(element)
 			Utility.AssertOnError(err)
 		}
