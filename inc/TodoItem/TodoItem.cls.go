@@ -8,10 +8,10 @@ import (
 type TodoItem struct {
 	DB *sqlx.DB `json:"-"`
 
-	ID      int    `json:"ID"`
-	OwnerID int    `json:"OwnerID"`
-	Message string `json:"Message"`
-	Status  int    `json:"Status"`
+	ID      int    `db:"ID"      json:"ID"`
+	OwnerID int    `db:"OwnerID" json:"OwnerID"`
+	Message string `db:"Message" json:"Message"`
+	Status  int    `db:"Status"  json:"Status"`
 }
 
 var DatabaseName = "stoic"

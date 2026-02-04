@@ -20,12 +20,12 @@ var (
 type User struct {
 	DB *sqlx.DB `json:"-"`
 
-	ID             int        `json:"ID"`
-	Email          string     `json:"Email"`
-	EmailConfirmed bool       `json:"EmailConfirmed"`
-	Joined         time.Time  `json:"Joined"`
-	LastLogin      *time.Time `json:"LastLogin"`
-	LastActive     *time.Time `json:"LastActive"`
+	ID             int        `db:"ID"             json:"ID"`
+	Email          string     `db:"Email"          json:"Email"`
+	EmailConfirmed bool       `db:"EmailConfirmed" json:"EmailConfirmed"`
+	Joined         time.Time  `db:"Joined"         json:"Joined"`
+	LastLogin      *time.Time `db:"LastLogin"      json:"LastLogin"`
+	LastActive     *time.Time `db:"LastActive"     json:"LastActive"`
 }
 
 type CookieData struct {

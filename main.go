@@ -4,13 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/superg3m/stoic-go/Core/ORM"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/superg3m/stoic-go/Core/ORM"
 
 	_ "github.com/superg3m/stoic-go/API/0.1"
 	_ "github.com/superg3m/stoic-go/Core/ORM"

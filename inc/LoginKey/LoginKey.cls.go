@@ -28,11 +28,11 @@ func getProvider(value int) LoginKeyProvider {
 }
 
 type LoginKey struct {
-	DB *sqlx.DB
+	DB *sqlx.DB `json:"-"`
 
-	UserID   int
-	Provider LoginKeyProvider
-	Key      string
+	UserID   int              `db:"UserID"   json:"UserID"`
+	Provider LoginKeyProvider `db:"Provider" json:"Provider"`
+	Key      string           `db:"Key"      json:"Key"`
 }
 
 var DatabaseName = "stoic"
