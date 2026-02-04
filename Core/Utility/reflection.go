@@ -219,3 +219,8 @@ func Copy[T any](source T, dest T, ignoreFields ...string) {
 		d_value.Set(s_value)
 	}
 }
+
+func NewUnderlyingType[T any]() T {
+	var t T
+	return reflect.New(reflect.TypeOf(t).Elem()).Interface().(T)
+}
